@@ -1231,7 +1231,7 @@
       "dayparts": [
         "midi"
       ],
-      "price_delivery": 18.5,
+      "price_delivery": null,
       "food_cost_pct": 33.25,
       "contribution_margin": 10.68,
       "photo": "pan_bagnat.jpg",
@@ -1239,7 +1239,7 @@
         "dine_in": true,
         "takeout": true,
         "online_pickup": true,
-        "delivery": true,
+        "delivery": false,
         "catering": false,
         "screens": true
       }
@@ -1597,7 +1597,7 @@
         "midi",
         "soir"
       ],
-      "price_delivery": 7,
+      "price_delivery": null,
       "food_cost_pct": 21.33,
       "contribution_margin": 4.72,
       "photo": "frites_zaatar.jpg",
@@ -1605,7 +1605,7 @@
         "dine_in": true,
         "takeout": true,
         "online_pickup": true,
-        "delivery": true,
+        "delivery": false,
         "catering": false,
         "screens": true
       }
@@ -1836,7 +1836,7 @@
         "matin",
         "midi"
       ],
-      "price_delivery": 10.5,
+      "price_delivery": null,
       "food_cost_pct": 24.44,
       "contribution_margin": 6.8,
       "photo": "mini_pain_perdu.jpg",
@@ -1844,7 +1844,7 @@
         "dine_in": true,
         "takeout": true,
         "online_pickup": true,
-        "delivery": true,
+        "delivery": false,
         "catering": false,
         "screens": true
       }

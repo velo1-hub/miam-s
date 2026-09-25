@@ -1428,7 +1428,10 @@
     "extra_oeuf",
     "mezze_trio",
     "pause_aprem",
-    "extra_shot"
+    "extra_shot",
+    "frites_zaatar",
+    "pan_bagnat",
+    "mini_pain_perdu"
   ],
   "takeout_exclude": [
     "madeleines",
