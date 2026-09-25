@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Miam's · Menu board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fraunces:opsz,wght,SOFT@9..144,600..800,80&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!--
+  In-store menu board (Phase 5). Designed at 1920×1080 and scaled to any screen.
+  URL options:
+    ?screen=auto (default: rotates) | main | drinks | promo
+    ?daypart=matin|midi|aprem|soir   (force a daypart, for testing)
+    ?portrait=1                        (1080×1920 layout)
+    ?rotate=12                         (seconds per slide)
+  Reads /assets/menu.json every 5 minutes, so price changes and sold-out items (sold_out: true) appear without touching the screen.
+-->
+<style>
+  :root{--creme:#F6EEDF;--olive:#26301F;--olive-2:#323E29;--terracotta:#B8472A;--safran:#E9A23B;--sauge:#8FA07E}
+  html,body{margin:0;height:100%;background:#1b2216;overflow:hidden;cursor:none}
+  #stage{width:1920px;height:1080px;position:absolute;left:50%;top:50%;transform-origin:center;background:var(--olive);color:var(--creme);font-family:Inter,system-ui,sans-serif}
+  body.portrait #stage{width:1080px;height:1920px}
+  .slide{position:absolute;inset:0;padding:72px 96px;opacity:0;transition:opacity .9s ease}
+  .slide.on{opacity:1}
+  header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid rgba(246,238,223,.18);padding-bottom:24px;margin-bottom:36px}
+  h1{font-family:Fraunces,serif;font-weight:800;font-size:96px;line-height:1;margin:0;color:var(--creme);font-variation-settings:"SOFT" 80}
+  h1 small{display:block;font-family:Inter,sans-serif;font-weight:400;font-size:34px;color:rgba(246,238,223,.7);margin-top:10px;font-style:italic}
+  .brand{font-family:Fraunces,serif;font-style:italic;font-weight:800;font-size:56px;color:var(--terracotta);background:var(--creme);padding:8px 28px 12px;border-radius:999px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 88px;align-content:start}
+  body.portrait .grid{grid-template-columns:1fr}
+  .item{display:grid;grid-template-columns:1fr auto;gap:2px 24px;padding:12px 0;align-content:start;border-bottom:2px dashed rgba(246,238,223,.14)}
+  .item h2{font-family:Fraunces,serif;font-weight:600;font-size:38px;margin:0;line-height:1.1}
+  .item .en{grid-column:1;font-size:24px;color:rgba(246,238,223,.65);font-style:italic}
+  .item .price{grid-row:1;grid-column:2;font-weight:600;font-size:40px;color:var(--safran);font-variant-numeric:tabular-nums}
+  .item .tags{grid-column:1/-1;display:flex;gap:10px}
+  .tag{font-size:20px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:4px 14px;border-radius:999px;background:rgba(143,160,126,.25);color:#dfe6d6}
+  .tag.sig{background:var(--safran);color:var(--olive)}
+  .item.soldout{opacity:.35}
+  .item.soldout .price::after{content:" · épuisé / sold out";font-size:22px;color:var(--creme)}
+  .promo{display:grid;grid-template-columns:1.1fr 1fr;height:100%;align-items:center;gap:80px}
+  body.portrait .promo{grid-template-columns:1fr}
+  .promo .kicker{font-family:Caveat,cursive;font-size:84px;color:var(--safran);margin:0}
+  .promo h2{font-family:Fraunces,serif;font-weight:800;font-size:120px;line-height:1;margin:10px 0 24px}
+  .promo p{font-size:40px;line-height:1.35;margin:0 0 12px;color:rgba(246,238,223,.85)}
+  .promo .big{font-size:150px;font-weight:600;color:var(--safran);font-variant-numeric:tabular-nums}
+  .sun{width:100%;max-width:640px;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 40% 38%,#f2b85a 0,var(--safran) 34%,var(--terracotta) 72%);box-shadow:0 0 0 30px rgba(233,162,59,.12),0 0 0 60px rgba(233,162,59,.06);display:grid;place-items:center;font-family:Fraunces,serif;font-style:italic;font-weight:800;font-size:150px;color:var(--creme)}
+  footer{position:absolute;left:96px;right:96px;bottom:40px;display:flex;justify-content:space-between;font-size:24px;color:rgba(246,238,223,.6)}
+  footer b{color:var(--creme)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+(function(){
+  var qs=new URLSearchParams(location.search);
+  var MODE=qs.get("screen")||"auto", FORCE=qs.get("daypart"), ROT=(+qs.get("rotate")||12)*1000;
+  if(qs.get("portrait"))document.body.classList.add("portrait");
+  var stage=document.getElementById("stage"), menu=null, slides=[], idx=0;
+
+  function fit(){var W=document.body.classList.contains("portrait")?1080:1920,H=W===1920?1080:1920;var s=Math.min(innerWidth/W,innerHeight/H);stage.style.transform="translate(-50%,-50%) scale("+s+")";}
+  addEventListener("resize",fit);fit();
+
+  function mtl(){var p=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Montreal",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());var g=function(t){return(p.find(function(x){return x.type===t})||{}).value};return{day:g("weekday"),t:(g("hour")==="24"?"00":g("hour"))+":"+g("minute")};}
+  function daypart(){
+    if(FORCE)return FORCE;
+    var n=mtl(), we=n.day==="Sat"||n.day==="Sun", eve=n.day==="Thu"||n.day==="Fri";
+    if(we)return n.t<"14:00"?"matin":"aprem";            // weekend: brunch all day, sweets late
+    if(n.t<"11:00")return"matin";
+    if(n.t<"14:00")return"midi";
+    if(n.t>="17:00"&&eve)return"soir";
+    return"aprem";
+  }
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+  var price=function(p){return Number.isInteger(p)?String(p):p.toFixed(2).replace(".",",")};
+  function items(cats,max){return menu.items.filter(function(i){return cats.indexOf(i.cat)>-1&&i.channels.screens&&i.tags.indexOf("modifier")<0}).slice(0,max||12);}
+  function itemHTML(i){
+    var tags=[];if(i.tags.indexOf("signature")>-1)tags.push('<span class="tag sig">★ Signature</span>');
+    if(i.tags.indexOf("vegan")>-1)tags.push('<span class="tag">Végane · Vegan</span>');else if(i.tags.indexOf("vegetarian")>-1)tags.push('<span class="tag">Végé</span>');
+    if(i.tags.indexOf("halal")>-1)tags.push('<span class="tag">Halal</span>');
+    return '<div class="item'+(i.sold_out?' soldout':'')+'"><h2>'+esc(i.fr)+'</h2><span class="price">'+price(i.price)+'</span>'+(i.en!==i.fr?'<span class="en">'+esc(i.en)+'</span>':'')+(tags.length?'<div class="tags">'+tags.join("")+'</div>':'')+'</div>';
+  }
+  function listSlide(title,sub,cats,max){return'<section class="slide"><header><h1>'+esc(title)+'<small>'+esc(sub)+'</small></h1><span class="brand">Miam\'s</span></header><div class="grid">'+items(cats,max).map(itemHTML).join("")+'</div>'+foot()+'</section>';}
+  function promoSlide(kicker,title,lines,big){return'<section class="slide"><div class="promo"><div><p class="kicker">'+esc(kicker)+'</p><h2>'+title+'</h2>'+lines.map(function(l){return"<p>"+esc(l)+"</p>"}).join("")+(big?'<div class="big">'+esc(big)+'</div>':'')+'</div><div class="sun">M</div></div>'+foot()+'</section>';}
+  function foot(){return'<footer><span><b>Ici, on dit miam.</b> · Here, we say miam.</span><span>Allergènes : demandez-nous · Ask us about allergens · Taxes en sus</span></footer>';}
+
+  var PLAN={
+    matin:{main:["Brunch","Jusqu'à 15 h en semaine, toute la journée le week-end · Until 3 pm weekdays, all day weekends",["matin"],8],drinks:["Café","Coffee & drinks",["cafe","froid"],10],promo:["Bon matin !","Formule matin",["Café filtre ou allongé + croissant pur beurre","Filter coffee or Americano + croissant · before 11 am"],"6,25"]},
+    midi:{main:["Midi","Lunch · dès 11 h · from 11 am",["midi"],8],drinks:["À boire","Drinks",["froid","cafe"],10],promo:["Le midi, on ajoute…","Formule midi +5",["Soupe ou limonade maison + biscuit tahini","Soup or house lemonade + tahini cookie"],"+5"]},
+    aprem:{main:["Douceurs","Pastries & sweets",["viennoiseries"],8],drinks:["Café","Coffee & drinks",["cafe","froid"],10],promo:["C'est l'heure de la pause","Pause d'après-midi",["Thé à la menthe ou café filtre + cigares baklava ou madeleines","Mint tea or filter coffee + baklava or madeleines"],"8,50"]},
+    soir:{main:["Apéro mezze","Jeudi & vendredi · Thursday & Friday",["soir"],8],drinks:["À boire","Drinks",["froid","cafe"],10],promo:["À partager","Trio mezze<br>+ pain plat",["Houmous au beurre noisette, halloumi miel-thym, falafels","Brown butter hummus, honey-thyme halloumi, falafel"],"29"]}
+  };
+  var current="";
+  function build(){
+    var dp=daypart(), p=PLAN[dp]||PLAN.matin; current=dp;
+    var all={main:listSlide.apply(null,p.main),drinks:listSlide.apply(null,p.drinks),promo:promoSlide.apply(null,p.promo)};
+    stage.innerHTML=MODE==="auto"?all.main+all.drinks+all.promo:all[MODE]||all.main;
+    slides=stage.querySelectorAll(".slide");idx=0;slides[0].classList.add("on");
+  }
+  function next(){if(daypart()!==current){build();return;}if(slides.length<2)return;slides[idx].classList.remove("on");idx=(idx+1)%slides.length;slides[idx].classList.add("on");}
+  function load(){return fetch("/assets/menu.json",{cache:"no-store"}).then(function(r){return r.json()}).then(function(m){menu=m;build();}).catch(function(){if(!menu)stage.innerHTML='<section class="slide on"><div class="promo"><div><h2>Miam\'s</h2><p>Menu en chargement…</p></div></div></section>';});}
+  load();setInterval(next,ROT);setInterval(load,5*60*1000);
+})();
+</script>
+</body>
+</html>

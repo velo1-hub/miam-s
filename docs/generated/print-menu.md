@@ -62,7 +62,7 @@ Allergènes / Allergens: L S So
 
 ## BOISSONS FRAÎCHES / *Cold drinks*
 
-**Limonade menthe-citron maison** 5,5  `VÉGANE`  
+**Limonade menthe-citron maison** 5,50  `VÉGANE`  
 *House mint lemonade*  
 Citrons pressés, menthe fraîche, juste assez de sucre.  
 *Squeezed lemons, fresh mint, just enough sugar.*  
@@ -72,7 +72,7 @@ Citrons pressés, menthe fraîche, juste assez de sucre.
 Pressé à la commande. Rien d'autre.  
 *Squeezed to order. Nothing else.*  
 
-**Latte glacé miel & cardamome** 6,5  `★ SIGNATURE · VÉGÉ`  
+**Latte glacé miel & cardamome** 6,50  `★ SIGNATURE · VÉGÉ`  
 *Iced honey & cardamom latte*  
 Notre signature, sur glace.  
 *Our signature, over ice.*  
@@ -86,13 +86,13 @@ Feuilleté croustillant, cuit chaque matin.
 *Crisp, flaky, baked every morning.*  
 Allergènes / Allergens: G L Œ
 
-**Croissant pistache** 5,5  `★ SIGNATURE · VÉGÉ`  
+**Croissant pistache** 5,50  `★ SIGNATURE · VÉGÉ`  
 *Pistachio croissant*  
 Garni de crème de pistache, pistaches concassées sur le dessus.  
 *Filled with pistachio cream, crushed pistachios on top.*  
 Allergènes / Allergens: G L Œ N
 
-**Cigares baklava pistache (2)** 4,5  `VÉGÉ`  
+**Cigares baklava pistache (2)** 4,50  `VÉGÉ`  
 *Pistachio baklava cigars (2)*  
 Pâte filo croustillante, pistaches, sirop léger à la fleur d'oranger.  
 *Crackling filo, pistachios, a light orange blossom syrup.*  
@@ -194,7 +194,7 @@ Poulet chermoula, toum à l'ail, cornichons, frites au zaatar dedans. Oui, dedan
 *Chermoula chicken, garlic toum, pickles, za'atar fries inside. Yes, inside.*  
 Allergènes / Allergens: G S
 
-**Wrap falafel** 15,5  `VÉGANE`  
+**Wrap falafel** 15,50  `VÉGANE`  
 *Falafel wrap*  
 Falafels maison, tahini, tomate, persil, navet mariné rose.  
 *House falafel, tahini, tomato, parsley, pink pickled turnip.*  
@@ -270,7 +270,7 @@ Allergènes / Allergens: L
 *Add an egg*  
 Allergènes / Allergens: Œ
 
-**Extra poulet chermoula** 5,5  `HALAL`  
+**Extra poulet chermoula** 5,50  `HALAL`  
 *Add chermoula chicken*  
 
 **Lait d'avoine** 0,75  `VÉGANE`  
@@ -314,7 +314,7 @@ Deux plats brunch au choix + deux cafés signature + un croissant pistache à pa
 *Any two brunch plates + two signature lattes + a pistachio croissant to share. Weekends only.*  
 Allergènes / Allergens: G L Œ N
 
-**Pause d'après-midi** 8,5  
+**Pause d'après-midi** 8,50  
 *Afternoon break*  
 Thé à la menthe ou café filtre + cigares baklava ou madeleines. De 14 h à la fermeture.  
 *Mint tea or filter coffee + baklava cigars or madeleines. From 2 pm to close.*  

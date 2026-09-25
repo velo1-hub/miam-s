@@ -52,7 +52,7 @@ Projected model: **~$14,460/week at menu prices (~$750k/yr), theoretical food an
 1. **No currency symbols, no trailing zeros**: "18" not "$18.00". Research on menu-price formats (Cornell, 2009) found guests spent more with numeral-only prices. French format with a comma (6,25) on the FR menu; 6.25 on EN screens.
 2. **Right-aligned with the description, never in a price column.** A column invites price shopping; prices sit immediately after the description.
 3. **Anchoring:** the *Grande assiette* (21) opens Brunch and the *Planche mezze* (34) opens the evening, so the next items feel reasonable.
-4. **Charm vs. round:** round and half prices (17, 16.5) for food signal quality; the .25/.75 steps on coffee are industry standard and read as precise.
+4. **Charm vs. round:** round and half prices (17, 15,50) for food signal quality; the .25/.75 steps on coffee are industry standard and read as precise.
 5. **Bundles:** Formule matin (6.25, saves 0.75); Formule midi (+5 adds soup/lemonade + cookie, ~9 value); Brunch pour deux (49, saves ~5); Pause d'après-midi (8.50); Mezze trio (29).
 6. **Add-ons (margins 60–80 %):** +œuf 2.25 · +halloumi 4 · +avocat 3 · +poulet 5.50 · lait d'avoine 0.75 · extra shot 1.25 · sirop maison 0.75.
 7. **Upsell scripts:** the barista always offers the signature ("Avec un latte miel-cardamome ?"); the server offers bread refills (free, builds generosity) and "+ un œuf ?" on toasts.

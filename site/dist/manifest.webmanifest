@@ -1,0 +1,15 @@
+{
+  "name": "Miam's Resto Café",
+  "short_name": "Miam's",
+  "start_url": "/fr/",
+  "display": "standalone",
+  "background_color": "#F6EEDF",
+  "theme_color": "#B8472A",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

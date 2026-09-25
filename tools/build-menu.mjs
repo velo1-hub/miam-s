@@ -110,7 +110,7 @@ mkdirSync(join(root, "docs/generated"), { recursive: true });
 writeFileSync(join(root, "docs/generated/menu-engineering.md"), md);
 writeFileSync(join(root, "docs/generated/menu-engineering.json"), JSON.stringify(summary, null, 2) + "\n");
 // Print-menu copy for the designer: FR first, EN below, allergen letters, no currency symbol.
-const fmt = (p) => (Number.isInteger(p) ? String(p) : p.toFixed(2).replace(/0$/, "").replace(".", ","));
+const fmt = (p) => (Number.isInteger(p) ? String(p) : p.toFixed(2).replace(".", ","));
 let pm = `# Print menu copy (generated)\n\n> Generated from \`data/menu.source.json\`. Paste into the layout as-is. Prices shown without "$", following Phase 3 §2. French is the primary text (larger); English sits below it in italic at 85 % size.\n\n`;
 for (const cat of src.categories.filter((c) => c.id !== "traiteur")) {
   const ci = items.filter((it) => it.cat === cat.id);
