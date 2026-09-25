@@ -1,0 +1,2172 @@
+{
+  "meta": {
+    "restaurant": "Miam's Resto Café",
+    "currency": "CAD",
+    "tax_note_fr": "Taxes en sus (TPS 5 % + TVQ 9,975 %).",
+    "tax_note_en": "Taxes extra (GST 5% + QST 9.975%).",
+    "allergen_note_fr": "Nos plats sont préparés dans une cuisine où sont manipulés les 11 allergènes prioritaires. Informez-nous de toute allergie avant de commander.",
+    "allergen_note_en": "Our food is prepared in a kitchen that handles all 11 priority allergens. Please tell us about any allergy before ordering.",
+    "delivery_markup": 0.15,
+    "version": "2026-09-25-v1-launch",
+    "note": "Source of truth. Edit this file, then run `node tools/build-menu.mjs` to regenerate menu.json, menu.csv and the menu engineering report.",
+    "changelog": [
+      "v0 → v1: toast 16.5→17, wrap 15→15.5, OJ 6.5→7, çılbır renamed, granola moved to pastries at 11, ayran removed, + extra shot, Pause d'après-midi, Trio mezze"
+    ]
+  },
+  "dayparts": [
+    {
+      "id": "matin",
+      "fr": "Matin",
+      "en": "Morning",
+      "weekday": "07:30-11:00",
+      "weekend": "08:30-16:00"
+    },
+    {
+      "id": "midi",
+      "fr": "Midi",
+      "en": "Lunch",
+      "weekday": "11:00-16:00",
+      "weekend": "11:00-16:00"
+    },
+    {
+      "id": "aprem",
+      "fr": "Après-midi",
+      "en": "Afternoon",
+      "weekday": "14:00-17:00",
+      "weekend": "14:00-16:00"
+    },
+    {
+      "id": "soir",
+      "fr": "Apéro mezze",
+      "en": "Mezze evening",
+      "weekday": "17:00-21:00 (jeu/Thu–ven/Fri)",
+      "weekend": "—"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cafe",
+      "fr": "Café & boissons chaudes",
+      "en": "Coffee & hot drinks",
+      "group": "boissons"
+    },
+    {
+      "id": "froid",
+      "fr": "Boissons fraîches",
+      "en": "Cold drinks",
+      "group": "boissons"
+    },
+    {
+      "id": "viennoiseries",
+      "fr": "Viennoiseries & douceurs",
+      "en": "Pastries & sweets",
+      "group": "douceurs"
+    },
+    {
+      "id": "matin",
+      "fr": "Brunch",
+      "en": "Brunch",
+      "group": "plats",
+      "note_fr": "Jusqu'à 15 h en semaine, toute la journée le week-end",
+      "note_en": "Until 3 pm on weekdays, all day on weekends"
+    },
+    {
+      "id": "midi",
+      "fr": "Midi",
+      "en": "Lunch",
+      "group": "plats",
+      "note_fr": "Dès 11 h",
+      "note_en": "From 11 am"
+    },
+    {
+      "id": "soir",
+      "fr": "Apéro mezze",
+      "en": "Mezze evenings",
+      "group": "soir",
+      "note_fr": "Jeudi et vendredi, 17 h à 21 h",
+      "note_en": "Thursday & Friday, 5 to 9 pm"
+    },
+    {
+      "id": "accompagnements",
+      "fr": "À côté",
+      "en": "On the side",
+      "group": "extras"
+    },
+    {
+      "id": "enfants",
+      "fr": "Pour les petits (12 ans et moins)",
+      "en": "For little ones (12 and under)",
+      "group": "enfants"
+    },
+    {
+      "id": "formules",
+      "fr": "Formules",
+      "en": "Combos",
+      "group": "formules"
+    },
+    {
+      "id": "traiteur",
+      "fr": "Traiteur",
+      "en": "Catering",
+      "group": "traiteur"
+    }
+  ],
+  "allergens": {
+    "gluten": {
+      "fr": "Gluten (blé, avoine, orge)",
+      "en": "Gluten (wheat, oats, barley)",
+      "icon": "G"
+    },
+    "milk": {
+      "fr": "Lait",
+      "en": "Milk",
+      "icon": "L"
+    },
+    "eggs": {
+      "fr": "Œufs",
+      "en": "Eggs",
+      "icon": "Œ"
+    },
+    "tree_nuts": {
+      "fr": "Noix",
+      "en": "Tree nuts",
+      "icon": "N"
+    },
+    "peanuts": {
+      "fr": "Arachides",
+      "en": "Peanuts",
+      "icon": "A"
+    },
+    "sesame": {
+      "fr": "Sésame",
+      "en": "Sesame",
+      "icon": "S"
+    },
+    "soy": {
+      "fr": "Soya",
+      "en": "Soy",
+      "icon": "So"
+    },
+    "fish": {
+      "fr": "Poisson",
+      "en": "Fish",
+      "icon": "P"
+    },
+    "shellfish": {
+      "fr": "Crustacés et mollusques",
+      "en": "Crustaceans & shellfish",
+      "icon": "C"
+    },
+    "mustard": {
+      "fr": "Moutarde",
+      "en": "Mustard",
+      "icon": "M"
+    },
+    "sulphites": {
+      "fr": "Sulfites",
+      "en": "Sulphites",
+      "icon": "Su"
+    }
+  },
+  "tags": {
+    "vegan": {
+      "fr": "Végane",
+      "en": "Vegan"
+    },
+    "vegetarian": {
+      "fr": "Végé",
+      "en": "Vegetarian"
+    },
+    "halal": {
+      "fr": "Halal",
+      "en": "Halal"
+    },
+    "signature": {
+      "fr": "Signature",
+      "en": "Signature"
+    },
+    "spicy_mild": {
+      "fr": "Relevé",
+      "en": "A little heat"
+    },
+    "no_gluten_ingredients": {
+      "fr": "Sans ingrédient à gluten",
+      "en": "No gluten ingredients"
+    }
+  },
+  "items": [
+    {
+      "id": "espresso",
+      "cat": "cafe",
+      "fr": "Espresso",
+      "en": "Espresso",
+      "desc_fr": "Un shot court et rond, torréfié à Montréal.",
+      "desc_en": "A short, round shot, roasted in Montréal.",
+      "price": 3.25,
+      "cost": 0.6,
+      "units": 36,
+      "allergens": [],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 18.46,
+      "contribution_margin": 2.65,
+      "photo": "espresso.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "allonge",
+      "cat": "cafe",
+      "fr": "Allongé",
+      "en": "Americano",
+      "desc_fr": "Espresso allongé à l'eau chaude, pour prendre son temps.",
+      "desc_en": "Espresso lengthened with hot water, made for lingering.",
+      "price": 3.75,
+      "cost": 0.64,
+      "units": 44,
+      "allergens": [],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 4.5,
+      "food_cost_pct": 17.07,
+      "contribution_margin": 3.11,
+      "photo": "allonge.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "filtre",
+      "cat": "cafe",
+      "fr": "Café filtre du jour",
+      "en": "Filter coffee of the day",
+      "desc_fr": "Une origine différente chaque semaine. Demandez laquelle.",
+      "desc_en": "A different origin every week. Ask which one.",
+      "price": 3.25,
+      "cost": 0.5,
+      "units": 48,
+      "allergens": [],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem"
+      ],
+      "price_delivery": 3.75,
+      "food_cost_pct": 15.38,
+      "contribution_margin": 2.75,
+      "photo": "filtre.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "cappuccino",
+      "cat": "cafe",
+      "fr": "Cappuccino",
+      "en": "Cappuccino",
+      "desc_fr": "Espresso, lait moussé serré, mousse épaisse.",
+      "desc_en": "Espresso, tight steamed milk, thick foam.",
+      "price": 5,
+      "cost": 1.11,
+      "units": 52,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 22.2,
+      "contribution_margin": 3.89,
+      "photo": "cappuccino.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "latte",
+      "cat": "cafe",
+      "fr": "Latte",
+      "en": "Latte",
+      "desc_fr": "Espresso et lait soyeux. Lait d'avoine sur demande.",
+      "desc_en": "Espresso and silky milk. Oat milk on request.",
+      "price": 5.25,
+      "cost": 1.25,
+      "units": 60,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 6.25,
+      "food_cost_pct": 23.81,
+      "contribution_margin": 4,
+      "photo": "latte.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "latte_miel_cardamome",
+      "cat": "cafe",
+      "fr": "Latte miel & cardamome",
+      "en": "Honey & cardamom latte",
+      "desc_fr": "Notre latte signature : miel du Québec, cardamome verte fraîchement moulue.",
+      "desc_en": "Our signature latte: Québec honey and freshly ground green cardamom.",
+      "price": 6.25,
+      "cost": 1.45,
+      "units": 56,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 7.25,
+      "food_cost_pct": 23.2,
+      "contribution_margin": 4.8,
+      "photo": "latte_miel_cardamome.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "latte_pistache",
+      "cat": "cafe",
+      "fr": "Latte pistache & fleur d'oranger",
+      "en": "Pistachio & orange blossom latte",
+      "desc_fr": "Crème de pistache maison, une goutte de fleur d'oranger. Doux, pas sucré.",
+      "desc_en": "House pistachio cream and a drop of orange blossom. Mellow, not sugary.",
+      "price": 6.75,
+      "cost": 1.92,
+      "units": 38,
+      "allergens": [
+        "milk",
+        "tree_nuts"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 8,
+      "food_cost_pct": 28.44,
+      "contribution_margin": 4.83,
+      "photo": "latte_pistache.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "the_menthe",
+      "cat": "cafe",
+      "fr": "Thé à la menthe fraîche",
+      "en": "Fresh mint tea",
+      "desc_fr": "Théière de thé vert et bouquet de menthe fraîche, servie comme à la maison.",
+      "desc_en": "A pot of green tea with a fistful of fresh mint, served the way it's done at home.",
+      "price": 4.75,
+      "cost": 0.71,
+      "units": 24,
+      "allergens": [],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 14.95,
+      "contribution_margin": 4.04,
+      "photo": "the_menthe.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "chai",
+      "cat": "cafe",
+      "fr": "Chaï maison",
+      "en": "House chai",
+      "desc_fr": "Épices infusées chez nous chaque matin, lait moussé.",
+      "desc_en": "Spices steeped in-house every morning, steamed milk.",
+      "price": 5.75,
+      "cost": 1.35,
+      "units": 22,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem"
+      ],
+      "price_delivery": 6.75,
+      "food_cost_pct": 23.48,
+      "contribution_margin": 4.4,
+      "photo": "chai.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "choco_tahini",
+      "cat": "cafe",
+      "fr": "Chocolat chaud au tahini",
+      "en": "Tahini hot chocolate",
+      "desc_fr": "Chocolat noir, tahini grillé, pincée de sel. Le réconfort, version sésame.",
+      "desc_en": "Dark chocolate, toasted tahini, a pinch of salt. Comfort, sesame-style.",
+      "price": 6,
+      "cost": 1.49,
+      "units": 16,
+      "allergens": [
+        "milk",
+        "sesame",
+        "soy"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem"
+      ],
+      "price_delivery": 7,
+      "food_cost_pct": 24.83,
+      "contribution_margin": 4.51,
+      "photo": "choco_tahini.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "limonade",
+      "cat": "froid",
+      "fr": "Limonade menthe-citron maison",
+      "en": "House mint lemonade",
+      "desc_fr": "Citrons pressés, menthe fraîche, juste assez de sucre.",
+      "desc_en": "Squeezed lemons, fresh mint, just enough sugar.",
+      "price": 5.5,
+      "cost": 1.06,
+      "units": 32,
+      "allergens": [],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 6.5,
+      "food_cost_pct": 19.27,
+      "contribution_margin": 4.44,
+      "photo": "limonade.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": true,
+        "screens": true
+      }
+    },
+    {
+      "id": "jus_orange",
+      "cat": "froid",
+      "fr": "Jus d'orange pressé",
+      "en": "Fresh-squeezed orange juice",
+      "desc_fr": "Pressé à la commande. Rien d'autre.",
+      "desc_en": "Squeezed to order. Nothing else.",
+      "price": 7,
+      "cost": 2.77,
+      "units": 18,
+      "allergens": [],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 8.25,
+      "food_cost_pct": 39.57,
+      "contribution_margin": 4.23,
+      "photo": "jus_orange.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "latte_glace",
+      "cat": "froid",
+      "fr": "Latte glacé miel & cardamome",
+      "en": "Iced honey & cardamom latte",
+      "desc_fr": "Notre signature, sur glace.",
+      "desc_en": "Our signature, over ice.",
+      "price": 6.5,
+      "cost": 1.49,
+      "units": 28,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 7.5,
+      "food_cost_pct": 22.92,
+      "contribution_margin": 5.01,
+      "photo": "latte_glace.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "croissant",
+      "cat": "viennoiseries",
+      "fr": "Croissant pur beurre",
+      "en": "All-butter croissant",
+      "desc_fr": "Feuilleté croustillant, cuit chaque matin.",
+      "desc_en": "Crisp, flaky, baked every morning.",
+      "price": 3.75,
+      "cost": 1.49,
+      "units": 44,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "aprem"
+      ],
+      "price_delivery": 4.5,
+      "food_cost_pct": 39.73,
+      "contribution_margin": 2.26,
+      "photo": "croissant.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "croissant_pistache",
+      "cat": "viennoiseries",
+      "fr": "Croissant pistache",
+      "en": "Pistachio croissant",
+      "desc_fr": "Garni de crème de pistache, pistaches concassées sur le dessus.",
+      "desc_en": "Filled with pistachio cream, crushed pistachios on top.",
+      "price": 5.5,
+      "cost": 2.48,
+      "units": 28,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "tree_nuts"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature"
+      ],
+      "dayparts": [
+        "matin",
+        "aprem"
+      ],
+      "price_delivery": 6.5,
+      "food_cost_pct": 45.09,
+      "contribution_margin": 3.02,
+      "photo": "croissant_pistache.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "cigares_baklava",
+      "cat": "viennoiseries",
+      "fr": "Cigares baklava pistache (2)",
+      "en": "Pistachio baklava cigars (2)",
+      "desc_fr": "Pâte filo croustillante, pistaches, sirop léger à la fleur d'oranger.",
+      "desc_en": "Crackling filo, pistachios, a light orange blossom syrup.",
+      "price": 4.5,
+      "cost": 1.56,
+      "units": 18,
+      "allergens": [
+        "gluten",
+        "milk",
+        "tree_nuts"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 5.25,
+      "food_cost_pct": 34.67,
+      "contribution_margin": 2.94,
+      "photo": "cigares_baklava.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "gateau_orange",
+      "cat": "viennoiseries",
+      "fr": "Gâteau orange-amande",
+      "en": "Orange & almond cake",
+      "desc_fr": "Oranges entières, amandes moulues, sans farine. Moelleux jusqu'au dernier morceau.",
+      "desc_en": "Whole oranges, ground almonds, no flour. Moist to the last crumb.",
+      "price": 5.75,
+      "cost": 1.77,
+      "units": 20,
+      "allergens": [
+        "eggs",
+        "tree_nuts"
+      ],
+      "tags": [
+        "vegetarian",
+        "no_gluten_ingredients"
+      ],
+      "dayparts": [
+        "midi",
+        "aprem"
+      ],
+      "price_delivery": 6.75,
+      "food_cost_pct": 30.78,
+      "contribution_margin": 3.98,
+      "photo": "gateau_orange.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "cookie_tahini",
+      "cat": "viennoiseries",
+      "fr": "Biscuit tahini & chocolat noir",
+      "en": "Tahini & dark chocolate cookie",
+      "desc_fr": "Bords croustillants, cœur fondant, fleur de sel.",
+      "desc_en": "Crisp edges, soft middle, sea salt.",
+      "price": 3.95,
+      "cost": 1.06,
+      "units": 34,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "sesame",
+        "soy"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": 4.75,
+      "food_cost_pct": 26.84,
+      "contribution_margin": 2.89,
+      "photo": "cookie_tahini.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": true,
+        "screens": true
+      }
+    },
+    {
+      "id": "madeleines",
+      "cat": "viennoiseries",
+      "fr": "Madeleines fleur d'oranger (3)",
+      "en": "Orange blossom madeleines (3)",
+      "desc_fr": "Cuites à la commande, servies tièdes.",
+      "desc_en": "Baked to order, served warm.",
+      "price": 4.25,
+      "cost": 0.92,
+      "units": 12,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "aprem"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 21.65,
+      "contribution_margin": 3.33,
+      "photo": "madeleines.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "shakshuka",
+      "cat": "matin",
+      "fr": "Shakshuka Miam's",
+      "en": "Miam's shakshuka",
+      "desc_fr": "Deux œufs pochés dans une sauce tomate-poivron mijotée trois heures, feta, coriandre, pain grillé pour saucer.",
+      "desc_en": "Two eggs poached in a tomato-pepper sauce simmered for three hours, feta, cilantro, toasted bread for dipping.",
+      "price": 18,
+      "cost": 4.76,
+      "units": 64,
+      "allergens": [
+        "eggs",
+        "milk",
+        "gluten"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature",
+        "spicy_mild"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 20.75,
+      "food_cost_pct": 26.44,
+      "contribution_margin": 13.24,
+      "photo": "shakshuka.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "shakshuka_verte",
+      "cat": "matin",
+      "fr": "Shakshuka verte",
+      "en": "Green shakshuka",
+      "desc_fr": "Épinards, poireaux fondants, zaatar, œufs pochés, labneh.",
+      "desc_en": "Spinach, melted leeks, za'atar, poached eggs, labneh.",
+      "price": 18,
+      "cost": 5.11,
+      "units": 24,
+      "allergens": [
+        "eggs",
+        "milk",
+        "gluten",
+        "sesame"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 28.39,
+      "contribution_margin": 12.89,
+      "photo": "shakshuka_verte.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "oeufs_turcs",
+      "cat": "matin",
+      "fr": "Œufs pochés, yogourt & beurre d'Alep (çılbır)",
+      "en": "Poached eggs, garlic yogurt & Aleppo butter (çılbır)",
+      "desc_fr": "Œufs pochés sur yogourt à l'ail, beurre noisette au piment d'Alep, aneth, pain chaud.",
+      "desc_en": "Poached eggs on garlic yogurt, brown butter with Aleppo pepper, dill, warm bread.",
+      "price": 17,
+      "cost": 4.05,
+      "units": 22,
+      "allergens": [
+        "eggs",
+        "milk",
+        "gluten"
+      ],
+      "tags": [
+        "vegetarian",
+        "spicy_mild"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 23.82,
+      "contribution_margin": 12.95,
+      "photo": "oeufs_turcs.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "toast_avocat",
+      "cat": "matin",
+      "fr": "Toast avocat, labneh & zaatar",
+      "en": "Avocado, labneh & za'atar toast",
+      "desc_fr": "Pain au levain grillé, labneh maison, avocat, zaatar, huile d'olive, piment.",
+      "desc_en": "Toasted sourdough, house labneh, avocado, za'atar, olive oil, chili.",
+      "price": 17,
+      "cost": 5.61,
+      "units": 48,
+      "allergens": [
+        "gluten",
+        "milk",
+        "sesame"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 19.75,
+      "food_cost_pct": 33,
+      "contribution_margin": 11.39,
+      "photo": "toast_avocat.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "pain_perdu",
+      "cat": "matin",
+      "fr": "Pain perdu brioché fleur d'oranger",
+      "en": "Orange blossom brioche French toast",
+      "desc_fr": "Brioche dorée au beurre, crème fleur d'oranger, pistaches, petits fruits du moment.",
+      "desc_en": "Butter-golden brioche, orange blossom cream, pistachios, seasonal berries.",
+      "price": 17,
+      "cost": 4.4,
+      "units": 44,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "tree_nuts"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 19.75,
+      "food_cost_pct": 25.88,
+      "contribution_margin": 12.6,
+      "photo": "pain_perdu.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "assiette_matin",
+      "cat": "matin",
+      "fr": "Grande assiette du matin",
+      "en": "The big morning plate",
+      "desc_fr": "Deux œufs au choix, halloumi grillé, labneh, olives, tomates, concombre, houmous, pain chaud. Pour les grandes faims.",
+      "desc_en": "Two eggs any style, grilled halloumi, labneh, olives, tomato, cucumber, hummus, warm bread. For big appetites.",
+      "price": 21,
+      "cost": 6.67,
+      "units": 40,
+      "allergens": [
+        "eggs",
+        "milk",
+        "gluten",
+        "sesame"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 24.25,
+      "food_cost_pct": 31.76,
+      "contribution_margin": 14.33,
+      "photo": "assiette_matin.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "granola",
+      "cat": "viennoiseries",
+      "fr": "Granola maison à emporter",
+      "en": "House granola to go",
+      "desc_fr": "Yogourt grec, granola sésame-dattes, miel, fruits frais. Prêt à partir.",
+      "desc_en": "Greek yogurt, sesame-date granola, honey, fresh fruit. Ready to go.",
+      "price": 11,
+      "cost": 2.98,
+      "units": 18,
+      "allergens": [
+        "milk",
+        "tree_nuts",
+        "gluten",
+        "sesame"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin"
+      ],
+      "price_delivery": 12.75,
+      "food_cost_pct": 27.09,
+      "contribution_margin": 8.02,
+      "photo": "granola.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "sandwich_matin",
+      "cat": "matin",
+      "fr": "Brioche œuf, halloumi & harissa",
+      "en": "Egg, halloumi & harissa brioche",
+      "desc_fr": "Œuf brouillé moelleux, halloumi grillé, mayo harissa, roquette. À emporter ou sur place.",
+      "desc_en": "Soft-scrambled egg, grilled halloumi, harissa mayo, arugula. For here or to go.",
+      "price": 13,
+      "cost": 3.62,
+      "units": 36,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "mustard"
+      ],
+      "tags": [
+        "vegetarian",
+        "spicy_mild"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 15,
+      "food_cost_pct": 27.85,
+      "contribution_margin": 9.38,
+      "photo": "sandwich_matin.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "bol_mezze",
+      "cat": "midi",
+      "fr": "Bol mezze",
+      "en": "Mezze bowl",
+      "desc_fr": "Houmous, taboulé, falafels croustillants, légumes marinés, sauce tahini, pita chaude.",
+      "desc_en": "Hummus, tabbouleh, crisp falafel, pickled vegetables, tahini sauce, warm pita.",
+      "price": 18,
+      "cost": 4.62,
+      "units": 38,
+      "allergens": [
+        "sesame",
+        "gluten"
+      ],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 20.75,
+      "food_cost_pct": 25.67,
+      "contribution_margin": 13.38,
+      "photo": "bol_mezze.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": true,
+        "screens": true
+      }
+    },
+    {
+      "id": "bol_poulet",
+      "cat": "midi",
+      "fr": "Bol poulet chermoula",
+      "en": "Chermoula chicken bowl",
+      "desc_fr": "Poulet mariné à la chermoula et grillé, riz aux herbes, houmous, salade de chou, yogourt au citron confit.",
+      "desc_en": "Chermoula-marinated grilled chicken, herbed rice, hummus, cabbage slaw, preserved-lemon yogurt.",
+      "price": 20,
+      "cost": 6.89,
+      "units": 48,
+      "allergens": [
+        "sesame",
+        "milk"
+      ],
+      "tags": [
+        "halal"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 23,
+      "food_cost_pct": 34.45,
+      "contribution_margin": 13.11,
+      "photo": "bol_poulet.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": true,
+        "screens": true
+      }
+    },
+    {
+      "id": "pan_bagnat",
+      "cat": "midi",
+      "fr": "Pan-bagnat du Miam",
+      "en": "Miam's pan-bagnat",
+      "desc_fr": "Le sandwich niçois : thon, œuf, olives, poivrons, oignon rouge, huile d'olive, pain rond.",
+      "desc_en": "The Niçoise sandwich: tuna, egg, olives, peppers, red onion, olive oil, round bun.",
+      "price": 16,
+      "cost": 5.32,
+      "units": 16,
+      "allergens": [
+        "fish",
+        "eggs",
+        "gluten",
+        "mustard"
+      ],
+      "tags": [],
+      "dayparts": [
+        "midi"
+      ],
+      "price_delivery": 18.5,
+      "food_cost_pct": 33.25,
+      "contribution_margin": 10.68,
+      "photo": "pan_bagnat.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "pita_poulet",
+      "cat": "midi",
+      "fr": "Pita poulet chermoula",
+      "en": "Chermoula chicken pita",
+      "desc_fr": "Poulet chermoula, toum à l'ail, cornichons, frites au zaatar dedans. Oui, dedans.",
+      "desc_en": "Chermoula chicken, garlic toum, pickles, za'atar fries inside. Yes, inside.",
+      "price": 16,
+      "cost": 5.04,
+      "units": 42,
+      "allergens": [
+        "gluten",
+        "sesame"
+      ],
+      "tags": [
+        "halal"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 18.5,
+      "food_cost_pct": 31.5,
+      "contribution_margin": 10.96,
+      "photo": "pita_poulet.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": true,
+        "screens": true
+      }
+    },
+    {
+      "id": "wrap_falafel",
+      "cat": "midi",
+      "fr": "Wrap falafel",
+      "en": "Falafel wrap",
+      "desc_fr": "Falafels maison, tahini, tomate, persil, navet mariné rose.",
+      "desc_en": "House falafel, tahini, tomato, parsley, pink pickled turnip.",
+      "price": 15.5,
+      "cost": 3.62,
+      "units": 28,
+      "allergens": [
+        "gluten",
+        "sesame"
+      ],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 18,
+      "food_cost_pct": 23.35,
+      "contribution_margin": 11.88,
+      "photo": "wrap_falafel.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": true,
+        "screens": true
+      }
+    },
+    {
+      "id": "fattouch",
+      "cat": "midi",
+      "fr": "Fattouch & halloumi grillé",
+      "en": "Fattoush with grilled halloumi",
+      "desc_fr": "Laitue croquante, radis, concombre, sumac, pita croustillante, halloumi grillé.",
+      "desc_en": "Crisp lettuce, radish, cucumber, sumac, crunchy pita, grilled halloumi.",
+      "price": 17,
+      "cost": 4.83,
+      "units": 20,
+      "allergens": [
+        "gluten",
+        "milk"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 19.75,
+      "food_cost_pct": 28.41,
+      "contribution_margin": 12.17,
+      "photo": "fattouch.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "soupe",
+      "cat": "midi",
+      "fr": "Soupe lentilles-citron",
+      "en": "Lemon lentil soup",
+      "desc_fr": "Lentilles corail, cumin, un trait de citron. Avec pain plat.",
+      "desc_en": "Red lentils, cumin, a squeeze of lemon. With flatbread.",
+      "price": 8,
+      "cost": 1.49,
+      "units": 24,
+      "allergens": [
+        "gluten"
+      ],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "midi"
+      ],
+      "price_delivery": 9.25,
+      "food_cost_pct": 18.63,
+      "contribution_margin": 6.51,
+      "photo": "soupe.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "planche_mezze",
+      "cat": "soir",
+      "fr": "Planche mezze à partager (2 pers.)",
+      "en": "Mezze sharing board (serves 2)",
+      "desc_fr": "Houmous, baba ghanouj, labneh, falafels, halloumi, olives, légumes marinés, pains plats chauds.",
+      "desc_en": "Hummus, baba ghanoush, labneh, falafel, halloumi, olives, pickles, warm flatbreads.",
+      "price": 34,
+      "cost": 11.5,
+      "units": 14,
+      "allergens": [
+        "gluten",
+        "milk",
+        "sesame"
+      ],
+      "tags": [
+        "vegetarian",
+        "signature"
+      ],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 33.82,
+      "contribution_margin": 22.5,
+      "photo": "planche_mezze.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "houmous_noisette",
+      "cat": "soir",
+      "fr": "Houmous au beurre noisette",
+      "en": "Brown butter hummus",
+      "desc_fr": "Houmous crémeux, beurre noisette épicé, pois chiches croustillants, pain plat.",
+      "desc_en": "Creamy hummus, spiced brown butter, crispy chickpeas, flatbread.",
+      "price": 12,
+      "cost": 2.2,
+      "units": 12,
+      "allergens": [
+        "sesame",
+        "milk",
+        "gluten"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": 14,
+      "food_cost_pct": 18.33,
+      "contribution_margin": 9.8,
+      "photo": "houmous_noisette.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "halloumi_miel",
+      "cat": "soir",
+      "fr": "Halloumi grillé, miel & thym",
+      "en": "Grilled halloumi, honey & thyme",
+      "desc_fr": "Doré à la plancha, miel du Québec, thym frais, poivre noir.",
+      "desc_en": "Seared on the plancha, Québec honey, fresh thyme, black pepper.",
+      "price": 14,
+      "cost": 5.04,
+      "units": 11,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian",
+        "no_gluten_ingredients"
+      ],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": 16.25,
+      "food_cost_pct": 36,
+      "contribution_margin": 8.96,
+      "photo": "halloumi_miel.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "falafels",
+      "cat": "soir",
+      "fr": "Falafels (5), sauce tahini",
+      "en": "Falafel (5), tahini sauce",
+      "desc_fr": "Croustillants dehors, verts dedans.",
+      "desc_en": "Crunchy outside, green inside.",
+      "price": 11,
+      "cost": 2.34,
+      "units": 10,
+      "allergens": [
+        "sesame"
+      ],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": 12.75,
+      "food_cost_pct": 21.27,
+      "contribution_margin": 8.66,
+      "photo": "falafels.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "brick",
+      "cat": "soir",
+      "fr": "Brick à l'œuf & thon",
+      "en": "Crispy brick pastry with egg & tuna",
+      "desc_fr": "Feuille de brick frite, œuf coulant, thon, câpres, persil.",
+      "desc_en": "Fried brick pastry, runny egg, tuna, capers, parsley.",
+      "price": 10,
+      "cost": 2.56,
+      "units": 6,
+      "allergens": [
+        "gluten",
+        "eggs",
+        "fish"
+      ],
+      "tags": [],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 25.6,
+      "contribution_margin": 7.44,
+      "photo": "brick.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "pain_plat",
+      "cat": "soir",
+      "fr": "Pain plat du four",
+      "en": "Oven flatbread",
+      "desc_fr": "Huile d'olive, zaatar, sel.",
+      "desc_en": "Olive oil, za'atar, salt.",
+      "price": 5,
+      "cost": 0.78,
+      "units": 12,
+      "allergens": [
+        "gluten",
+        "sesame"
+      ],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": 5.75,
+      "food_cost_pct": 15.6,
+      "contribution_margin": 4.22,
+      "photo": "pain_plat.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "frites_zaatar",
+      "cat": "accompagnements",
+      "fr": "Frites au zaatar",
+      "en": "Za'atar fries",
+      "desc_fr": "Avec toum à l'ail.",
+      "desc_en": "With garlic toum.",
+      "price": 6,
+      "cost": 1.28,
+      "units": 36,
+      "allergens": [
+        "sesame"
+      ],
+      "tags": [
+        "vegan"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 7,
+      "food_cost_pct": 21.33,
+      "contribution_margin": 4.72,
+      "photo": "frites_zaatar.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "extra_halloumi",
+      "cat": "accompagnements",
+      "fr": "Extra halloumi grillé",
+      "en": "Add grilled halloumi",
+      "desc_fr": "",
+      "desc_en": "",
+      "price": 4,
+      "cost": 1.7,
+      "units": 20,
+      "allergens": [
+        "milk"
+      ],
+      "tags": [
+        "vegetarian",
+        "modifier"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 4.75,
+      "food_cost_pct": 42.5,
+      "contribution_margin": 2.3,
+      "photo": "extra_halloumi.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "extra_avocat",
+      "cat": "accompagnements",
+      "fr": "Extra avocat",
+      "en": "Add avocado",
+      "desc_fr": "",
+      "desc_en": "",
+      "price": 3,
+      "cost": 1.63,
+      "units": 16,
+      "allergens": [],
+      "tags": [
+        "vegan",
+        "modifier"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 3.5,
+      "food_cost_pct": 54.33,
+      "contribution_margin": 1.37,
+      "photo": "extra_avocat.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "extra_oeuf",
+      "cat": "accompagnements",
+      "fr": "Extra œuf",
+      "en": "Add an egg",
+      "desc_fr": "",
+      "desc_en": "",
+      "price": 2.25,
+      "cost": 0.54,
+      "units": 18,
+      "allergens": [
+        "eggs"
+      ],
+      "tags": [
+        "vegetarian",
+        "modifier"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 24,
+      "contribution_margin": 1.71,
+      "photo": "extra_oeuf.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "extra_poulet",
+      "cat": "accompagnements",
+      "fr": "Extra poulet chermoula",
+      "en": "Add chermoula chicken",
+      "desc_fr": "",
+      "desc_en": "",
+      "price": 5.5,
+      "cost": 2.7,
+      "units": 10,
+      "allergens": [],
+      "tags": [
+        "halal",
+        "modifier"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": 6.5,
+      "food_cost_pct": 49.09,
+      "contribution_margin": 2.8,
+      "photo": "extra_poulet.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "lait_avoine",
+      "cat": "accompagnements",
+      "fr": "Lait d'avoine",
+      "en": "Oat milk",
+      "desc_fr": "",
+      "desc_en": "",
+      "price": 0.75,
+      "cost": 0.35,
+      "units": 28,
+      "allergens": [
+        "gluten"
+      ],
+      "tags": [
+        "vegan",
+        "modifier"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 46.67,
+      "contribution_margin": 0.4,
+      "photo": "lait_avoine.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "extra_shot",
+      "cat": "accompagnements",
+      "fr": "Shot d'espresso en plus",
+      "en": "Extra espresso shot",
+      "desc_fr": "",
+      "desc_en": "",
+      "price": 1.25,
+      "cost": 0.3,
+      "units": 30,
+      "allergens": [],
+      "tags": [
+        "vegan",
+        "modifier"
+      ],
+      "dayparts": [
+        "matin",
+        "midi",
+        "aprem",
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 24,
+      "contribution_margin": 0.95,
+      "photo": "extra_shot.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "mini_pain_perdu",
+      "cat": "enfants",
+      "fr": "Petit pain perdu & fruits",
+      "en": "Little French toast & fruit",
+      "desc_fr": "Avec un verre de lait ou de jus.",
+      "desc_en": "With a glass of milk or juice.",
+      "price": 9,
+      "cost": 2.2,
+      "units": 8,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": 10.5,
+      "food_cost_pct": 24.44,
+      "contribution_margin": 6.8,
+      "photo": "mini_pain_perdu.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "oeuf_mouillettes",
+      "cat": "enfants",
+      "fr": "Œuf à la coque & mouillettes",
+      "en": "Soft-boiled egg & toast soldiers",
+      "desc_fr": "Avec quartiers de fruits.",
+      "desc_en": "With fruit wedges.",
+      "price": 8,
+      "cost": 1.49,
+      "units": 6,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs"
+      ],
+      "tags": [
+        "vegetarian"
+      ],
+      "dayparts": [
+        "matin",
+        "midi"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 18.63,
+      "contribution_margin": 6.51,
+      "photo": "oeuf_mouillettes.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "formule_matin",
+      "cat": "formules",
+      "fr": "Formule matin",
+      "en": "Morning combo",
+      "desc_fr": "Café filtre ou allongé + croissant. Avant 11 h.",
+      "desc_en": "Filter coffee or Americano + croissant. Before 11 am.",
+      "price": 6.25,
+      "cost": 2.06,
+      "units": 36,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs"
+      ],
+      "tags": [
+        "combo"
+      ],
+      "dayparts": [
+        "matin"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 32.96,
+      "contribution_margin": 4.19,
+      "photo": "formule_matin.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "formule_midi",
+      "cat": "formules",
+      "fr": "Formule midi (+5)",
+      "en": "Lunch combo (+5)",
+      "desc_fr": "Ajoutez à tout bol ou pita : soupe du jour ou limonade maison + biscuit tahini.",
+      "desc_en": "Add to any bowl or pita: soup of the day or house lemonade + tahini cookie.",
+      "price": 5,
+      "cost": 2.34,
+      "units": 32,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "sesame",
+        "soy"
+      ],
+      "tags": [
+        "combo",
+        "modifier"
+      ],
+      "dayparts": [
+        "midi"
+      ],
+      "price_delivery": 5.75,
+      "food_cost_pct": 46.8,
+      "contribution_margin": 2.66,
+      "photo": "formule_midi.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": true,
+        "catering": false,
+        "screens": false
+      }
+    },
+    {
+      "id": "formule_brunch_duo",
+      "cat": "formules",
+      "fr": "Brunch pour deux",
+      "en": "Brunch for two",
+      "desc_fr": "Deux plats brunch au choix + deux cafés signature + un croissant pistache à partager. Week-end seulement.",
+      "desc_en": "Any two brunch plates + two signature lattes + a pistachio croissant to share. Weekends only.",
+      "price": 49,
+      "cost": 14.48,
+      "units": 16,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "tree_nuts"
+      ],
+      "tags": [
+        "combo",
+        "signature"
+      ],
+      "dayparts": [
+        "matin"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 29.55,
+      "contribution_margin": 34.52,
+      "photo": "formule_brunch_duo.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "pause_aprem",
+      "cat": "formules",
+      "fr": "Pause d'après-midi",
+      "en": "Afternoon break",
+      "desc_fr": "Thé à la menthe ou café filtre + cigares baklava ou madeleines. De 14 h à la fermeture.",
+      "desc_en": "Mint tea or filter coffee + baklava cigars or madeleines. From 2 pm to close.",
+      "price": 8.5,
+      "cost": 1.8,
+      "units": 20,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "tree_nuts"
+      ],
+      "tags": [
+        "combo"
+      ],
+      "dayparts": [
+        "aprem"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 21.18,
+      "contribution_margin": 6.7,
+      "photo": "pause_aprem.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "mezze_trio",
+      "cat": "formules",
+      "fr": "Trio mezze + pain plat",
+      "en": "Mezze trio + flatbread",
+      "desc_fr": "Houmous au beurre noisette, halloumi miel-thym, falafels et un pain plat du four. Jeudi et vendredi soir.",
+      "desc_en": "Brown butter hummus, honey-thyme halloumi, falafel and an oven flatbread. Thursday & Friday evenings.",
+      "price": 29,
+      "cost": 6.4,
+      "units": 10,
+      "allergens": [
+        "gluten",
+        "milk",
+        "sesame"
+      ],
+      "tags": [
+        "combo",
+        "vegetarian"
+      ],
+      "dayparts": [
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 22.07,
+      "contribution_margin": 22.6,
+      "photo": "mezze_trio.jpg",
+      "channels": {
+        "dine_in": true,
+        "takeout": true,
+        "online_pickup": true,
+        "delivery": false,
+        "catering": false,
+        "screens": true
+      }
+    },
+    {
+      "id": "boite_bureau",
+      "cat": "traiteur",
+      "fr": "Boîte déjeuner bureau",
+      "en": "Office lunch box",
+      "desc_fr": "Bol ou pita au choix, salade, douceur, boisson. Emballage compostable, étiqueté par personne. Minimum 8.",
+      "desc_en": "Bowl or pita of choice, salad, sweet, drink. Compostable packaging, labelled per person. Minimum 8.",
+      "price": 25,
+      "cost": 8.8,
+      "units": 0,
+      "allergens": [
+        "gluten",
+        "milk",
+        "sesame",
+        "eggs"
+      ],
+      "tags": [
+        "catering"
+      ],
+      "dayparts": [
+        "midi"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 35.2,
+      "contribution_margin": 16.2,
+      "photo": "boite_bureau.jpg",
+      "channels": {
+        "dine_in": false,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": true,
+        "screens": false
+      }
+    },
+    {
+      "id": "plateau_matin",
+      "cat": "traiteur",
+      "fr": "Plateau du matin (12 pers.)",
+      "en": "Morning platter (serves 12)",
+      "desc_fr": "12 viennoiseries, fruits tranchés, yogourt-granola, 2 L de café et le nécessaire.",
+      "desc_en": "12 pastries, sliced fruit, yogurt-granola, 2 L of coffee and all the fixings.",
+      "price": 110,
+      "cost": 39.05,
+      "units": 0,
+      "allergens": [
+        "gluten",
+        "milk",
+        "eggs",
+        "tree_nuts",
+        "sesame"
+      ],
+      "tags": [
+        "catering"
+      ],
+      "dayparts": [
+        "matin"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 35.5,
+      "contribution_margin": 70.95,
+      "photo": "plateau_matin.jpg",
+      "channels": {
+        "dine_in": false,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": true,
+        "screens": false
+      }
+    },
+    {
+      "id": "plateau_mezze",
+      "cat": "traiteur",
+      "fr": "Grand plateau mezze (10 pers.)",
+      "en": "Large mezze platter (serves 10)",
+      "desc_fr": "Houmous, baba ghanouj, taboulé, falafels, halloumi, légumes, pains plats.",
+      "desc_en": "Hummus, baba ghanoush, tabbouleh, falafel, halloumi, vegetables, flatbreads.",
+      "price": 145,
+      "cost": 51.12,
+      "units": 0,
+      "allergens": [
+        "gluten",
+        "milk",
+        "sesame"
+      ],
+      "tags": [
+        "catering",
+        "vegetarian"
+      ],
+      "dayparts": [
+        "midi",
+        "soir"
+      ],
+      "price_delivery": null,
+      "food_cost_pct": 35.26,
+      "contribution_margin": 93.88,
+      "photo": "plateau_mezze.jpg",
+      "channels": {
+        "dine_in": false,
+        "takeout": false,
+        "online_pickup": false,
+        "delivery": false,
+        "catering": true,
+        "screens": false
+      }
+    }
+  ]
+}

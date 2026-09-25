@@ -1,0 +1,242 @@
+[
+  {
+    "id": "latte_miel_cardamome",
+    "name": "Latte miel & cardamome",
+    "group": "Drinks",
+    "cls": "Star"
+  },
+  {
+    "id": "latte",
+    "name": "Latte",
+    "group": "Drinks",
+    "cls": "Star"
+  },
+  {
+    "id": "cappuccino",
+    "name": "Cappuccino",
+    "group": "Drinks",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "latte_pistache",
+    "name": "Latte pistache & fleur d'oranger",
+    "group": "Drinks",
+    "cls": "Star"
+  },
+  {
+    "id": "limonade",
+    "name": "Limonade menthe-citron maison",
+    "group": "Drinks",
+    "cls": "Star"
+  },
+  {
+    "id": "latte_glace",
+    "name": "Latte glacé miel & cardamome",
+    "group": "Drinks",
+    "cls": "Star"
+  },
+  {
+    "id": "allonge",
+    "name": "Allongé",
+    "group": "Drinks",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "filtre",
+    "name": "Café filtre du jour",
+    "group": "Drinks",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "the_menthe",
+    "name": "Thé à la menthe fraîche",
+    "group": "Drinks",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "chai",
+    "name": "Chaï maison",
+    "group": "Drinks",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "espresso",
+    "name": "Espresso",
+    "group": "Drinks",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "jus_orange",
+    "name": "Jus d'orange pressé",
+    "group": "Drinks",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "choco_tahini",
+    "name": "Chocolat chaud au tahini",
+    "group": "Drinks",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "granola",
+    "name": "Granola maison à emporter",
+    "group": "Pastries & sweets",
+    "cls": "Star"
+  },
+  {
+    "id": "croissant",
+    "name": "Croissant pur beurre",
+    "group": "Pastries & sweets",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "cookie_tahini",
+    "name": "Biscuit tahini & chocolat noir",
+    "group": "Pastries & sweets",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "croissant_pistache",
+    "name": "Croissant pistache",
+    "group": "Pastries & sweets",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "gateau_orange",
+    "name": "Gâteau orange-amande",
+    "group": "Pastries & sweets",
+    "cls": "Star"
+  },
+  {
+    "id": "cigares_baklava",
+    "name": "Cigares baklava pistache (2)",
+    "group": "Pastries & sweets",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "madeleines",
+    "name": "Madeleines fleur d'oranger (3)",
+    "group": "Pastries & sweets",
+    "cls": "Dog"
+  },
+  {
+    "id": "shakshuka",
+    "name": "Shakshuka Miam's",
+    "group": "Brunch & lunch mains",
+    "cls": "Star"
+  },
+  {
+    "id": "bol_poulet",
+    "name": "Bol poulet chermoula",
+    "group": "Brunch & lunch mains",
+    "cls": "Star"
+  },
+  {
+    "id": "assiette_matin",
+    "name": "Grande assiette du matin",
+    "group": "Brunch & lunch mains",
+    "cls": "Star"
+  },
+  {
+    "id": "pain_perdu",
+    "name": "Pain perdu brioché fleur d'oranger",
+    "group": "Brunch & lunch mains",
+    "cls": "Star"
+  },
+  {
+    "id": "toast_avocat",
+    "name": "Toast avocat, labneh & zaatar",
+    "group": "Brunch & lunch mains",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "bol_mezze",
+    "name": "Bol mezze",
+    "group": "Brunch & lunch mains",
+    "cls": "Star"
+  },
+  {
+    "id": "pita_poulet",
+    "name": "Pita poulet chermoula",
+    "group": "Brunch & lunch mains",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "sandwich_matin",
+    "name": "Brioche œuf, halloumi & harissa",
+    "group": "Brunch & lunch mains",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "wrap_falafel",
+    "name": "Wrap falafel",
+    "group": "Brunch & lunch mains",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "shakshuka_verte",
+    "name": "Shakshuka verte",
+    "group": "Brunch & lunch mains",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "oeufs_turcs",
+    "name": "Œufs pochés, yogourt & beurre d'Alep (çılbır)",
+    "group": "Brunch & lunch mains",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "fattouch",
+    "name": "Fattouch & halloumi grillé",
+    "group": "Brunch & lunch mains",
+    "cls": "Puzzle"
+  },
+  {
+    "id": "pan_bagnat",
+    "name": "Pan-bagnat du Miam",
+    "group": "Brunch & lunch mains",
+    "cls": "Dog"
+  },
+  {
+    "id": "soupe",
+    "name": "Soupe lentilles-citron",
+    "group": "Brunch & lunch mains",
+    "cls": "Dog"
+  },
+  {
+    "id": "planche_mezze",
+    "name": "Planche mezze à partager (2 pers.)",
+    "group": "Mezze evenings",
+    "cls": "Star"
+  },
+  {
+    "id": "houmous_noisette",
+    "name": "Houmous au beurre noisette",
+    "group": "Mezze evenings",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "halloumi_miel",
+    "name": "Halloumi grillé, miel & thym",
+    "group": "Mezze evenings",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "falafels",
+    "name": "Falafels (5), sauce tahini",
+    "group": "Mezze evenings",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "pain_plat",
+    "name": "Pain plat du four",
+    "group": "Mezze evenings",
+    "cls": "Plowhorse"
+  },
+  {
+    "id": "brick",
+    "name": "Brick à l'œuf & thon",
+    "group": "Mezze evenings",
+    "cls": "Dog"
+  }
+]
