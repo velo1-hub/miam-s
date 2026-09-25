@@ -306,7 +306,7 @@ export const PAGES = [
     <li><strong>Recevez votre soumission</strong> en moins de 4 heures ouvrables. Bon de commande et facture d'entreprise acceptés.</li>
     <li><strong>On livre avant 11 h 45</strong> dans un rayon de 5 km (frais selon la zone). Chaque boîte est étiquetée : nom, plat, allergènes.</li>
   </ol>
-  <p><a class="btn" href="mailto:{{EMAIL}}?subject=Demande%20traiteur">Demander une soumission</a> <a class="btn btn-ghost" href="tel:{{PHONE}}">{{PHONE_DISPLAY}}</a></p>
+  <p><a class="btn" href="mailto:{{EMAIL}}?subject=Demande%20traiteur" data-event="click_catering_quote">Demander une soumission</a> <a class="btn btn-ghost" href="tel:{{PHONE}}">{{PHONE_DISPLAY}}</a></p>
   <h2>Événements privés</h2>
   <p>Anniversaires, showers, lancements : privatisez le café (jusqu'à 30 personnes) le soir, du lundi au mercredi ou le week-end après 16 h. Menu mezze sur mesure.</p>
 </section>`,
@@ -327,7 +327,7 @@ export const PAGES = [
     <li><strong>Get your quote</strong> within 4 business hours. Purchase orders and company invoices accepted.</li>
     <li><strong>Delivered before 11:45 am</strong> within 5 km (fee depends on zone). Every box is labelled with name, dish and allergens.</li>
   </ol>
-  <p><a class="btn" href="mailto:{{EMAIL}}?subject=Catering%20request">Request a quote</a> <a class="btn btn-ghost" href="tel:{{PHONE}}">{{PHONE_DISPLAY}}</a></p>
+  <p><a class="btn" href="mailto:{{EMAIL}}?subject=Catering%20request" data-event="click_catering_quote">Request a quote</a> <a class="btn btn-ghost" href="tel:{{PHONE}}">{{PHONE_DISPLAY}}</a></p>
   <h2>Private events</h2>
   <p>Birthdays, showers, launches: book the whole café (up to 30 guests) in the evening from Monday to Wednesday, or on weekends after 4 pm. Custom mezze menu.</p>
 </section>`,

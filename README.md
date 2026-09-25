@@ -11,13 +11,13 @@ Everything needed to launch and run Miam's Resto Café: strategy, identity, menu
 | 0 | Discovery & audit | [docs/00-discovery.md](docs/00-discovery.md) | Question list, competitor matrix, SWOT |
 | 1 | Brand strategy | [docs/01-brand-strategy.md](docs/01-brand-strategy.md) | Positioning, taglines, tone of voice, brand stories FR/EN |
 | 2 | Visual identity | [docs/02-visual-identity.md](docs/02-visual-identity.md) | Palette, type, logo brief + AI prompts, shot list, brand book |
-| 3 | Menu engineering | [docs/03-menu.md](docs/03-menu.md) | [`data/menu.source.json`](data/menu.source.json) (master), [`data/menu.json`](data/menu.json), [`data/menu.csv`](data/menu.csv), [engineering matrix](docs/generated/menu-engineering.md) |
+| 3 | Menu engineering | [docs/03-menu.md](docs/03-menu.md) | [`data/menu.source.json`](data/menu.source.json) (master), [`data/menu.json`](data/menu.json), [`data/menu.csv`](data/menu.csv), [engineering matrix](docs/generated/menu-engineering.md), [print copy](docs/generated/print-menu.md) |
 | 4 | QR digital menu | [docs/04-qr-menu.md](docs/04-qr-menu.md) | Built: `site/dist/fr/menu/` and `site/dist/en/menu/` |
 | 5 | In-store screens | [docs/05-screens.md](docs/05-screens.md) | Built: `site/dist/screens/board.html` |
 | 6 | Website | [docs/06-website.md](docs/06-website.md) | Built static site in [`site/`](site/) (FR/EN, schema, sitemap) |
 | 7 | Google profile & local SEO | [docs/07-local-seo.md](docs/07-local-seo.md) | GBP copy, 15 Q&As, 30-day posts, review replies, citations |
 | 8 | Delivery platforms | [docs/08-delivery.md](docs/08-delivery.md) | Listing copy, delivery menu, ranking playbook |
-| 9 | MIAM OS | [docs/09-miam-os.md](docs/09-miam-os.md) | [`miam-os/`](miam-os/): database schema with row-level security (Supabase/Postgres) |
+| 9 | MIAM OS | [docs/09-miam-os.md](docs/09-miam-os.md) | [`miam-os/`](miam-os/): 73-table Supabase/Postgres schema, row-level security, seed, passing tests (`bash miam-os/scripts/test-local.sh`) |
 | 10 | Social media | [docs/10-social.md](docs/10-social.md) | 30-day calendar, 20 Reels scripts, launch campaign |
 | 11 | Meta Ads | [docs/11-meta-ads.md](docs/11-meta-ads.md) | Campaign structure, 10 ad concepts FR/EN, reporting template |
 | 12 | Loyalty & CRM | [docs/12-loyalty-crm.md](docs/12-loyalty-crm.md) | Program design, email/SMS flows with full copy |
@@ -30,6 +30,8 @@ Everything needed to launch and run Miam's Resto Café: strategy, identity, menu
 node tools/build-menu.mjs     # after editing data/menu.source.json: regenerates menu.json, menu.csv, engineering matrix
 node site/build.mjs           # regenerates the website, QR menu and screen board into site/dist
 npx serve site/dist           # preview locally (any static server works)
+node miam-os/scripts/generate-seed.mjs && bash miam-os/scripts/test-local.sh   # MIAM OS seed + tests
+node tools/shots.mjs shots    # QA screenshots + OG image (Playwright)
 ```
 
 `site/dist` is a plain static folder. Deploy it to Cloudflare Pages, Netlify or any web host, with no server and no database. The master menu flows from `data/menu.source.json` into the print menu text, website, QR menu, screens and delivery CSV. **Change a price in one place.**
