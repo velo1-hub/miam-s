@@ -692,6 +692,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       <div class="amt"><span id="hTotal">3 000 $</span> <small>+ taxes</small></div>
       <div class="ttc"><b id="hTTC">3 449,25 $</b> taxes incluses (TPS et TVQ)</div>
       <div class="valid" id="hNote">Forfait complet · 3 versements</div>
+      <div class="valid" id="hPromo" style="margin-top:6px;color:#86efac">🎉 Rabais promotionnel de 2 000 $ déjà appliqué</div>
       <div class="valid" id="hMonthly" style="margin-top:6px;color:var(--cyan)">+ Accompagnement mensuel : 1 499 $ / mois + taxes</div>
       <div class="cd"><span class="pulse"></span>Offre valide encore <b id="cdT">30 j</b></div>
     </div>
@@ -1171,7 +1172,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
   var NUM={gestion:"01",pointage:"02",site:"03",qr:"04",emp:"05",prop:"06",seo:"07",avis:"08"};
   var ORDER=["gestion","pointage","site","qr","emp","prop","seo","avis"];
   var CORE=["gestion","pointage","site","qr","emp","prop"];
-  var MONTHLY=1499, BUNDLE=3000;
+  var MONTHLY=1499, BUNDLE=3000, PROMO=2000;
   var sel={gestion:true,pointage:true,site:true,qr:true,emp:true,prop:true,seo:false,avis:false,mensuel:true};
   try{var _s=JSON.parse(localStorage.getItem("vl2sel"));if(_s)for(var _k in sel)if(typeof _s[_k]==="boolean")sel[_k]=_s[_k]}catch(e){}
   function r2(x){return Math.round(x*100)/100}
@@ -1191,7 +1192,8 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     var coreSum=coreSel.reduce(function(a,k){return a+P[k]},0);
     var full=coreSel.length===CORE.length;
     var disc=full?coreSum-BUNDLE:0;
-    var net=sub-disc;
+    var promo=Math.min(PROMO,Math.max(0,sub-disc));
+    var net=sub-disc-promo;
     var tps=r2(net*0.05),tvq=r2(net*0.09975),ttc=r2(net+tps+tvq);
     var mt=r2(MONTHLY*0.05),mq=r2(MONTHLY*0.09975),mttc=r2(MONTHLY+mt+mq);
     // toggles
@@ -1204,6 +1206,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     $("hTTC").textContent=m(ttc,1);
     var nPay=net===0?0:(net<1000?1:3);
     $("hNote").textContent=net===0?"Aucun service de mise en place choisi":(full?"Forfait complet (rabais de "+m(disc)+")"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+" · ")+(nPay?(nPay===1?"1 versement":"3 versements"):"");
+    $("hPromo").style.display=promo?"":"none";
     $("hMonthly").style.display=sel.mensuel?"":"none";
     // dock
     $("dTotal").textContent=m(net);
@@ -1221,6 +1224,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       var h='<tr><th>Mise en place</th><th>Montant</th></tr>';
       items.forEach(function(k){h+='<tr><td><span class="k">'+NUM[k]+'</span>'+NAMES[k]+'</td><td>'+m(P[k],1)+'</td></tr>'});
       if(disc){h+='<tr class="sub"><td>Sous-total</td><td>'+m(sub,1)+'</td></tr><tr class="disc"><td>Rabais forfait complet (services 01 à 06)</td><td>− '+m(disc,1)+'</td></tr>'}
+      if(promo){h+='<tr class="disc"><td>Rabais promotionnel Veloria Labs</td><td>− '+m(promo,1)+'</td></tr>'}
       h+='<tr class="sub"><td>Total avant taxes</td><td>'+m(net,1)+'</td></tr>';
       h+='<tr class="tax"><td>TPS (5 %)<span class="rn">708582630 RT0001</span></td><td>'+m(tps,1)+'</td></tr>';
       h+='<tr class="tax"><td>TVQ (9,975 %)<span class="rn">1233881526 TQ0001</span></td><td>'+m(tvq,1)+'</td></tr>';
@@ -1245,6 +1249,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     // mailto
     var lines=items.map(function(k){return "- "+NAMES[k]+" : "+m(P[k])});
     if(disc)lines.push("- Rabais forfait complet : -"+m(disc));
+    if(promo)lines.push("- Rabais promotionnel Veloria Labs : -"+m(promo));
     var body="Bonjour Veloria Labs,\n\nJ'accepte la soumission VL-0002 avec les services suivants :\n"+(lines.join("\n")||"- (aucun service de mise en place)")+"\n\nMise en place : "+m(net)+" + taxes ("+m(ttc,1)+" taxes incluses)"+(sel.mensuel?"\nAccompagnement mensuel : "+m(MONTHLY)+" / mois + taxes":"\nAccompagnement mensuel : non")+(window.__sigLine||"")+"\n\nNom :\nTéléphone :\n";
     $("acceptLink").href="mailto:hello@velorialabs.ca?subject="+encodeURIComponent("Acceptation - Soumission VL-0002 - Miam's Resto Café")+"&body="+encodeURIComponent(body);
     window.__body=body;
