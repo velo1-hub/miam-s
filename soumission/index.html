@@ -693,11 +693,11 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     </div>
     <div class="totalbox"><span class="holo" aria-hidden="true"></span>
       <div class="lbl">Votre sélection · mise en place</div>
-      <div class="amt"><span id="hTotal">3 000 $</span> <small>+ taxes</small></div>
-      <div class="ttc"><b id="hTTC">3 449,25 $</b> taxes incluses (TPS et TVQ)</div>
-      <div class="valid" id="hNote">Forfait complet · 3 versements</div>
-      <div class="valid" id="hPromo" style="margin-top:6px;color:#86efac">🎉 Rabais promotionnel de 2 000 $ déjà appliqué</div>
-      <div class="valid" id="hMonthly" style="margin-top:6px;color:var(--cyan)">+ Accompagnement mensuel : 1 499 $ / mois + taxes</div>
+      <div class="amt"><span id="hTotal">0 $</span> <small>+ taxes</small></div>
+      <div class="ttc"><b id="hTTC">0,00 $</b> taxes incluses (TPS et TVQ)</div>
+      <div class="valid" id="hNote">Cochez vos services : le total se calcule en direct</div>
+      <div class="valid" id="hPromo" style="margin-top:6px;color:#86efac;display:none">🎉 Rabais promotionnel de 2 000 $ déjà appliqué</div>
+      <div class="valid" id="hMonthly" style="margin-top:6px;color:var(--cyan);display:none">+ Accompagnement mensuel : 1 499 $ / mois + taxes</div>
       <div class="cd"><span class="pulse"></span>Offre valide encore <b id="cdT">30 j</b></div>
     </div>
   </div>
@@ -1249,7 +1249,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 <div class="botbar"></div>
 
 <div class="dock" id="dock">
-  <div class="dk-l"><div class="dk-lbl">Votre total</div><div class="dk-v"><b id="dTotal">3 000 $</b> + taxes <span class="dk-m" id="dMonthly">· 1 499 $ / mois</span></div></div>
+  <div class="dk-l"><div class="dk-lbl">Votre total</div><div class="dk-v"><b id="dTotal">0 $</b> + taxes <span class="dk-m" id="dMonthly"></span></div></div>
   <div class="dk-r"><button type="button" class="dk-nav" id="navOpen" aria-label="Aller à une section"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button><a class="dk-btn" href="#prix">Voir le détail</a></div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1262,8 +1262,8 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
   var ORDER=["gestion","pointage","site","qr","emp","prop","seo","avis","video","crm"];
   var CORE=["gestion","pointage","site","qr","emp","prop"];
   var MONTHLY=1499, BUNDLE=3000, PROMO=2000;
-  var sel={gestion:true,pointage:true,site:true,qr:true,emp:true,prop:true,seo:false,avis:false,video:false,crm:false,mensuel:true};
-  try{var _s=JSON.parse(localStorage.getItem("vl2sel"));if(_s)for(var _k in sel)if(typeof _s[_k]==="boolean")sel[_k]=_s[_k]}catch(e){}
+  var sel={gestion:false,pointage:false,site:false,qr:false,emp:false,prop:false,seo:false,avis:false,video:false,crm:false,mensuel:false};
+  try{var _s=JSON.parse(localStorage.getItem("vl3sel"));if(_s)for(var _k in sel)if(typeof _s[_k]==="boolean")sel[_k]=_s[_k]}catch(e){}
   function r2(x){return Math.round(x*100)/100}
   function m(x,dec){return x.toLocaleString("fr-CA",{minimumFractionDigits:dec?2:0,maximumFractionDigits:dec?2:0}).replace(/\u202f/g," ")+" $"}
   function $(id){return document.getElementById(id)}
@@ -1294,7 +1294,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     $("hTotal").textContent=m(net);
     $("hTTC").textContent=m(ttc,1);
     var nPay=net===0?0:(net<1000?1:2);
-    $("hNote").textContent=!items.length?"Aucun service de mise en place choisi":(full?"Forfait complet (rabais de "+m(disc+promo)+")"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+(promo?" (rabais promo "+m(promo)+")":"")+" · ")+(net===0?"aucun solde à payer":(nPay===1?"1 versement":"2 versements"));
+    $("hNote").textContent=!items.length?"Cochez vos services : le total se calcule en direct":(full?"Forfait complet (rabais de "+m(disc+promo)+")"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+(promo?" (rabais promo "+m(promo)+")":"")+" · ")+(net===0?"aucun solde à payer":(nPay===1?"1 versement":"2 versements"));
     $("hPromo").style.display=promo?"":"none";
     $("hMonthly").style.display=sel.mensuel?"":"none";
     // dock
@@ -1305,7 +1305,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     var up=$("upsell");
     if(missing.length&&missing.length<CORE.length){var extra=missing.reduce(function(a,k){return a+P[k]},0);var gain=(coreSum+extra)-BUNDLE+promo;up.innerHTML="Astuce : ajoutez "+missing.map(function(k){return "<b>"+NAMES[k]+"</b>"}).join(", ")+" et obtenez les 6 services de base au prix du forfait complet : <b>"+m(BUNDLE-promo)+"</b> (rabais de "+m(gain)+")."+' <button type="button" class="tg on" id="addAll">Tout ajouter</button>';up.style.display="";$("addAll").onclick=function(){CORE.forEach(function(k){sel[k]=true});render()}}
     else if(full){up.innerHTML="Forfait complet activé : vous économisez <b>"+m(disc+promo)+"</b>.";up.style.display=""}
-    else up.style.display="none";
+    else{up.innerHTML="Offre forfait : les 6 services de base (01 à 06) ensemble pour <b>"+m(BUNDLE-PROMO)+"</b> au lieu de "+m(CORE.reduce(function(a,k){return a+P[k]},0))+", rabais promotionnel inclus."+' <button type="button" class="tg on" id="addAll">Choisir le forfait</button>';up.style.display="";$("addAll").onclick=function(){CORE.forEach(function(k){sel[k]=true});render()}}
     // setup table
     var t=$("tSetup");
     if(!items.length){t.style.display="none";$("emptySetup").style.display=""}
@@ -1521,7 +1521,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     state=s;
     roll("hTotal");roll("dTotal");roll("hTTC",1);roll("firstPay",1);
     if(!first)buzz(12);first=false;
-    try{store("vl2sel",JSON.stringify(s.sel))}catch(e){}
+    try{store("vl3sel",JSON.stringify(s.sel))}catch(e){}
     if(window.__roi)window.__roi();
   };
 
@@ -1701,6 +1701,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       var name=$("sigName").value.trim();
       if(!name){$("sigErr").textContent="Inscrivez votre nom avant de signer.";$("sigName").focus();return}
       if(!strokes){$("sigErr").textContent="Signez avec le doigt ou la souris dans le cadre.";return}
+      var qq=window.__quote;if(!qq||(!qq.items.length&&!qq.mensuel)){$("sigErr").textContent="Choisissez au moins un service avant de signer.";return}
       var ts=new Date(),img=c.toDataURL("image/png"),sel=state.sel||{};
       var payload=JSON.stringify({doc:"VL-0002",client:"Miam's Resto Café",name:name,sel:sel,net:state.net,ts:ts.toISOString(),sig:img});
       var done=function(h){
