@@ -696,7 +696,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       <div class="amt"><span id="hTotal">0 $</span> <small>+ taxes</small></div>
       <div class="ttc"><b id="hTTC">0,00 $</b> taxes incluses (TPS et TVQ)</div>
       <div class="valid" id="hNote">Cochez vos services : le total se calcule en direct</div>
-      <div class="valid" id="hPromo" style="margin-top:6px;color:#86efac;display:none">🎉 Rabais promotionnel de 2 000 $ déjà appliqué</div>
+      <div class="valid" id="hPromo" style="margin-top:6px;color:#86efac;display:none">Rabais de 2 000 $ déjà accordé à Miam's</div>
       <div class="valid" id="hMonthly" style="margin-top:6px;color:var(--cyan);display:none">+ Accompagnement mensuel : 1 499 $ / mois + taxes</div>
       <div class="cd"><span class="pulse"></span>Offre valide encore <b id="cdT">30 j</b></div>
     </div>
@@ -711,7 +711,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 
   <div class="why">
     <div class="l">POURQUOI CETTE SOUMISSION</div>
-    <p>Un restaurant se gère mieux quand tout est au même endroit. Cette soumission est <b>à la carte</b> : cochez les services dont Miam's a besoin, retirez ceux dont vous n'avez pas besoin, et le total, les taxes et les versements se calculent automatiquement. <b>En prenant les six services de base (01 à 06) ensemble, vous obtenez le forfait complet à 1 000 $ au lieu de 4 693 $ (rabais forfait de 1 693 $ + rabais promotionnel de 2 000 $).</b> Le référencement Google, les avis Google, la production vidéo et le programme de fidélité s'ajoutent au besoin. <b>Tout est pensé pour grandir : ce système est la base d'une future franchise Miam's.</b></p>
+    <p>Un restaurant se gère mieux quand tout est au même endroit. Cette soumission est <b>à la carte</b> : cochez les services dont Miam's a besoin, retirez ceux dont vous n'avez pas besoin, et le total, les taxes et les versements se calculent automatiquement. <b>Nous avons déjà prévu pour Miam's un rabais de 2 000 $ sur le forfait complet (les six services de base, 01 à 06).</b> Le référencement Google, les avis Google, la production vidéo et le programme de fidélité s'ajoutent au besoin. <b>Tout est pensé pour grandir : ce système est la base d'une future franchise Miam's.</b></p>
   </div>
 </header>
 
@@ -1280,8 +1280,8 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     var coreSel=CORE.filter(function(k){return sel[k]});
     var coreSum=coreSel.reduce(function(a,k){return a+P[k]},0);
     var full=coreSel.length===CORE.length;
-    var disc=full?coreSum-BUNDLE:0;
-    var promo=Math.min(PROMO,Math.max(0,sub-disc));
+    var disc=0;
+    var promo=full?PROMO:0;
     var net=sub-disc-promo;
     var tps=r2(net*0.05),tvq=r2(net*0.09975),ttc=r2(net+tps+tvq);
     var mt=r2(MONTHLY*0.05),mq=r2(MONTHLY*0.09975),mttc=r2(MONTHLY+mt+mq);
@@ -1294,7 +1294,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     $("hTotal").textContent=m(net);
     $("hTTC").textContent=m(ttc,1);
     var nPay=net===0?0:(net<1000?1:2);
-    $("hNote").textContent=!items.length?"Cochez vos services : le total se calcule en direct":(full?"Forfait complet (rabais de "+m(disc+promo)+")"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+(promo?" (rabais promo "+m(promo)+")":"")+" · ")+(net===0?"aucun solde à payer":(nPay===1?"1 versement":"2 versements"));
+    $("hNote").textContent=!items.length?"Cochez vos services : le total se calcule en direct":(full?"Forfait complet · rabais de "+m(PROMO)+" appliqué"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+" · ")+(net===0?"aucun solde à payer":(nPay===1?"1 versement":"2 versements"));
     $("hPromo").style.display=promo?"":"none";
     $("hMonthly").style.display=sel.mensuel?"":"none";
     // dock
@@ -1303,9 +1303,9 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     // upsell
     var missing=CORE.filter(function(k){return !sel[k]});
     var up=$("upsell");
-    if(missing.length&&missing.length<CORE.length){var extra=missing.reduce(function(a,k){return a+P[k]},0);var gain=(coreSum+extra)-BUNDLE+promo;up.innerHTML="Astuce : ajoutez "+missing.map(function(k){return "<b>"+NAMES[k]+"</b>"}).join(", ")+" et obtenez les 6 services de base au prix du forfait complet : <b>"+m(BUNDLE-promo)+"</b> (rabais de "+m(gain)+")."+' <button type="button" class="tg on" id="addAll">Tout ajouter</button>';up.style.display="";$("addAll").onclick=function(){CORE.forEach(function(k){sel[k]=true});render()}}
-    else if(full){up.innerHTML="Forfait complet activé : vous économisez <b>"+m(disc+promo)+"</b>.";up.style.display=""}
-    else{up.innerHTML="Offre forfait : les 6 services de base (01 à 06) ensemble pour <b>"+m(BUNDLE-PROMO)+"</b> au lieu de "+m(CORE.reduce(function(a,k){return a+P[k]},0))+", rabais promotionnel inclus."+' <button type="button" class="tg on" id="addAll">Choisir le forfait</button>';up.style.display="";$("addAll").onclick=function(){CORE.forEach(function(k){sel[k]=true});render()}}
+    if(missing.length&&missing.length<CORE.length){var extra=missing.reduce(function(a,k){return a+P[k]},0);up.innerHTML="Ajoutez "+missing.map(function(k){return "<b>"+NAMES[k]+"</b>"}).join(", ")+" pour compléter le forfait : votre <b>rabais de "+m(PROMO)+"</b> s'applique automatiquement."+' <button type="button" class="tg on" id="addAll">Tout ajouter</button>';up.style.display="";$("addAll").onclick=function(){CORE.forEach(function(k){sel[k]=true});render()}}
+    else if(full){up.innerHTML="Forfait complet : votre <b>rabais de "+m(PROMO)+"</b> est déjà appliqué.";up.style.display=""}
+    else{up.innerHTML="Nous avons déjà prévu pour Miam's un <b>rabais de "+m(PROMO)+"</b> sur le forfait complet : les 6 services de base (01 à 06)."+' <button type="button" class="tg on" id="addAll">Choisir le forfait</button>';up.style.display="";$("addAll").onclick=function(){CORE.forEach(function(k){sel[k]=true});render()}}
     // setup table
     var t=$("tSetup");
     if(!items.length){t.style.display="none";$("emptySetup").style.display=""}
@@ -1313,7 +1313,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       var h='<tr><th>Mise en place</th><th>Montant</th></tr>';
       items.forEach(function(k){h+='<tr><td><span class="k">'+NUM[k]+'</span>'+NAMES[k]+'</td><td>'+m(P[k],1)+'</td></tr>'});
       if(disc){h+='<tr class="sub"><td>Sous-total</td><td>'+m(sub,1)+'</td></tr><tr class="disc"><td>Rabais forfait complet (services 01 à 06)</td><td>− '+m(disc,1)+'</td></tr>'}
-      if(promo){h+='<tr class="disc"><td>Rabais promotionnel Veloria Labs</td><td>− '+m(promo,1)+'</td></tr>'}
+      if(promo){h+='<tr class="sub"><td>Sous-total</td><td>'+m(sub,1)+'</td></tr><tr class="disc"><td>Rabais accordé à Miam\'s (forfait complet)</td><td>− '+m(promo,1)+'</td></tr>'}
       h+='<tr class="sub"><td>Total avant taxes</td><td>'+m(net,1)+'</td></tr>';
       h+='<tr class="tax"><td>TPS (5 %)<span class="rn">708582630 RT0001</span></td><td>'+m(tps,1)+'</td></tr>';
       h+='<tr class="tax"><td>TVQ (9,975 %)<span class="rn">1233881526 TQ0001</span></td><td>'+m(tvq,1)+'</td></tr>';
@@ -1339,7 +1339,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     // mailto
     var lines=items.map(function(k){return "- "+NAMES[k]+" : "+m(P[k])});
     if(disc)lines.push("- Rabais forfait complet : -"+m(disc));
-    if(promo)lines.push("- Rabais promotionnel Veloria Labs : -"+m(promo));
+    if(promo)lines.push("- Rabais accordé (forfait complet) : -"+m(promo));
     var body="Bonjour Veloria Labs,\n\nJ'accepte la soumission VL-0002 avec les services suivants :\n"+(lines.join("\n")||"- (aucun service de mise en place)")+"\n\nMise en place : "+m(net)+" + taxes ("+m(ttc,1)+" taxes incluses)"+(sel.mensuel?"\nAccompagnement mensuel : "+m(MONTHLY)+" / mois + taxes, payable d'avance chaque mois":"\nAccompagnement mensuel : non")+(window.__sigLine||"")+"\n\nNom :\nTéléphone :\n";
     $("acceptLink").href="mailto:hello@velorialabs.ca?subject="+encodeURIComponent("Acceptation - Soumission VL-0002 - Miam's Resto Café")+"&body="+encodeURIComponent(body);
     window.__body=body;
@@ -1617,7 +1617,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       y+=106;label(M,y,"Services retenus");y+=10;
       var rows=q.items.map(function(it){return[it.k,it.n,mo(it.p,1),0]});
       if(q.disc)rows.push(["","Rabais forfait complet (services 01 à 06)","- "+mo(q.disc,1),1]);
-      if(q.promo)rows.push(["","Rabais promotionnel Veloria Labs","- "+mo(q.promo,1),1]);
+      if(q.promo)rows.push(["","Rabais accordé à Miam's (forfait complet)","- "+mo(q.promo,1),1]);
       rows.push(["","Total avant taxes",mo(q.net,1),2]);
       rows.push(["","TPS (5 %) · 708582630 RT0001",mo(q.tps,1),3]);
       rows.push(["","TVQ (9,975 %) · 1233881526 TQ0001",mo(q.tvq,1),3]);
