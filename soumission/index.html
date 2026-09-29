@@ -1571,6 +1571,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       if(t-t0<2600)requestAnimationFrame(f);else{x.clearRect(0,0,W,H);c.hidden=true}})(t0)}
 
   /* ---------- instant signed contract (PDF) ---------- */
+  var DLCAP=null;try{if(window.claude&&typeof window.claude.use==="function")window.claude.use("downloads").then(function(d){DLCAP=d},function(){})}catch(e){}
   window.VLContract=(function(){
     var lastUrl=null;
     function t(x){return String(x).replace(/[  ]/g," ").replace(/[’]/g,"'").replace(/[^\x00-\xff—·€]/g,"")}
@@ -1712,7 +1713,8 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
         var box=$("certPdf"),st=$("certSend");
         if(!res){st.textContent="Le contrat PDF n'a pas pu être généré ici. Copiez le message d'acceptation et envoyez-le à hello@velorialabs.ca.";box.hidden=false;$("certDl").hidden=true;return}
         var dl=$("certDl");dl.href=res.url;dl.setAttribute("download",res.name);dl.hidden=false;box.hidden=false;
-        try{dl.click()}catch(e){}
+        var saveCap=function(){return DLCAP.save({filename:res.name,data:res.blob}).catch(function(){})};
+        if(DLCAP){dl.onclick=function(e){e.preventDefault();saveCap()};saveCap()}else{try{dl.click()}catch(e){}}
         st.textContent="Transmission du contrat à Veloria Labs...";
         var money=function(x){return x.toLocaleString("fr-CA",{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/[\u202f\u00a0]/g," ")+" $"};
         fetch("/api/contract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,when:when,hash:h,filename:res.name,pdf:res.b64,
