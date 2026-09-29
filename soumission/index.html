@@ -211,6 +211,8 @@ footer{margin-top:50px;border-top:1px solid var(--line);padding:24px 0 30px;colo
 
 .tl.five{grid-template-columns:repeat(5,1fr)}
 .pays.three{grid-template-columns:repeat(3,1fr)}
+.pays.two{grid-template-columns:repeat(2,1fr)}
+@media (max-width:640px){.pays.two{grid-template-columns:1fr}}
 
 /* interactive */
 .opt{cursor:pointer;user-select:none}
@@ -598,6 +600,7 @@ section,.accept,.welcome{scroll-margin-top:64px}
 .cta3{display:inline-flex;align-items:center;justify-content:center;padding:16px 22px;border-radius:14px;border:1px solid rgba(34,211,238,.4);background:rgba(34,211,238,.06);color:#fff;font:600 15px "Inter",sans-serif;margin-left:10px;cursor:pointer}
 .msgbox{margin-top:14px;width:100%;min-height:180px;padding:14px;border-radius:14px;border:1px solid var(--line2);background:rgba(0,0,0,.4);color:var(--tx2);font:500 12.5px/1.6 var(--mono)}
 
+.cert-pdf{margin-top:12px;display:grid;gap:8px}.cert-pdf .cta{justify-content:center;font-size:14px;padding:13px 16px}.cert-send{font-size:12.5px;color:var(--tx2)}.cert-send b{color:#86efac}
 /* confetti */
 #confetti{position:fixed;inset:0;width:100%;height:100%;z-index:170;pointer-events:none}
 
@@ -708,14 +711,14 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 
   <div class="why">
     <div class="l">POURQUOI CETTE SOUMISSION</div>
-    <p>Un restaurant se gère mieux quand tout est au même endroit. Cette soumission est <b>à la carte</b> : cochez les services dont Miam's a besoin, retirez ceux dont vous n'avez pas besoin, et le total, les taxes et les versements se calculent automatiquement. <b>En prenant les six services de base (01 à 06) ensemble, vous obtenez le forfait complet à 1 000 $ au lieu de 4 498 $ (rabais forfait de 1 498 $ + rabais promotionnel de 2 000 $).</b> Le référencement Google et les avis Google s'ajoutent au besoin.</p>
+    <p>Un restaurant se gère mieux quand tout est au même endroit. Cette soumission est <b>à la carte</b> : cochez les services dont Miam's a besoin, retirez ceux dont vous n'avez pas besoin, et le total, les taxes et les versements se calculent automatiquement. <b>En prenant les six services de base (01 à 06) ensemble, vous obtenez le forfait complet à 1 000 $ au lieu de 4 693 $ (rabais forfait de 1 693 $ + rabais promotionnel de 2 000 $).</b> Le référencement Google, les avis Google, la production vidéo et le programme de fidélité s'ajoutent au besoin. <b>Tout est pensé pour grandir : ce système est la base d'une future franchise Miam's.</b></p>
   </div>
 </header>
 
 <!-- OVERVIEW -->
 <section id="apercu">
   <div class="sh"><span class="num">00</span><h2>Votre système en un coup d'oeil</h2></div>
-  <p class="lead">Huit services au choix, plus un accompagnement mensuel. Chacun est détaillé plus bas.</p>
+  <p class="lead">Dix services au choix, plus un accompagnement mensuel. Chacun est détaillé plus bas.</p>
 
   <div class="stats">
     <div class="stat"><div class="n"><span class="g">1</span> système</div><div class="t">Gestion, pointage, site, menu et portails reliés ensemble</div></div>
@@ -734,7 +737,9 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     <label class="tile opt" data-k="prop"><input type="checkbox"><span class="chk"></span><div class="k">06 · PHASE 2</div><div class="n">Portail propriétaire</div><div class="d">Tout le restaurant, en direct, dans votre poche.</div><span class="p" data-price="prop"></span> <a class="more" href="#s06">Détails ↓</a></label>
     <label class="tile opt" data-k="seo"><input type="checkbox"><span class="chk"></span><div class="k">07 · PHASE 1</div><div class="n">Référencement Google (SEO local)</div><div class="d">Apparaître quand on cherche où manger près de chez vous.</div><span class="p" data-price="seo"></span> <a class="more" href="#s07b">Détails ↓</a></label>
     <label class="tile opt" data-k="avis"><input type="checkbox"><span class="chk"></span><div class="k">08 · PHASE 1</div><div class="n">Avis Google</div><div class="d">Recevoir plus d'avis et bien y répondre.</div><span class="p" data-price="avis"></span> <a class="more" href="#s08b">Détails ↓</a></label>
-    <label class="tile opt s7 monthly-tile" data-k="mensuel"><input type="checkbox"><span class="chk"></span><div class="k">09 · MENSUEL</div><div class="n">Accompagnement : réseaux sociaux, publicité, ventes et maintenance</div><div class="d">Un contenu par jour, vos publicités gérées, une stratégie de vente et vos outils entretenus.</div><span class="p" data-price="mensuel"></span> <a class="more" href="#s07">Détails ↓</a></label>
+    <label class="tile opt" data-k="video"><input type="checkbox"><span class="chk"></span><div class="k">09 · NOUVEAU</div><div class="n">Production vidéo &amp; contenu</div><div class="d">Une journée de tournage et 30 vidéos prêtes à publier.</div><span class="p" data-price="video"></span> <a class="more" href="#s09v">Détails ↓</a></label>
+    <label class="tile opt" data-k="crm"><input type="checkbox"><span class="chk"></span><div class="k">10 · NOUVEAU</div><div class="n">Programme de fidélité &amp; CRM</div><div class="d">Faire revenir chaque client, automatiquement.</div><span class="p" data-price="crm"></span> <a class="more" href="#s10c">Détails ↓</a></label>
+    <label class="tile opt s7 monthly-tile" data-k="mensuel"><input type="checkbox"><span class="chk"></span><div class="k">11 · MENSUEL</div><div class="n">Accompagnement : réseaux sociaux, publicité, ventes et maintenance</div><div class="d">Un contenu par jour, vos publicités gérées, une stratégie de vente et vos outils entretenus.</div><span class="p" data-price="mensuel"></span> <a class="more" href="#s07">Détails ↓</a></label>
   </div>
   <div class="upsell" id="upsell"></div>
 </section>
@@ -991,9 +996,45 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
   </div>
 </section>
 
+<!-- 09 VIDEO -->
+<section id="s09v" class="svc" data-k="video">
+  <div class="sh"><span class="num">09</span><h2>Production vidéo &amp; contenu</h2></div>
+  <p class="lead">En 2026, <b>la vidéo courte est la première vitrine d'un restaurant</b> : les gens choisissent où manger en regardant des Reels et des TikTok. Une journée de tournage professionnelle donne à Miam's un mois complet de contenu.</p>
+  <div class="panel">
+    <ul class="feats">
+      <li><b>Journée de tournage au restaurant</b> : plats, cuisine en action, équipe, clients et ambiance, filmés en vertical.</li>
+      <li><b>30 vidéos montées</b> : Reels, TikTok et stories de 7 à 30 secondes, avec sous-titres et musique libre de droits.</li>
+      <li><b>Photos des plats</b> : 40 photos retouchées pour le site, le menu QR, Google et les plateformes de livraison.</li>
+      <li><b>Accroches testées</b> : les 3 premières secondes pensées pour arrêter le défilement.</li>
+      <li><b>Banque de contenu</b> : tout est à vous, classé et prêt à réutiliser pour la publicité.</li>
+      <li><b>Formule pour la suite</b> : un guide simple pour que l'équipe filme elle-même entre deux tournages.</li>
+    </ul>
+    <div class="pricebar"><span class="pl">Prix · Production vidéo &amp; contenu</span><span class="pv"><span data-price="video"></span> <small>+ taxes</small></span><button type="button" class="tg" data-k="video"></button></div>
+    <p class="note">Avec l'accompagnement mensuel, ces vidéos alimentent la publication quotidienne dès le premier jour.</p>
+  </div>
+</section>
+
+<!-- 10 CRM -->
+<section id="s10c" class="svc" data-k="crm">
+  <div class="sh"><span class="num">10</span><h2>Programme de fidélité &amp; CRM</h2></div>
+  <p class="lead">Un nouveau client coûte cinq fois plus cher qu'un client qui revient. <b>Ce programme transforme chaque visite en relation durable</b>, et chaque client en donnée utile.</p>
+  <div class="panel">
+    <ul class="feats">
+      <li><b>Carte de fidélité numérique</b> : des points à chaque commande, sur le site et au comptoir, sans carte en plastique.</li>
+      <li><b>Fiches clients enrichies</b> : fréquence, plats préférés, dépense moyenne et dernière visite.</li>
+      <li><b>Campagnes automatiques</b> : anniversaire, client absent depuis 30 jours, nouveau plat, heures creuses.</li>
+      <li><b>Textos et courriels</b> : modèles prêts en français et en anglais, aux couleurs de Miam's.</li>
+      <li><b>Segments</b> : habitués, nouveaux, amateurs de brunch, clients du midi.</li>
+      <li><b>Mesure</b> : taux de retour, revenus générés par les campagnes et valeur d'un client.</li>
+    </ul>
+    <div class="pricebar"><span class="pl">Prix · Programme de fidélité &amp; CRM</span><span class="pv"><span data-price="crm"></span> <small>+ taxes</small></span><button type="button" class="tg" data-k="crm"></button></div>
+    <p class="note">Les frais d'envoi de textos (fournisseur tiers) sont facturés au coût réel.</p>
+  </div>
+</section>
+
 <!-- 07 -->
 <section id="s07" class="svc" data-k="mensuel">
-  <div class="sh"><span class="num">09</span><h2>Accompagnement mensuel</h2></div>
+  <div class="sh"><span class="num">11</span><h2>Accompagnement mensuel</h2></div>
   <p class="lead">Réseaux sociaux, publicité, stratégie de vente et maintenance de vos outils : <b>nous nous en occupons chaque jour</b>, pour que votre restaurant attire de nouveaux clients chaque mois.</p>
   <div class="panel">
     <div class="two">
@@ -1001,6 +1042,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
         <h3 style="margin-top:0">Gestion des réseaux sociaux</h3>
         <ul class="feats one">
           <li><b>1 contenu publié chaque jour, 7 jours sur 7</b> : publications, Reels et stories sur Instagram et Facebook (et TikTok si souhaité).</li>
+          <li><b>La vidéo d'abord</b> : Reels et TikTok en priorité, le format que les algorithmes poussent le plus loin, gratuitement.</li>
           <li>Calendrier de contenu du mois, envoyé pour approbation avant publication.</li>
           <li>Photos et vidéos de vos plats, de votre équipe et de l'ambiance, avec textes et mots-clics.</li>
           <li>Réponses aux commentaires et aux messages.</li>
@@ -1018,6 +1060,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
           <li>Plan de promotions chaque mois : spéciaux, combos, événements et fêtes.</li>
           <li>Analyse des ventes dans l'application : quoi pousser, quoi ajuster.</li>
           <li>Offres pour faire revenir les clients et remplir les heures creuses.</li>
+          <li><b>Rapport quotidien chaque matin</b> : ventes de la veille, commandes en ligne, publications, portée et messages reçus, sur votre téléphone.</li>
           <li><b>Rapport mensuel</b> et rencontre de 30 minutes pour faire le point.</li>
         </ul>
         <h3>Maintenance de vos outils</h3>
@@ -1030,13 +1073,57 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       </div>
     </div>
     <div class="pricebar"><span class="pl">Prix · Accompagnement mensuel</span><span class="pv">1 499 $ <small>/ mois + taxes</small></span><button type="button" class="tg" data-k="mensuel"></button></div>
-    <p class="note">1 723,48 $ par mois taxes incluses. Le budget publicitaire est payé directement à Meta par le client. Débute à la mise en service de la phase 1. Engagement minimum de 3 mois, puis de mois en mois avec un préavis de 30 jours.</p>
+    <p class="note"><b>Payable d'avance au début de chaque mois</b> : 1 723,48 $ par mois taxes incluses. Le budget publicitaire est payé directement à Meta par le client. Débute à la mise en service de la phase 1. Engagement minimum de 3 mois, puis de mois en mois avec un préavis de 30 jours.</p>
+  </div>
+</section>
+
+<!-- 12 CROISSANCE -->
+<section id="croissance">
+  <div class="sh"><span class="num">12</span><h2>De Miam's à la franchise</h2></div>
+  <p class="lead">Une franchise, c'est un restaurant qui fonctionne <b>sans dépendre d'une seule personne</b>. Chaque service de cette soumission construit cette base : des chiffres fiables, des procédures écrites, une marque forte et des clients fidèles.</p>
+  <div class="stats">
+    <div class="stat"><div class="n"><span class="g">30</span> vidéos</div><div class="t">Publiées chaque mois : la marque Miam's devient connue au-delà du quartier</div></div>
+    <div class="stat"><div class="n"><span class="g">7h</span> chaque matin</div><div class="t">Le rapport quotidien arrive : vous pilotez avec des chiffres, pas au feeling</div></div>
+    <div class="stat"><div class="n"><span class="g">0 %</span></div><div class="t">De commission sur vos commandes en ligne : la marge reste chez vous</div></div>
+    <div class="stat"><div class="n"><span class="g">1 → 3</span></div><div class="t">Succursales : le même système se copie tel quel dans chaque nouveau restaurant</div></div>
+  </div>
+  <div class="panel" style="margin-top:14px">
+    <div class="two">
+      <div>
+        <h3 style="margin-top:0">Pourquoi la vidéo change tout</h3>
+        <ul class="feats one">
+          <li><b>Publier chaque jour</b> multiplie la portée : les algorithmes montrent plus souvent les comptes réguliers.</li>
+          <li><b>Une vidéo qui fonctionne</b> peut être vue par des dizaines de milliers de personnes de la région, sans payer de publicité.</li>
+          <li><b>Les clients viennent pour un plat vu en vidéo</b> : c'est la raison n° 1 pour essayer un nouveau restaurant.</li>
+          <li><b>Chaque vidéo reste</b> : elle continue d'attirer des clients des mois après sa publication.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-top:0">Le chemin vers la franchise</h3>
+        <ul class="feats one">
+          <li><b>Mois 1 à 3</b> : système en place, contenu quotidien, premiers rapports. Les commandes en ligne démarrent.</li>
+          <li><b>Mois 4 à 12</b> : la marque grandit, les clients reviennent grâce à la fidélité, les chiffres se stabilisent.</li>
+          <li><b>Année 2</b> : deuxième succursale ouverte avec le même système, le même menu et les mêmes rapports.</li>
+          <li><b>Année 3</b> : dossier de franchise prêt : procédures, chiffres vérifiés, marque reconnue.</li>
+        </ul>
+      </div>
+    </div>
+    <h3>D'autres services disponibles quand vous serez prêt</h3>
+    <ul class="feats">
+      <li><b>Application mobile Miam's</b> : commande et fidélité dans une application à votre nom.</li>
+      <li><b>Bornes de commande</b> : les clients commandent eux-mêmes au comptoir, plus vite.</li>
+      <li><b>Écrans de menu numériques</b> : menus animés en restaurant, modifiés depuis l'application.</li>
+      <li><b>Cartes-cadeaux</b> : vendues en ligne et au comptoir, surtout pendant les fêtes.</li>
+      <li><b>Traiteur et événements</b> : page de réservation pour les groupes et les entreprises.</li>
+      <li><b>Dossier de franchise</b> : manuel d'opérations, image de marque et guide pour les futurs franchisés.</li>
+    </ul>
+    <p class="note">Scénario illustratif : la croissance réelle dépend de l'emplacement, du menu et de l'exécution. Les rapports quotidiens permettent de mesurer chaque étape.</p>
   </div>
 </section>
 
 <!-- TIMELINE -->
 <section id="echeancier">
-  <div class="sh"><span class="num">10</span><h2>Échéancier</h2></div>
+  <div class="sh"><span class="num">13</span><h2>Échéancier</h2></div>
   <p class="lead">La phase 1 (site web, application de gestion, pointage) est <b>en service en 7 jours</b>. La phase 2 (menu QR et portails) suit la semaine d'après. Seuls les services choisis sont livrés.</p>
   <div class="panel">
     <div class="tl" style="grid-template-columns:repeat(5,1fr)">
@@ -1077,7 +1164,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 
 <!-- PRICE SUMMARY -->
 <section id="prix">
-  <div class="sh"><span class="num">11</span><h2>Résumé des prix</h2></div>
+  <div class="sh"><span class="num">14</span><h2>Résumé des prix</h2></div>
   <p class="lead">Calculé automatiquement selon <b>votre sélection</b>. Cochez ou décochez un service plus haut pour mettre le total à jour.</p>
   <table class="ptable" id="tSetup"></table>
   <div id="emptySetup" class="monthly" style="display:none">Aucun service de mise en place choisi pour le moment.</div>
@@ -1086,15 +1173,15 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 
 <!-- PAYMENTS -->
 <section id="versements">
-  <div class="sh"><span class="num">12</span><h2>Calendrier des versements</h2></div>
+  <div class="sh"><span class="num">15</span><h2>Calendrier des versements</h2></div>
   <p class="lead" id="payLead"></p>
   <div class="pays" id="pays"></div>
-  <p class="note">L'accompagnement mensuel, s'il est choisi, est facturé au début de chaque mois, à partir de la mise en service. Aucun dépôt additionnel.</p>
+  <p class="note">L'accompagnement mensuel, s'il est choisi, est <b>payable d'avance au début de chaque mois</b>, à partir de la mise en service. Aucun dépôt additionnel.</p>
 </section>
 
 <!-- PAYMENT INFO -->
 <section id="paiement">
-  <div class="sh"><span class="num">13</span><h2>Informations de paiement</h2></div>
+  <div class="sh"><span class="num">16</span><h2>Informations de paiement</h2></div>
   <p class="lead">Tous les paiements se font par <b>virement Interac</b>. Aucun frais de carte, aucun chèque.</p>
   <div class="payinfo">
     <div class="pi-main">
@@ -1115,7 +1202,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 
 <!-- CONDITIONS -->
 <section id="conditions">
-  <div class="sh"><span class="num">14</span><h2>Conditions, soutien et garantie</h2></div>
+  <div class="sh"><span class="num">17</span><h2>Conditions, soutien et garantie</h2></div>
   <p class="lead">Ce qui est inclus, ce qui ne l'est pas, et ce que nous demandons pour livrer à temps.</p>
   <div class="conds">
     <div class="cond"><div class="ic"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></div><h4>Soutien 24/7</h4><p>Jour et nuit au <b>819 384-0135</b> et à <b>hello@velorialabs.ca</b>. Les urgences (application inaccessible, commandes bloquées, pointage en panne) sont traitées en priorité.</p></div>
@@ -1129,8 +1216,8 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
 
 <!-- ACCEPT -->
 <div class="accept" id="acceptation">
-  <div class="sh"><span class="num">15</span><h2>Acceptation de la soumission</h2></div>
-  <p class="lead">Cliquez ci-dessous : un courriel s'ouvre avec votre sélection et votre total déjà inscrits. Nous commençons dès la réception du premier versement.</p>
+  <div class="sh"><span class="num">18</span><h2>Acceptation de la soumission</h2></div>
+  <p class="lead"><b>Signez plus bas avec le doigt</b> : votre contrat est généré instantanément en PDF, avec votre sélection, vos prix, votre signature et une empreinte numérique unique, puis transmis à Veloria Labs. Nous commençons dès la réception du premier versement.</p>
   <a class="cta" id="acceptLink" href="mailto:hello@velorialabs.ca?subject=Acceptation%20-%20Soumission%20VL-0002%20-%20Miam's%20Resto%20Caf%C3%A9&body=Bonjour%20Veloria%20Labs%2C%0A%0AJ'accepte%20la%20soumission%20VL-0002%20%3A%20mise%20en%20place%20de%203%20000%20%24%20%2B%20taxes%20et%20accompagnement%20mensuel%20de%201%20499%20%24%20%2B%20taxes.%0A%0ANom%20%3A%0AT%C3%A9l%C3%A9phone%20%3A%0A">Accepter la soumission →</a>
   <a class="cta2" href="tel:+18193840135">Appeler Veloria Labs</a>
   <button type="button" class="cta3" id="copyMsg">Copier le message d'acceptation</button>
@@ -1147,7 +1234,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       <div class="sig-pad" id="sigPad"><canvas aria-label="Zone de signature"></canvas><span class="x"></span><span class="ph">Signez avec le doigt</span></div>
       <div class="sig-act"><button type="button" id="sigClear">Effacer</button><button type="button" class="go" id="sigGo">Signer</button></div>
       <div class="sig-err" id="sigErr" role="alert"></div>
-      <div class="cert" id="cert" hidden><div class="h">Signé électroniquement</div><img id="certImg" alt="Signature"><div><b id="certName" style="color:#fff"></b> · <span id="certWhen"></span></div><div class="hash" id="certHash"></div><div style="margin-top:8px;font-size:12px;color:var(--tx3)">Votre signature et votre empreinte sont ajoutées au message d'acceptation. Envoyez-le pour confirmer.</div></div>
+      <div class="cert" id="cert" hidden><div class="h">Signé électroniquement</div><img id="certImg" alt="Signature"><div><b id="certName" style="color:#fff"></b> · <span id="certWhen"></span></div><div class="hash" id="certHash"></div><div class="cert-pdf" id="certPdf" hidden><a class="cta" id="certDl" href="#" download>Télécharger le contrat signé (PDF)</a><div class="cert-send" id="certSend"></div></div><div style="margin-top:8px;font-size:12px;color:var(--tx3)">Votre contrat PDF contient votre sélection, vos prix, votre signature et cette empreinte numérique.</div></div>
     </div>
     <div class="sig"><div class="l">Pour Veloria Labs</div><div class="hand">Wael Bedhiaf</div><div class="s">Wael Bedhiaf · 26 septembre 2026</div></div>
   </div>
@@ -1166,15 +1253,16 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
   <div class="dk-r"><button type="button" class="dk-nav" id="navOpen" aria-label="Aller à une section"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button><a class="dk-btn" href="#prix">Voir le détail</a></div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
-  var P={gestion:1250,pointage:750,site:1499,qr:499,emp:250,prop:250,seo:500,avis:500};
-  var NAMES={gestion:"Application de gestion",pointage:"Système de pointage intelligent",site:"Site web complet avec commande en ligne",qr:"Menu QR",emp:"Portail employés",prop:"Portail propriétaire",seo:"Référencement Google (SEO local)",avis:"Avis Google"};
-  var NUM={gestion:"01",pointage:"02",site:"03",qr:"04",emp:"05",prop:"06",seo:"07",avis:"08"};
-  var ORDER=["gestion","pointage","site","qr","emp","prop","seo","avis"];
+  var P={gestion:1499,pointage:499,site:1198,qr:499,emp:499,prop:499,seo:499,avis:499,video:799,crm:499};
+  var NAMES={gestion:"Application de gestion",pointage:"Système de pointage intelligent",site:"Site web complet avec commande en ligne",qr:"Menu QR",emp:"Portail employés",prop:"Portail propriétaire",seo:"Référencement Google (SEO local)",avis:"Avis Google",video:"Production vidéo & contenu",crm:"Programme de fidélité & CRM"};
+  var NUM={gestion:"01",pointage:"02",site:"03",qr:"04",emp:"05",prop:"06",seo:"07",avis:"08",video:"09",crm:"10"};
+  var ORDER=["gestion","pointage","site","qr","emp","prop","seo","avis","video","crm"];
   var CORE=["gestion","pointage","site","qr","emp","prop"];
   var MONTHLY=1499, BUNDLE=3000, PROMO=2000;
-  var sel={gestion:true,pointage:true,site:true,qr:true,emp:true,prop:true,seo:false,avis:false,mensuel:true};
+  var sel={gestion:true,pointage:true,site:true,qr:true,emp:true,prop:true,seo:false,avis:false,video:false,crm:false,mensuel:true};
   try{var _s=JSON.parse(localStorage.getItem("vl2sel"));if(_s)for(var _k in sel)if(typeof _s[_k]==="boolean")sel[_k]=_s[_k]}catch(e){}
   function r2(x){return Math.round(x*100)/100}
   function m(x,dec){return x.toLocaleString("fr-CA",{minimumFractionDigits:dec?2:0,maximumFractionDigits:dec?2:0}).replace(/\u202f/g," ")+" $"}
@@ -1205,8 +1293,8 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     // hero
     $("hTotal").textContent=m(net);
     $("hTTC").textContent=m(ttc,1);
-    var nPay=net===0?0:(net<1000?1:3);
-    $("hNote").textContent=!items.length?"Aucun service de mise en place choisi":(full?"Forfait complet (rabais de "+m(disc+promo)+")"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+(promo?" (rabais promo "+m(promo)+")":"")+" · ")+(net===0?"aucun solde à payer":(nPay===1?"1 versement":"3 versements"));
+    var nPay=net===0?0:(net<1000?1:2);
+    $("hNote").textContent=!items.length?"Aucun service de mise en place choisi":(full?"Forfait complet (rabais de "+m(disc+promo)+")"+(items.length>6?" + "+(items.length-6)+" option"+(items.length>7?"s":""):"")+" · ":items.length+" service"+(items.length>1?"s":"")+(promo?" (rabais promo "+m(promo)+")":"")+" · ")+(net===0?"aucun solde à payer":(nPay===1?"1 versement":"2 versements"));
     $("hPromo").style.display=promo?"":"none";
     $("hMonthly").style.display=sel.mensuel?"":"none";
     // dock
@@ -1232,7 +1320,7 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       h+='<tr class="grand"><td>Total taxes incluses</td><td>'+m(ttc,1)+'</td></tr>';
       t.innerHTML=h}
     var tm=$("tMonthly");
-    if(sel.mensuel){tm.style.display="";tm.innerHTML='<tr><th>Accompagnement mensuel</th><th>Par mois</th></tr><tr><td><span class="k">09</span>Réseaux sociaux, publicité, stratégie de vente et maintenance</td><td>'+m(MONTHLY,1)+'</td></tr><tr class="tax"><td>TPS (5 %)</td><td>'+m(mt,1)+'</td></tr><tr class="tax"><td>TVQ (9,975 %)</td><td>'+m(mq,1)+'</td></tr><tr class="grand"><td>Total par mois, taxes incluses</td><td>'+m(mttc,1)+'</td></tr>'}
+    if(sel.mensuel){tm.style.display="";tm.innerHTML='<tr><th>Accompagnement mensuel</th><th>Par mois</th></tr><tr><td><span class="k">11</span>Réseaux sociaux, publicité, stratégie de vente et maintenance</td><td>'+m(MONTHLY,1)+'</td></tr><tr class="tax"><td>TPS (5 %)</td><td>'+m(mt,1)+'</td></tr><tr class="tax"><td>TVQ (9,975 %)</td><td>'+m(mq,1)+'</td></tr><tr class="grand"><td>Total par mois, taxes incluses</td><td>'+m(mttc,1)+'</td></tr>'}
     else tm.style.display="none";
     // payments
     var pays=$("pays"),first=0,html="";
@@ -1240,20 +1328,22 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
       first=sel.mensuel?mttc:0}
     else if(nPay===1){first=ttc;$("payLead").innerHTML="Un seul versement de <b>"+m(net)+" + taxes</b> ("+m(ttc,1)+" taxes incluses), à l'acceptation.";
       html='<div class="pay now"><div class="w">À l\'acceptation</div><div class="a">'+m(net)+' <small>+ taxes</small></div><div class="d">'+m(ttc,1)+' taxes incluses</div></div>'}
-    else{var p1=r2(Math.floor(net/3*100)/100),p3=r2(net-2*p1);
-      var w1=r2(p1*1.14975);first=w1;
-      $("payLead").innerHTML="Trois versements égaux de <b>"+m(p1,p1%1!==0)+" + taxes</b> ("+m(w1,1)+" taxes incluses), chacun lié à une livraison concrète.";
-      var steps=[["À l'acceptation","Lancement du projet"],["À la mise en service","Livraison des services de la phase 1"],["À la livraison finale","Tous les services choisis en service; équipe formée"]];
-      [p1,p1,p3].forEach(function(p,i){html+='<div class="pay'+(i===0?' now':'')+'"><div class="w">'+steps[i][0]+'</div><div class="a">'+m(p,p%1!==0)+' <small>+ taxes</small></div><div class="d">'+steps[i][1]+' · '+m(i===2?r2(ttc-2*w1):r2(p*1.14975),1)+' taxes incluses</div></div>'})}
-    pays.innerHTML=html;pays.style.display=html?"":"none";
+    else{var p1=r2(Math.floor(net/2*100)/100),p2=r2(net-p1);
+      var w1=r2(p1*1.14975),w2=r2(ttc-w1);first=w1;
+      $("payLead").innerHTML="Deux versements de <b>"+m(p1,p1%1!==0)+" + taxes</b> ("+m(w1,1)+" taxes incluses) : la moitié à l'acceptation, la moitié à la mise en service.";
+      var steps=[["À l'acceptation","Lancement du projet"],["À la mise en service","Système livré et équipe formée"]];
+      [[p1,w1],[p2,w2]].forEach(function(p,i){html+='<div class="pay'+(i===0?' now':'')+'"><div class="w">'+steps[i][0]+'</div><div class="a">'+m(p[0],p[0]%1!==0)+' <small>+ taxes</small></div><div class="d">'+steps[i][1]+' · '+m(p[1],1)+' taxes incluses</div></div>'})}
+    pays.innerHTML=html;pays.style.display=html?"":"none";pays.className="pays"+(nPay===2?" two":"");
+    window.__pays=nPay===2?[{w:"À l'acceptation",a:p1,t:w1},{w:"À la mise en service",a:p2,t:w2}]:(nPay===1?[{w:"À l'acceptation",a:net,t:ttc}]:[]);
     $("firstPay").textContent=m(first,1);$("firstPay2").textContent=m(first,1);
     // mailto
     var lines=items.map(function(k){return "- "+NAMES[k]+" : "+m(P[k])});
     if(disc)lines.push("- Rabais forfait complet : -"+m(disc));
     if(promo)lines.push("- Rabais promotionnel Veloria Labs : -"+m(promo));
-    var body="Bonjour Veloria Labs,\n\nJ'accepte la soumission VL-0002 avec les services suivants :\n"+(lines.join("\n")||"- (aucun service de mise en place)")+"\n\nMise en place : "+m(net)+" + taxes ("+m(ttc,1)+" taxes incluses)"+(sel.mensuel?"\nAccompagnement mensuel : "+m(MONTHLY)+" / mois + taxes":"\nAccompagnement mensuel : non")+(window.__sigLine||"")+"\n\nNom :\nTéléphone :\n";
+    var body="Bonjour Veloria Labs,\n\nJ'accepte la soumission VL-0002 avec les services suivants :\n"+(lines.join("\n")||"- (aucun service de mise en place)")+"\n\nMise en place : "+m(net)+" + taxes ("+m(ttc,1)+" taxes incluses)"+(sel.mensuel?"\nAccompagnement mensuel : "+m(MONTHLY)+" / mois + taxes, payable d'avance chaque mois":"\nAccompagnement mensuel : non")+(window.__sigLine||"")+"\n\nNom :\nTéléphone :\n";
     $("acceptLink").href="mailto:hello@velorialabs.ca?subject="+encodeURIComponent("Acceptation - Soumission VL-0002 - Miam's Resto Café")+"&body="+encodeURIComponent(body);
     window.__body=body;
+    window.__quote={items:items.map(function(k){return{k:NUM[k],n:NAMES[k],p:P[k]}}),sub:sub,disc:disc,promo:promo,net:net,tps:tps,tvq:tvq,ttc:ttc,mensuel:!!sel.mensuel,monthly:MONTHLY,mt:mt,mq:mq,mttc:mttc,pays:window.__pays||[]};
     if(window.onQuoteRender)window.onQuoteRender({net:net,ttc:ttc,first:first,sel:JSON.parse(JSON.stringify(sel))});
   }
   document.querySelectorAll(".opt").forEach(function(el){
@@ -1480,6 +1570,118 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
     (function f(t){x.clearRect(0,0,W,H);ps.forEach(function(p){p.vy+=.45;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.s;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});
       if(t-t0<2600)requestAnimationFrame(f);else{x.clearRect(0,0,W,H);c.hidden=true}})(t0)}
 
+  /* ---------- instant signed contract (PDF) ---------- */
+  window.VLContract=(function(){
+    var lastUrl=null;
+    function t(x){return String(x).replace(/[  ]/g," ").replace(/[’]/g,"'").replace(/[^\x00-\xff—·€]/g,"")}
+    function mo(x,dec){return t(x.toLocaleString("fr-CA",{minimumFractionDigits:dec?2:0,maximumFractionDigits:dec?2:0}))+" $"}
+    function logoData(){try{var im=document.querySelector(".w-logo")||document.querySelector(".logo");if(!im||!im.naturalWidth)return null;var c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext("2d").drawImage(im,0,0);return{d:c.toDataURL("image/png"),r:im.naturalWidth/im.naturalHeight}}catch(e){return null}}
+    function build(o){
+      var J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
+      var d=new J({unit:"pt",format:"letter"}),W=612,H=792,q=o.q,M=44,pg=1,TOT=3,logo=logoData();
+      var C={bg:[7,7,11],card:[17,17,26],line:[42,42,58],tx:[244,244,248],tx2:[180,180,196],tx3:[124,124,146],cy:[34,211,238],pk:[236,72,153],vi:[139,92,246],lav:[196,181,253],gr:[74,222,128],or:[249,115,22]};
+      function fill(c){d.setFillColor(c[0],c[1],c[2])}function ink(c){d.setTextColor(c[0],c[1],c[2])}function stroke(c){d.setDrawColor(c[0],c[1],c[2])}
+      function grad(x,y,w,h){var st=[[59,130,246],[139,92,246],[236,72,153],[249,115,22]];for(var i=0;i<w;i+=2){var u=i/w*3,j=Math.min(2,Math.floor(u)),f=u-j,a=st[j],b=st[j+1];d.setFillColor(Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f));d.rect(x+i,y,2.2,h,"F")}}
+      function page(){fill(C.bg);d.rect(0,0,W,H,"F");stroke([20,20,30]);d.setLineWidth(.4);for(var gx=0;gx<=W;gx+=34)d.line(gx,6,gx,H);for(var gy=6;gy<=H;gy+=34)d.line(0,gy,W,gy);
+        // glow orbs
+        d.setGState&&d.setGState(new d.GState({opacity:.10}));fill(C.vi);d.circle(60,70,180,"F");fill(C.pk);d.circle(W-20,H-120,200,"F");d.setGState&&d.setGState(new d.GState({opacity:1}));
+        grad(0,0,W,6);
+        ink(C.tx3);d.setFont("courier","normal");d.setFontSize(7.5);d.text("VL-0002 · CONTRAT SIGNÉ · PAGE "+pg+"/"+TOT,W-M,26,{align:"right"});
+        stroke(C.line);d.line(M,H-40,W-M,H-40);d.setFont("helvetica","normal");d.setFontSize(7.5);ink(C.tx3);
+        d.text("Veloria Labs Inc. · 18164, rue Roy, Bécancour (Québec) G9H 0X5 · 819 384-0135 · hello@velorialabs.ca",M,H-26);
+        d.text("SHA-256 "+o.hash.slice(0,16)+"...",W-M,H-26,{align:"right"})}
+      function label(x,y,s,c){d.setFont("courier","bold");d.setFontSize(7.5);ink(c||C.tx3);d.text(t(s).toUpperCase().split("").join(" "),x,y)}
+      function box(x,y,w,h,bc){fill(C.card);stroke(bc||C.line);d.setLineWidth(.8);d.roundedRect(x,y,w,h,8,8,"FD")}
+
+      // ===== PAGE 1 =====
+      page();
+      var y=46;
+      if(logo){var lh=22;d.addImage(logo.d,"PNG",M,y-6,lh*logo.r,lh,undefined,"FAST")}
+      label(W-M-150,y+6,"Contrat de service",C.cy);
+      y=112;fill(C.cy);d.circle(M+3,y-3,3,"F");label(M+12,y,"Document généré à la signature",C.cy);
+      y+=36;d.setFont("helvetica","bold");d.setFontSize(34);ink(C.tx);d.text("CONTRAT SIGNÉ",M,y);
+      y+=22;d.setFont("helvetica","normal");d.setFontSize(12);ink(C.tx2);d.text(t("Soumission VL-0002 · Miam's Resto Café · Veloria Labs Inc."),M,y);
+      // status pill
+      y+=20;fill([12,40,26]);stroke([34,120,70]);d.roundedRect(M,y,W-2*M,26,13,13,"FD");fill(C.gr);d.circle(M+16,y+13,3.5,"F");
+      d.setFont("helvetica","bold");d.setFontSize(9.5);ink([134,239,172]);d.text(t("SIGNÉ ÉLECTRONIQUEMENT PAR "+o.name.toUpperCase()+" · "+o.when),M+28,y+16.5);
+      // parties
+      y+=44;var cw=(W-2*M-14)/2;
+      box(M,y,cw,86);box(M+cw+14,y,cw,86);
+      label(M+14,y+18,"Prestataire",C.lav);label(M+cw+28,y+18,"Client",C.lav);
+      d.setFont("helvetica","bold");d.setFontSize(11);ink(C.tx);d.text("Veloria Labs Inc.",M+14,y+36);d.text(t("Miam's Resto Café"),M+cw+28,y+36);
+      d.setFont("helvetica","normal");d.setFontSize(8.3);ink(C.tx2);
+      d.text(["18164, rue Roy, Bécancour (Québec) G9H 0X5","NEQ 1182206111 · TPS 708582630 RT0001","TVQ 1233881526 TQ0001"],M+14,y+50,{lineHeightFactor:1.45});
+      d.text(t("Représenté par : "+o.name).slice(0,60),M+cw+28,y+50);d.text("Signé le "+t(o.when),M+cw+28,y+62);
+      // services table
+      y+=106;label(M,y,"Services retenus");y+=10;
+      var rows=q.items.map(function(it){return[it.k,it.n,mo(it.p,1),0]});
+      if(q.disc)rows.push(["","Rabais forfait complet (services 01 à 06)","- "+mo(q.disc,1),1]);
+      if(q.promo)rows.push(["","Rabais promotionnel Veloria Labs","- "+mo(q.promo,1),1]);
+      rows.push(["","Total avant taxes",mo(q.net,1),2]);
+      rows.push(["","TPS (5 %) · 708582630 RT0001",mo(q.tps,1),3]);
+      rows.push(["","TVQ (9,975 %) · 1233881526 TQ0001",mo(q.tvq,1),3]);
+      var rh=19,th=rows.length*rh+22+30;box(M,y,W-2*M,th);
+      fill([0,0,0]);d.roundedRect(M,y,W-2*M,22,8,8,"F");d.rect(M,y+12,W-2*M,10,"F");
+      label(M+14,y+14,"Mise en place",C.tx);d.setFont("courier","bold");d.setFontSize(7.5);ink(C.tx);d.text("MONTANT",W-M-14,y+14,{align:"right"});
+      var ry=y+22;rows.forEach(function(r){stroke(C.line);d.setLineWidth(.5);d.line(M,ry,W-M,ry);
+        var col=r[3]===1?[240,171,252]:(r[3]===3?C.tx2:C.tx);ink(col);d.setFont("helvetica",r[3]===2?"bold":"normal");d.setFontSize(r[3]===3?8.3:9.3);
+        if(r[0]){d.setFont("courier","normal");d.setFontSize(7.5);ink(C.tx3);d.text(r[0],M+14,ry+12.5);ink(col);d.setFont("helvetica","normal");d.setFontSize(9.3)}
+        d.text(t(r[1]),M+(r[0]?36:14),ry+12.8);d.setFont("courier",r[3]===2?"bold":"normal");d.text(r[2],W-M-14,ry+12.8,{align:"right"});ry+=rh});
+      grad(M+1,ry,W-2*M-2,30);d.setGState&&d.setGState(new d.GState({opacity:.55}));fill([10,10,16]);d.rect(M+1,ry,W-2*M-2,30,"F");d.setGState&&d.setGState(new d.GState({opacity:1}));
+      d.setFont("helvetica","bold");d.setFontSize(12.5);ink(C.tx);d.text("Total taxes incluses",M+14,ry+19.5);d.text(mo(q.ttc,1),W-M-14,ry+19.5,{align:"right"});
+      y=ry+30+22;
+      // ===== PAGE 2 : money =====
+      d.addPage();pg=2;page();y=60;
+      label(M,y,"Engagements financiers",C.lav);y+=24;d.setFont("helvetica","bold");d.setFontSize(18);ink(C.tx);d.text("Mensualité et versements",M,y);y+=22;
+      // monthly
+      if(q.mensuel){box(M,y,W-2*M,50,[34,120,140]);label(M+14,y+17,"11 · Accompagnement mensuel",C.cy);
+        d.setFont("helvetica","normal");d.setFontSize(9);ink(C.tx);d.text("Réseaux sociaux, vidéo quotidienne, publicité, rapports quotidiens et maintenance",M+14,y+33);
+        ink(C.tx2);d.setFontSize(8);d.text("Payable d'avance au début de chaque mois · "+mo(q.mttc,1)+" taxes incluses",M+14,y+44);
+        d.setFont("helvetica","bold");d.setFontSize(13);ink(C.tx);d.text(mo(q.monthly)+" / mois",W-M-14,y+30,{align:"right"});y+=64}
+      // payments
+      if(q.pays.length){label(M,y+4,"Calendrier des versements");y+=14;var pw=(W-2*M-10*(q.pays.length-1))/q.pays.length;
+        q.pays.forEach(function(p,i){var x=M+i*(pw+10);box(x,y,pw,52,i===0?[160,50,110]:C.line);label(x+12,y+16,p.w,i===0?[249,168,212]:C.tx3);
+          d.setFont("helvetica","bold");d.setFontSize(14);ink(C.tx);d.text(mo(p.a,p.a%1!==0)+" + taxes",x+12,y+34);d.setFont("helvetica","normal");d.setFontSize(8);ink(C.tx2);d.text(mo(p.t,1)+" taxes incluses · Virement Interac",x+12,y+45)});y+=62}
+
+      y+=16;
+      label(M,y,"Conditions",C.lav);y+=24;d.setFont("helvetica","bold");d.setFontSize(18);ink(C.tx);d.text("Ce que les deux parties acceptent",M,y);y+=18;
+      var conds=[
+        ["Livraison","Phase 1 (site web, gestion, pointage) en service en 7 jours; phase 2 en 14 jours, à partir de la réception du 1er versement et des informations demandées."],
+        ["Paiement","Mise en place payable en deux versements par virement Interac : 50 % à l'acceptation, 50 % à la mise en service. L'accompagnement mensuel est payable d'avance au début de chaque mois."],
+        ["Engagement mensuel","Minimum de 3 mois, puis de mois en mois avec un préavis de 30 jours. Le budget publicitaire est payé directement à Meta par le client."],
+        ["Données","Les données du restaurant appartiennent à Miam's Resto Café et peuvent être exportées en tout temps. Le logiciel demeure sous licence de Veloria Labs."],
+        ["Garantie et soutien","Toute anomalie dans ce qui est décrit est corrigée sans frais. Soutien 24/7 au 819 384-0135 et à hello@velorialabs.ca."],
+        ["Non inclus","Matériel (tablette, écran, imprimante), budget publicitaire, frais de paiement par carte, impression et frais de textos de tiers."]];
+      conds.forEach(function(c){var lines=d.setFont("helvetica","normal").setFontSize(8.6).splitTextToSize(t(c[1]),W-2*M-150);var h=Math.max(34,lines.length*11.5+16);
+        box(M,y,W-2*M,h);d.setFont("helvetica","bold");d.setFontSize(9.5);ink(C.tx);d.text(t(c[0]),M+14,y+19);d.setFont("helvetica","normal");d.setFontSize(8.6);ink(C.tx2);d.text(lines,M+140,y+19,{lineHeightFactor:1.35});y+=h+8});
+      // ===== PAGE 3 : signatures =====
+      d.addPage();pg=3;page();y=60;
+      label(M,y,"Signatures",C.lav);y+=24;d.setFont("helvetica","bold");d.setFontSize(18);ink(C.tx);d.text("Lu, approuvé et signé",M,y);y+=18;y+=12;var sh=118;box(M,y,cw,sh,[120,70,190]);box(M+cw+14,y,cw,sh);
+      label(M+14,y+18,"Pour Miam's Resto Café",[192,132,252]);label(M+cw+28,y+18,"Pour Veloria Labs",[192,132,252]);
+      try{d.addImage(o.img,"PNG",M+14,y+26,cw-28,52,undefined,"FAST")}catch(e){}
+      stroke(C.line);d.line(M+14,y+82,M+cw-14,y+82);d.line(M+cw+28,y+82,W-M-14,y+82);
+      d.setFont("times","italic");d.setFontSize(22);ink(C.tx);d.text("Wael Bedhiaf",M+cw+28,y+70);
+      d.setFont("helvetica","bold");d.setFontSize(9);ink(C.tx);d.text(t(o.name).slice(0,40),M+14,y+97);d.text("Wael Bedhiaf, fondateur",M+cw+28,y+97);
+      d.setFont("helvetica","normal");d.setFontSize(7.8);ink(C.tx3);d.text(t(o.when),M+14,y+109);d.text("26 septembre 2026",M+cw+28,y+109);
+      y+=sh+18;
+      // certificate
+      box(M,y,W-2*M,96,[34,120,70]);fill(C.gr);d.circle(M+18,y+18,3.5,"F");label(M+28,y+21,"Certificat de signature électronique",[134,239,172]);
+      d.setFont("helvetica","normal");d.setFontSize(8.4);ink(C.tx2);
+      d.text(["Signataire : "+t(o.name)+"  ·  Horodatage : "+o.iso,"Document : Soumission VL-0002, "+q.items.length+" service(s), total "+mo(q.ttc,1)+" taxes incluses","Empreinte numérique SHA-256 de la sélection, des montants, de l'horodatage et de la signature :"],M+14,y+38,{lineHeightFactor:1.5});
+      d.setFont("courier","bold");d.setFontSize(8.6);ink(C.cy);d.text(o.hash.match(/.{1,32}/g),M+14,y+76,{lineHeightFactor:1.35});
+      y+=110;d.setFont("helvetica","normal");d.setFontSize(7.8);ink(C.tx3);
+      d.text(d.splitTextToSize("Ce contrat a été généré automatiquement au moment de la signature en ligne. Toute modification du contenu change l'empreinte numérique ci-dessus, ce qui permet de vérifier que le document n'a pas été altéré.",W-2*M),M,y,{lineHeightFactor:1.4});
+      return d;
+    }
+    function make(o){
+      var d=build(o);if(!d)return null;
+      var fname="Contrat-VL-0002-Miams-signe-"+o.iso.slice(0,10)+".pdf";
+      var blob=d.output("blob");if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(blob);
+      return{doc:d,blob:blob,url:lastUrl,name:fname,b64:d.output("datauristring").split(",")[1]};
+    }
+    return{make:make};
+  })();
+
   /* ---------- signature pad + digital fingerprint ---------- */
   (function(){
     var pad=$("sigPad");if(!pad)return;var c=pad.querySelector("canvas"),x=c.getContext("2d"),drawing=false,strokes=0,lp=null,dpr=Math.min(devicePixelRatio||1,2);
@@ -1505,6 +1707,19 @@ h2.scr-on{text-shadow:0 0 18px rgba(34,211,238,.35)}
         $("certName").textContent=name;$("certWhen").textContent=when;$("certHash").textContent="SHA-256 · "+h.match(/.{1,8}/g).join(" ");$("certImg").src=img;$("cert").hidden=false;
         window.__sigLine="\n\nSignature électronique : "+name+" · "+when+"\nEmpreinte numérique (SHA-256) : "+h;
         if(window.__render)window.__render();confetti();buzz([20,40,20]);
+        var q=window.__quote,res=null;
+        try{res=window.VLContract&&q&&window.VLContract.make({name:name,when:when,iso:ts.toISOString(),hash:h,img:img,q:q})}catch(e){res=null}
+        var box=$("certPdf"),st=$("certSend");
+        if(!res){st.textContent="Le contrat PDF n'a pas pu être généré ici. Copiez le message d'acceptation et envoyez-le à hello@velorialabs.ca.";box.hidden=false;$("certDl").hidden=true;return}
+        var dl=$("certDl");dl.href=res.url;dl.setAttribute("download",res.name);dl.hidden=false;box.hidden=false;
+        try{dl.click()}catch(e){}
+        st.textContent="Transmission du contrat à Veloria Labs...";
+        var money=function(x){return x.toLocaleString("fr-CA",{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/[\u202f\u00a0]/g," ")+" $"};
+        fetch("/api/contract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:name,when:when,hash:h,filename:res.name,pdf:res.b64,
+          total:money(q.net)+" + taxes ("+money(q.ttc)+" TTC)",monthly:q.mensuel?money(q.monthly)+" / mois + taxes":"",services:q.items.map(function(it){return it.k+" "+it.n+" : "+money(it.p)})})})
+          .then(function(r){return r.json().catch(function(){return{}}).then(function(j){if(!r.ok||!j.ok)throw 0})})
+          .then(function(){st.innerHTML="<b>Contrat transmis à Veloria Labs.</b> Une copie est téléchargée sur votre appareil."},
+                function(){st.innerHTML="Contrat téléchargé sur votre appareil. <b>Joignez-le</b> au message d'acceptation envoyé à hello@velorialabs.ca."});
       };
       if(window.crypto&&crypto.subtle&&window.TextEncoder){crypto.subtle.digest("SHA-256",new TextEncoder().encode(payload)).then(function(b){done(hex(b))},function(){done(fallbackHash(payload))})}
       else done(fallbackHash(payload));
