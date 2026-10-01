@@ -44,6 +44,17 @@ const copyDir = (from, to) => {
 copyDir(join(SRC, "assets"), join(DIST, "assets"));
 const HAS_VIDEO = existsSync(join(SRC, "assets/video/hero.mp4"));
 const HAS_POSTER = existsSync(join(SRC, "assets/img/hero-poster.jpg"));
+const IMG_DIM = { hero: [1344, 752], "hero-sm": [800, 448], spiral: [760, 1009], welding: [1344, 752], street: [1280, 716], before: [672, 752], after: [672, 752] };
+const hasImg = (n) => existsSync(join(SRC, `assets/img/${n}.webp`));
+const ALT = {
+  hero: { fr: "Façade de brique à Montréal au crépuscule avec escalier en colimaçon et balcons en fer forgé noirs", en: "Brick façade in Montréal at dusk with a black wrought-iron spiral staircase and balconies" },
+  spiral: { fr: "Escalier en colimaçon en fer forgé vu d’en bas, avec rampe ouvragée et mur de brique", en: "Wrought-iron spiral staircase seen from below, with an ornate railing and brick wall" },
+  welding: { fr: "Soudeur masqué restaurant un garde-corps en fer forgé, étincelles", en: "Masked welder restoring a wrought-iron railing, sparks flying" },
+  street: { fr: "Rue montréalaise bordée d’immeubles de brique avec escaliers extérieurs en fer forgé", en: "Montréal street lined with brick buildings and wrought-iron exterior stairs" },
+  before: { fr: "Garde-corps en fer forgé rouillé et écaillé", en: "Rusted, flaking wrought-iron railing" },
+  after: { fr: "Garde-corps en fer forgé restauré et repeint", en: "Restored, freshly painted wrought-iron railing" },
+};
+const photo = (n, lang, cls = "", { eager = false, decorative = false } = {}) => `<img class="${cls}" src="/assets/img/${n}.webp" alt="${decorative ? "" : esc(ALT[n][lang])}" width="${IMG_DIM[n][0]}" height="${IMG_DIM[n][1]}" ${eager ? 'fetchpriority="high" decoding="async"' : 'loading="lazy" decoding="async"'}>`;
 const HAS_OG = existsSync(join(SRC, "assets/og.jpg"));
 
 // ---------- SVG building blocks ----------
@@ -76,7 +87,9 @@ function railing(state) {
   return `<svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${rust ? "Garde-corps rouillé" : "Garde-corps repeint"}"><rect width="600" height="360" fill="${wall}"/><g opacity=".35" stroke="#9C9486" stroke-width="2">${Array.from({ length: 9 }, (_, r) => `<path d="M0 ${r * 40}h600"/>`).join("")}</g><rect x="28" y="52" width="544" height="14" rx="3" fill="${iron}"/><rect x="28" y="290" width="544" height="16" rx="3" fill="${iron}"/>${posts.map((x) => `<rect x="${x - 3.5}" y="62" width="7" height="232" fill="${iron}"/><circle cx="${x}" cy="48" r="8" fill="${iron}"/>`).join("")}${scrolls}<g stroke="${hi}" stroke-width="1.5" opacity=".6">${posts.map((x) => `<path d="M${x - 1.5} 66v224"/>`).join("")}</g>${spots}${flakes}<rect x="0" y="318" width="600" height="42" fill="#000" opacity=".12"/></svg>`;
 }
 function beforeAfter(lang, label) {
-  return `<figure class="ba" data-ba style="--pos:50%"><div class="ba-layer ba-after">${railing("clean")}</div><div class="ba-layer ba-before">${railing("rust")}</div><span class="ba-tag ba-tag-b">${t(lang).before}</span><span class="ba-tag ba-tag-a">${t(lang).after}</span><span class="ba-ribbon">${t(lang).illustration}</span><span class="ba-handle" aria-hidden="true"><i></i></span><input type="range" min="0" max="100" value="50" aria-label="${esc(label)}"><figcaption class="ba-hint">${t(lang).sliderHint}</figcaption></figure>`;
+  const real = hasImg("before") && hasImg("after");
+  const aft = real ? photo("after", lang) : railing("clean"), bef = real ? photo("before", lang) : railing("rust");
+  return `<figure class="ba${real ? " ba-photo" : ""}" data-ba style="--pos:50%"><div class="ba-layer ba-after">${aft}</div><div class="ba-layer ba-before">${bef}</div><span class="ba-tag ba-tag-b">${t(lang).before}</span><span class="ba-tag ba-tag-a">${t(lang).after}</span><span class="ba-ribbon">${t(lang).illustration}</span><span class="ba-handle" aria-hidden="true"><i></i></span><input type="range" min="0" max="100" value="50" aria-label="${esc(label)}"><figcaption class="ba-hint">${t(lang).sliderHint}</figcaption></figure>`;
 }
 const ICONS = {
   shield: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
@@ -160,8 +173,9 @@ function areaChips(lang) {
 function breadcrumbs(lang, key, label) {
   return `<nav class="crumbs" aria-label="${lang === "fr" ? "Fil d’Ariane" : "Breadcrumb"}"><ol><li><a href="${path("home", lang)}">${t(lang).breadcrumbHome}</a></li>${key === "g1" || key === "g2" ? `<li><a href="${path("guides", lang)}">${t(lang).nav.guides}</a></li>` : ""}<li aria-current="page">${esc(label)}</li></ol></nav>`;
 }
-function pageHead(lang, key, h1, lead, label) {
-  return `<section class="phead"><div class="phead-bg" aria-hidden="true">${spiralArt()}${embers()}</div><div class="wrap phead-in">${breadcrumbs(lang, key, label || h1)}<h1 class="rv">${h1}</h1>${lead ? `<p class="lead rv">${lead}</p>` : ""}</div></section>`;
+function pageHead(lang, key, h1, lead, label, img) {
+  const bg = img && hasImg(img) ? `${photo(img, lang, "phead-img", { decorative: true, eager: true })}<div class="phead-shade"></div>` : spiralArt();
+  return `<section class="phead${img && hasImg(img) ? " has-img" : ""}"><div class="phead-bg" aria-hidden="true">${bg}${embers()}</div><div class="wrap phead-in">${breadcrumbs(lang, key, label || h1)}<h1 class="rv">${h1}</h1>${lead ? `<p class="lead rv">${lead}</p>` : ""}</div></section>`;
 }
 
 // ---------- Schema ----------
@@ -227,15 +241,16 @@ ${footer(lang)}${stickyBar(lang)}${cookieBanner(lang)}
 function homePage(lang) {
   const c = COPY[lang].home, u = t(lang);
   const video = HAS_VIDEO ? `<video class="hero-video" muted loop playsinline preload="none" ${HAS_POSTER ? 'poster="/assets/img/hero-poster.jpg"' : ""} data-mp4="/assets/video/hero.mp4"${existsSync(join(SRC, "assets/video/hero.webm")) ? ' data-webm="/assets/video/hero.webm"' : ""} aria-hidden="true"></video>` : "";
-  const hero = `<section class="hero" data-hero><div class="hero-media" aria-hidden="true">${video}<div class="hero-art" data-parallax="0.18">${spiralArt()}</div>${embers()}</div><div class="hero-shade" aria-hidden="true"></div><div class="wrap hero-in"><p class="eyebrow rv">${c.eyebrow}</p><h1 class="hero-h rv">${c.h1}</h1><p class="hero-sub rv">${c.sub}</p><div class="hero-cta rv">${btn(path("contact", lang), u.quoteLong, "primary", ' data-event="click_quote"')}${tel("btn btn-ghost", `${icon("phone", "btn-ic")}<span>${u.callNow} ${BIZ.phoneDisplay}</span>`)}</div><p class="hero-note rv">${c.note}</p></div><a class="scroll-cue" href="#intro" aria-label="${u.scroll}"><span></span></a></section>`;
+  const heroImg = hasImg("hero");
+  const hero = `<section class="hero${heroImg ? " has-img" : ""}" data-hero><div class="hero-media" aria-hidden="true">${heroImg ? photo("hero", lang, "hero-img", { eager: true, decorative: true }) : ""}${video}<div class="hero-art" data-parallax="0.18">${spiralArt()}</div>${embers()}</div><div class="hero-shade" aria-hidden="true"></div><div class="wrap hero-in"><p class="eyebrow rv">${c.eyebrow}</p><h1 class="hero-h rv">${c.h1}</h1><p class="hero-sub rv">${c.sub}</p><div class="hero-cta rv">${btn(path("contact", lang), u.quoteLong, "primary", ' data-event="click_quote"')}${tel("btn btn-ghost", `${icon("phone", "btn-ic")}<span>${u.callNow} ${BIZ.phoneDisplay}</span>`)}</div><p class="hero-note rv">${c.note}</p></div><a class="scroll-cue" href="#intro" aria-label="${u.scroll}"><span></span></a></section>`;
   const intro = `<section class="sec intro" id="intro"><div class="wrap narrow"><h2 class="h2 rv">${c.intro[0]}</h2><p class="lead rv">${c.intro[1]}</p></div></section>`;
-  const services = `<section class="sec svc"><div class="wrap"><h2 class="h2 rv">${c.servicesH}</h2><div class="svc-grid">${c.svc.map((s, i) => `<a class="svc-card rv" href="${path(s.k, lang)}"><div class="svc-art" aria-hidden="true">${i ? icon("wrench", "svc-ic") : icon("brush", "svc-ic")}<div class="svc-glow"></div></div><h3>${s.t}</h3><p>${s.d}</p><span class="more">${lang === "fr" ? "En savoir plus" : "Learn more"} ${icon("arrow")}</span></a>`).join("")}</div></div></section>`;
+  const services = `<section class="sec svc"><div class="wrap"><h2 class="h2 rv">${c.servicesH}</h2><div class="svc-grid">${c.svc.map((s, i) => `<a class="svc-card rv" href="${path(s.k, lang)}"><div class="svc-art${hasImg(i ? "welding" : "spiral") ? " has-img" : ""}" aria-hidden="true">${hasImg(i ? "welding" : "spiral") ? photo(i ? "welding" : "spiral", lang, "svc-img", { decorative: true }) : ""}${i ? icon("wrench", "svc-ic") : icon("brush", "svc-ic")}<div class="svc-glow"></div></div><h3>${s.t}</h3><p>${s.d}</p><span class="more">${lang === "fr" ? "En savoir plus" : "Learn more"} ${icon("arrow")}</span></a>`).join("")}</div></div></section>`;
   const structs = `<section class="sec structs"><div class="wrap"><h2 class="h2 rv">${c.structH}</h2><ul class="struct-row">${STRUCTURES.map((s, i) => `<li class="struct rv" style="--d:${i * 70}ms"><span class="struct-n">0${i + 1}</span>${esc(s[lang])}</li>`).join("")}</ul></div></section>`;
   const process = `<section class="process" data-process aria-labelledby="proc-h"><div class="process-pin"><div class="wrap process-grid"><div class="process-intro"><h2 class="h2" id="proc-h">${c.processH}</h2><p class="lead">${c.processSub}</p><ol class="pnav" aria-hidden="true">${PROCESS.map((p, i) => `<li data-i="${i}"><span>${i + 1}</span>${esc(p[lang][0])}</li>`).join("")}</ol><div class="pbar" aria-hidden="true"><i></i></div></div><div class="process-stage">${PROCESS.map((p, i) => `<article class="pstep" data-i="${i}"><div class="pstep-ic">${icon(stepIcons[i])}</div><span class="pstep-n">0${i + 1}</span><h3>${esc(p[lang][0])}</h3><p>${esc(p[lang][1])}</p></article>`).join("")}</div></div></div></section>`;
   const why = `<section class="sec why"><div class="wrap"><h2 class="h2 rv">${c.whyH}</h2><div class="why-grid">${c.why.map((w, i) => `<article class="why-c rv" style="--d:${i * 80}ms"><span class="why-i">${icon(["shield", "pin", "check", "home"][i])}</span><h3>${w[0]}</h3><p>${w[1]}</p></article>`).join("")}</div></div></section>`;
   const work = `<section class="sec workteaser"><div class="wrap work-grid"><div><h2 class="h2 rv">${c.workH}</h2><p class="lead rv">${c.workSub}</p><div class="rv">${btn(path("work", lang), u.nav.work, "ghost-d")}</div></div><div class="rv">${beforeAfter(lang, c.workH)}</div></div></section>`;
   const warranty = ct(BIZ.warranty) ? `<section class="sec warranty"><div class="wrap narrow"><h2 class="h2 rv">${lang === "fr" ? "Notre garantie" : "Our warranty"}</h2><p class="lead rv">${esc(BIZ.warranty[lang])}</p></div></section>` : "";
-  const areas = `<section class="sec areas"><div class="wrap"><h2 class="h2 rv">${c.areasH}</h2><p class="lead rv">${c.areasSub}</p><div class="rv">${areaChips(lang)}</div><p class="rv">${link("areas", lang, `${COPY[lang].areas.h1} ${"→"}`, "textlink")}</p></div></section>`;
+  const areas = `<section class="sec areas"><div class="wrap${hasImg("street") ? " areas-grid" : ""}"><div><h2 class="h2 rv">${c.areasH}</h2><p class="lead rv">${c.areasSub}</p><div class="rv">${areaChips(lang)}</div><p class="rv">${link("areas", lang, `${COPY[lang].areas.h1} ${"→"}`, "textlink")}</p></div>${hasImg("street") ? `<figure class="areas-fig rv">${photo("street", lang)}</figure>` : ""}</div></section>`;
   const faq = `<section class="sec faqsec"><div class="wrap narrow"><h2 class="h2 rv">${c.faqH}</h2>${faqBlock(lang, FAQ.slice(0, 4))}<p class="rv">${link("faq", lang, `${t(lang).nav.faq} →`, "textlink")}</p></div></section>`;
   return shell({ lang, key: "home", title: c.title, desc: c.desc, body: hero + trustStrip(lang) + intro + services + structs + process + why + work + reviews(lang, c.reviewsH) + warranty + areas + faq + ctaBand(lang, c.ctaH, c.ctaSub), extraSchema: [faqSchema(lang, FAQ.slice(0, 4))], bodyClass: "home" });
 }
@@ -244,14 +259,14 @@ function paintPage(lang) {
   const c = COPY[lang].paint, u = t(lang);
   const body = pageHead(lang, "paint", c.h1, c.lead) +
     `<section class="sec"><div class="wrap"><h2 class="h2 rv">${c.structH}</h2><ul class="struct-row struct-row-lg">${STRUCTURES.map((s, i) => `<li class="struct rv" style="--d:${i * 70}ms"><span class="struct-n">0${i + 1}</span>${esc(s[lang])}</li>`).join("")}</ul><p class="rv big">${lang === "fr" ? "Un rendu durable, esthétique et protégé contre la corrosion." : "A durable, attractive finish protected against corrosion."}</p></div></section>` +
-    `<section class="sec dark two"><div class="wrap two-grid"><div class="card-l rv"><h2 class="h3">${c.procH}</h2><ol class="steps">${c.procBullets.map((b) => `<li>${b}</li>`).join("")}</ol></div><div class="rv"><h2 class="h3">${c.durH}</h2><p>${c.durP}</p><p>${c.crossP} ${link("weld", lang, c.crossLink, "textlink")}.</p><div class="mt">${btn(path("contact", lang), u.quoteLong, "primary", ' data-event="click_quote"')}</div></div></div></section>` +
+    `<section class="sec dark two"><div class="wrap two-grid">${hasImg("spiral") ? `<figure class="side-fig rv">${photo("spiral", lang)}</figure>` : ""}<div class="card-l rv"><h2 class="h3">${c.procH}</h2><ol class="steps">${c.procBullets.map((b) => `<li>${b}</li>`).join("")}</ol></div><div class="rv"><h2 class="h3">${c.durH}</h2><p>${c.durP}</p><p>${c.crossP} ${link("weld", lang, c.crossLink, "textlink")}.</p><div class="mt">${btn(path("contact", lang), u.quoteLong, "primary", ' data-event="click_quote"')}</div></div></div></section>` +
     `<section class="sec"><div class="wrap work-grid"><div><h2 class="h2 rv">${COPY[lang].home.workH}</h2><p class="lead rv">${COPY[lang].home.workSub}</p></div><div class="rv">${beforeAfter(lang, COPY[lang].home.workH)}</div></div></section>` +
     ctaBand(lang, c.ctaH);
   return shell({ lang, key: "paint", title: c.title, desc: c.desc, body, extraSchema: [serviceSchema(lang, "paint")] });
 }
 function weldPage(lang) {
   const c = COPY[lang].weld, u = t(lang);
-  const body = pageHead(lang, "weld", c.h1, c.lead) +
+  const body = pageHead(lang, "weld", c.h1, c.lead, undefined, "welding") +
     `<section class="sec"><div class="wrap"><h2 class="h2 rv">${c.cardsH}</h2><div class="two-cards">${c.cards.map((cd, i) => `<article class="why-c rv"><span class="why-i">${icon(i ? "shield" : "wrench")}</span><h3>${cd[0]}</h3><ul class="ticks">${cd[1].map((x) => `<li>${icon("check")}${x}</li>`).join("")}</ul></article>`).join("")}</div></div></section>` +
     `<section class="sec dark"><div class="wrap"><h2 class="h2 rv">${c.structH}</h2><div class="weld-grid">${WELD_STRUCTURES.map((w, i) => `<article class="weld-c rv" style="--d:${i * 70}ms"><span class="struct-n">0${i + 1}</span><h3>${esc(w[lang][0])}</h3><p>${esc(w[lang][1])}</p></article>`).join("")}</div><p class="rv mt">${c.crossP} ${link("paint", lang, c.crossLink, "textlink")} ${c.crossEnd}</p></div></section>` +
     ctaBand(lang, c.ctaH);
@@ -279,7 +294,7 @@ function aboutPage(lang) {
 }
 function areasPage(lang) {
   const c = COPY[lang].areas;
-  const body = pageHead(lang, "areas", c.h1, c.lead) +
+  const body = pageHead(lang, "areas", c.h1, c.lead, undefined, "street") +
     `<section class="sec"><div class="wrap two-grid"><div><h2 class="h2 rv">${c.listH}</h2><div class="rv">${areaChips(lang)}</div><a class="btn btn-ghost-d rv mt" href="${BIZ.mapsUrl}" rel="noopener" target="_blank" data-event="click_directions"><span>${c.mapBtn}</span>${icon("arrow", "btn-ic")}</a></div><div class="rv card-l"><h2 class="h3">${c.whyH}</h2><p>${c.whyP}</p><address class="nap">${icon("pin")}${esc(addr)}<br>${icon("phone")}${tel("", BIZ.phoneDisplay)}</address></div></div></section>` + ctaBand(lang, c.ctaH);
   return shell({ lang, key: "areas", title: c.title, desc: c.desc, body });
 }

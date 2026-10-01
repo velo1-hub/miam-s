@@ -356,3 +356,28 @@ ul,ol{margin:0;padding:0;list-style:none}
   .pstep{transition:none}
 }
 @media print{.hdr,.mbar,.cookie,.progress,.embers{display:none}}
+
+/* ---------- Photography (brand imagery) ---------- */
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 50%;animation:kenburns 28s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.12) translate(-1.5%,-1%)}}
+.hero.has-img .hero-art{opacity:.12}
+.hero.has-img .hero-shade{background:linear-gradient(90deg,rgba(11,14,32,.94) 0%,rgba(11,14,32,.7) 45%,rgba(11,14,32,.15) 100%),linear-gradient(0deg,rgba(11,14,32,.85),transparent 40%)}
+.phead-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.phead-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,14,32,.94),rgba(11,14,32,.62) 60%,rgba(11,14,32,.4))}
+.phead.has-img .phead-bg{opacity:1}
+.svc-art.has-img{padding:0;background:none}
+.svc-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
+.svc-art.has-img::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(14,18,38,.75),rgba(14,18,38,.15))}
+.svc-art.has-img .svc-ic{z-index:2;color:#fff;filter:drop-shadow(0 4px 12px rgba(0,0,0,.6))}
+.svc-card:hover .svc-img{transform:scale(1.07)}
+.svc-art{height:200px}
+.ba-photo{aspect-ratio:9/10;max-width:620px;margin-inline:auto}
+.ba-photo .ba-layer img{width:100%;height:100%;object-fit:cover}
+.ba-wide.rv .ba-photo{max-width:560px}
+.areas-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(24px,5vw,64px);align-items:center}
+.areas-fig{margin:0;border-radius:var(--r);overflow:hidden;box-shadow:0 30px 60px -30px rgba(14,18,38,.6)}
+.areas-fig img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.side-fig{margin:0;border-radius:var(--r);overflow:hidden;align-self:stretch;min-height:320px;box-shadow:0 30px 60px -30px #000}
+.side-fig img{width:100%;height:100%;object-fit:cover}
+@media (max-width:980px){.areas-grid{grid-template-columns:1fr}.side-fig{min-height:260px;max-height:420px}.hero-img{object-position:68% 50%}}
+@media (prefers-reduced-motion:reduce){.hero-img{animation:none}}

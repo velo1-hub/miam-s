@@ -19,6 +19,7 @@ Nothing below is invented on the site. Each item is either hidden until provided
 | Confirm 5,0 ★ / 55 reviews is still current (`BIZ.rating`) | Trust strip, schema |
 
 ## Media
+- [ ] **AI-generated brand images are in use** (Higgsfield): hero, spiral, welding, street, before/after (`proferforge/src/assets/img/*.webp`). They are mood imagery, **not the client's work**; the before/after slider is labelled "Image illustrative". Replace them with real project photos (same file names, same aspect ratios) before launch, and do not describe them as the client's projects.
 - [ ] **Hero video:** 8 to 15 s of real footage. Run `bash proferforge/tools/make-hero-video.sh footage.mov 0 12`; the build picks up `hero.mp4`, `hero.webm` and `hero-poster.jpg` automatically. Until then the hero uses an animated ironwork backdrop.
   Shots to film (horizontal, steady, no audio needed): 1) grinder with sparks on a railing, 2) welder at work, 3) brush or roller on a spiral stair, 4) wide shot of a finished façade stair, 5) before/after of the same balcony, 6) the van on a Montréal street.
 - [ ] **Real project photos**, before and after, for the Réalisations page (replace the labelled illustration in `build.mjs` → `beforeAfter()` with real images).
