@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://proferforge.ca/sitemap.xml

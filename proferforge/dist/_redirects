@@ -1,0 +1,8 @@
+# Old WordPress URLs keep working (same slugs). Add extra rules below if needed.
+/blog  /guides/  301
+/blog/  /guides/  301
+/index.html  /  301
+/contact  /contact-devis/  301
+/contact/  /contact-devis/  301
+/en/contact  /en/contact-quote/  301
+/en/contact/  /en/contact-quote/  301
