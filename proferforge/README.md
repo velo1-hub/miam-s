@@ -31,3 +31,6 @@ Publish `proferforge/dist/` with build command `node proferforge/build.mjs`. `_h
 ## Notes
 - Hero art is an animated ironwork SVG until real footage is added. The "Réalisations" before/after uses a labelled illustration until real photos are added.
 - No analytics or third-party scripts load before consent (Law 25).
+
+## Hero video before real footage exists
+Set `PF_HERO_VIDEO_URL` to a public mp4 URL and rebuild; the hero then streams it (CSP `media-src` is extended automatically). Before launch, download it, run `PINGPONG=1 bash proferforge/tools/make-hero-video.sh clip.mp4`, and unset the variable so the video is self-hosted.

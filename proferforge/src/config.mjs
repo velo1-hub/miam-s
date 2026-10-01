@@ -39,6 +39,7 @@ export const BIZ = {
 export const ENV = {
   formEndpoint: process.env.PF_FORM_ENDPOINT || "",   // Formspree / Netlify / Supabase function URL
   gaId: process.env.PF_GA_ID || "",                   // G-XXXXXXXXXX (loaded only after consent)
+  heroVideoUrl: process.env.PF_HERO_VIDEO_URL || "", // optional remote mp4 for the hero until a local hero.mp4 exists (self-host before launch)
   turnstileKey: process.env.PF_TURNSTILE_KEY || "",   // Cloudflare Turnstile site key
 };
 
