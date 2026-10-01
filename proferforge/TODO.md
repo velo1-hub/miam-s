@@ -36,3 +36,11 @@ Nothing below is invented on the site. Each item is either hidden until provided
 - [ ] **Google Search Console:** add the domain, submit `https://proferforge.ca/sitemap.xml`.
 - [ ] **Google Business Profile:** see `docs/proferforge-seo-playbook.md`.
 - [ ] **Domain and DNS cutover** from WordPress to the new host (see README).
+
+## Virtual assistant (see `proferforge/backend/README.md`)
+- [ ] Create the Supabase project, run `backend/supabase/migrations/0001_assistant.sql`, add the owner to `staff_users`, disable public sign-ups.
+- [ ] Anthropic API key + Resend key as Supabase secrets; deploy the `assistant` function.
+- [ ] Rebuild the site with `PF_ASSISTANT_URL`, `PF_SUPABASE_URL`, `PF_SUPABASE_ANON_KEY`.
+- [ ] In the dashboard → Paramètres: RBQ number, warranty, payment terms, **rate card prices**, **visit hours**.
+- [ ] Name the privacy officer (`BIZ.privacyOfficer`) — required by Law 25 now that the assistant stores conversations.
+- [ ] Try 5 real conversations end to end before announcing the assistant.

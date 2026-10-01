@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, existsSyn
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { stripTypeScriptTypes } from "node:module";
 import { BIZ, ENV, BUILD_DATE } from "./src/config.mjs";
 import { UI, PAGES, STRUCTURES, PROCESS, WELD_STRUCTURES, REVIEWS, FAQ, GUIDES, COPY, PRIVACY } from "./src/content.mjs";
 
@@ -31,6 +32,9 @@ const css = readFileSync(join(SRC, "styles.css"), "utf8");
 const js = readFileSync(join(SRC, "site.js"), "utf8");
 const CSS_FILE = `styles.${hash(css)}.css`;
 const JS_FILE = `site.${hash(js)}.js`;
+const asstJs = readFileSync(join(SRC, "assistant.js"), "utf8");
+const ASST_FILE = `assistant.${hash(asstJs)}.js`;
+writeFileSync(join(DIST, "assets", ASST_FILE), asstJs);
 writeFileSync(join(DIST, "assets", CSS_FILE), css);
 writeFileSync(join(DIST, "assets", JS_FILE), js);
 const copyDir = (from, to) => {
@@ -229,7 +233,7 @@ ${noindex ? '<meta name="robots" content="noindex">' : '<meta name="robots" cont
 <link rel="stylesheet" href="/assets/${CSS_FILE}">
 <script>${INLINE_JS}</script>
 ${schemaGraph(lang, key, title, extraSchema)}
-</head><body class="${bodyClass}" data-lang="${lang}" data-ga="${esc(ENV.gaId)}" data-endpoint="${esc(ENV.formEndpoint)}" data-turnstile="${esc(ENV.turnstileKey)}">
+</head><body class="${bodyClass}" data-lang="${lang}" data-ga="${esc(ENV.gaId)}" data-endpoint="${esc(ENV.formEndpoint)}" data-turnstile="${esc(ENV.turnstileKey)}"${ENV.assistantUrl ? ` data-assistant="${esc(ENV.assistantUrl)}" data-assistant-js="/assets/${ASST_FILE}"${ENV.assistantDemo ? ' data-assistant-demo="1"' : ""}` : ""}>
 <a class="skip" href="#main">${t(lang).skip}</a><div class="progress" aria-hidden="true"><i></i></div>
 ${header(lang, key)}
 <main id="main">${body}</main>
@@ -353,6 +357,25 @@ const renderers = { home: homePage, paint: paintPage, weld: weldPage, work: work
 const write = (rel, content) => { const p = join(DIST, rel); mkdirSync(dirname(p), { recursive: true }); writeFileSync(p, content); };
 for (const p of PAGES) for (const lang of LANGS) write(join(p[lang], "index.html"), renderers[p.key](lang));
 write("404.html", notFound());
+
+// ---------- Staff dashboard (/admin/) ----------
+{
+  const A = join(SRC, "admin");
+  const quoteJs = stripTypeScriptTypes(readFileSync(join(here, "backend/supabase/functions/_shared/quote.ts"), "utf8"), { mode: "strip" }).replace(/^\s*import\s+type[^\n]*\n/m, "");
+  const files = { "admin.js": readFileSync(join(A, "admin.js"), "utf8"), "admin.css": readFileSync(join(A, "admin.css"), "utf8"), "quote.js": quoteJs };
+  for (const [f, c] of Object.entries(files)) write(`admin/${f}`, c);
+  copyFileSync(join(A, "vendor/supabase-2.117.2.js"), join(DIST, "admin/supabase.js"));
+  const v = hash(files["admin.js"] + files["quote.js"] + files["admin.css"]);
+  write("admin/index.html", `<!doctype html>
+<html lang="fr-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tableau de bord | Pro Fer Forgé</title><meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/admin/admin.css?v=${v}">
+</head><body data-sb-url="${esc(ENV.supabaseUrl)}" data-sb-key="${esc(ENV.supabaseAnonKey)}"${ENV.assistantDemo ? ' data-demo="1"' : ""}>
+<header class="top"><h1>Pro Fer Forgé · Équipe</h1><span class="sp"></span><span id="who"></span><button type="button" id="logout" hidden>Déconnexion</button></header>
+<main id="app"><p class="muted">Chargement…</p></main>
+<script src="/admin/supabase.js"></script><script type="module" src="/admin/admin.js?v=${v}"></script>
+</body></html>`);
+}
 write("assets/favicon.svg", FAVICON);
 write("assets/logo.svg", logo().replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ').replace('fill="currentColor"', 'fill="#333657" color="#333657"'));
 
@@ -361,6 +384,6 @@ const urls = PAGES.flatMap((p) => LANGS.map((lang) => `<url><loc>${abs(path(p.ke
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urls.join("")}</urlset>`);
 write("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${abs("/sitemap.xml")}\n`);
 write("manifest.webmanifest", JSON.stringify({ name: BIZ.name, short_name: "Pro Fer Forgé", lang: "fr-CA", start_url: "/", display: "standalone", background_color: "#0E1226", theme_color: "#0E1226", icons: [{ src: "/assets/favicon.svg", sizes: "any", type: "image/svg+xml" }] }));
-write("_headers", `/*\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-${INLINE_HASH}' https://www.googletagmanager.com https://challenges.cloudflare.com; connect-src 'self' https:; frame-src https://challenges.cloudflare.com; media-src 'self'${ENV.heroVideoUrl ? " " + new URL(ENV.heroVideoUrl).origin : ""}; font-src 'self'; form-action 'self' https:; base-uri 'self'\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/*.html\n  Cache-Control: public, max-age=0, must-revalidate\n`);
+write("_headers", `/*\n  X-Content-Type-Options: nosniff\n  X-Frame-Options: DENY\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-${INLINE_HASH}' https://www.googletagmanager.com https://challenges.cloudflare.com; connect-src 'self' https:; frame-src https://challenges.cloudflare.com; media-src 'self'${ENV.heroVideoUrl ? " " + new URL(ENV.heroVideoUrl).origin : ""}; font-src 'self'; form-action 'self' https:; base-uri 'self'\n/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n/admin/*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-store\n/*.html\n  Cache-Control: public, max-age=0, must-revalidate\n`);
 write("_redirects", `# Old WordPress URLs keep working (same slugs). Add extra rules below if needed.\n/blog  /guides/  301\n/blog/  /guides/  301\n/index.html  /  301\n/contact  /contact-devis/  301\n/contact/  /contact-devis/  301\n/en/contact  /en/contact-quote/  301\n/en/contact/  /en/contact-quote/  301\n`);
 console.log(`Built ${PAGES.length * 2 + 1} pages → ${DIST}${HAS_VIDEO ? " (with hero video)" : ENV.heroVideoUrl ? " (hero video from PF_HERO_VIDEO_URL)" : " (no hero video yet: still-image hero)"}`);

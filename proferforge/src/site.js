@@ -147,5 +147,26 @@
       }
     });
   }
+  // Virtual assistant launcher: the widget script is only downloaded on first click.
+  if (b.dataset.assistant && b.dataset.assistantJs) {
+    const fr = lang === "fr";
+    const btn = d.createElement("button");
+    btn.type = "button"; btn.className = "asst-launch"; btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-haspopup", "dialog");
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg><span>${fr ? "Soumission express" : "Quick quote"}</span>`;
+    d.body.appendChild(btn);
+    let loading = null;
+    const load = () => loading || (loading = new Promise((res, rej) => { const s = d.createElement("script"); s.src = b.dataset.assistantJs; s.onload = res; s.onerror = rej; d.head.appendChild(s); }));
+    btn.addEventListener("click", () => load().then(() => window.PFAssistant.toggle()).catch(() => (location.href = fr ? "/contact-devis/" : "/en/contact-quote/")));
+    d.querySelectorAll("[data-open-assistant]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); btn.click(); }));
+    if (!store.get("pf-asst-nudge")) setTimeout(() => {
+      if (d.body.classList.contains("asst-open")) return;
+      const tip = d.createElement("div"); tip.className = "asst-nudge"; tip.setAttribute("role", "status");
+      tip.innerHTML = `${fr ? "Une question ? Je prépare votre soumission et réserve une visite gratuite." : "A question? I can prepare your quote and book a free visit."}<button type="button" aria-label="${fr ? "Fermer" : "Close"}">×</button>`;
+      d.body.appendChild(tip); store.set("pf-asst-nudge", "1");
+      tip.querySelector("button").addEventListener("click", () => tip.remove());
+      btn.addEventListener("click", () => tip.remove(), { once: true });
+      setTimeout(() => tip.remove(), 12000);
+    }, 9000);
+  }
   onScroll();
 })();

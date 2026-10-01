@@ -40,6 +40,10 @@ export const ENV = {
   formEndpoint: process.env.PF_FORM_ENDPOINT || "",   // Formspree / Netlify / Supabase function URL
   gaId: process.env.PF_GA_ID || "",                   // G-XXXXXXXXXX (loaded only after consent)
   heroVideoUrl: process.env.PF_HERO_VIDEO_URL || "", // optional remote mp4 for the hero until a local hero.mp4 exists (self-host before launch)
+  assistantUrl: process.env.PF_ASSISTANT_URL || "",      // assistant endpoint (Supabase Edge Function URL). Empty = no assistant on the site
+  assistantDemo: process.env.PF_ASSISTANT_DEMO === "1",  // label the widget as a demo (local dev server)
+  supabaseUrl: process.env.PF_SUPABASE_URL || "",          // staff dashboard (/admin/): project URL
+  supabaseAnonKey: process.env.PF_SUPABASE_ANON_KEY || "", // public anon key (safe in the browser; RLS protects the data)
   turnstileKey: process.env.PF_TURNSTILE_KEY || "",   // Cloudflare Turnstile site key
 };
 

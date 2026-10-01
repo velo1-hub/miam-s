@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 const DIST = new URL("../dist/", import.meta.url).pathname;
 const walk = (d) => readdirSync(d).flatMap((f) => (statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)]));
-const files = walk(DIST), pages = files.filter((f) => f.endsWith(".html"));
+const files = walk(DIST).filter((f) => !f.includes("/admin/")), pages = files.filter((f) => f.endsWith(".html"));
 const problems = []; const bad = (f, m) => problems.push(`${f.replace(DIST, "")}: ${m}`);
 const exists = (u) => { const p = join(DIST, u.split("#")[0].split("?")[0]); return existsSync(p) && (statSync(p).isFile() || existsSync(join(p, "index.html"))); };
 const titles = new Map(), descs = new Map();

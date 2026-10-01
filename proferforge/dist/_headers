@@ -6,5 +6,8 @@
   Content-Security-Policy: default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-qOhFsq0QMV2REqNwk5hGH5bZE9SkX6gt6yeyKdYPv+U=' https://www.googletagmanager.com https://challenges.cloudflare.com; connect-src 'self' https:; frame-src https://challenges.cloudflare.com; media-src 'self'; font-src 'self'; form-action 'self' https:; base-uri 'self'
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
