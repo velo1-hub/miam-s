@@ -72,3 +72,16 @@ Without `ANTHROPIC_API_KEY` the widget runs a scripted demo (no AI) so the flow,
 - **Not tested here:** live calls to the Anthropic API, Supabase and Resend (no credentials in this environment). The same code paths run in the tests with a scripted model and an in-memory store; the SQL runs on real PostgreSQL.
 - **Cost:** each chat turn is one to three model calls; the system prompt and tools are cached across turns. Watch usage in the Anthropic console during the first weeks.
 - **Law 25:** consent is collected in the widget before the first message, the privacy policy has a "virtual assistant" section, and scoring is only a priority aid (a person always decides). The privacy officer must be named in `src/config.mjs`.
+
+## Live setup (October 2026)
+
+| Piece | Where |
+|---|---|
+| Supabase project | `pro-fer-forge` (ref `dmslnxnqpqlkqqxaxwyl`, region ca-central-1), migrations 0001 + 0002 applied |
+| Félix endpoint | `https://dmslnxnqpqlkqqxaxwyl.supabase.co/functions/v1/assistant` (version 2, `verify_jwt = false`) |
+| Staff accounts | 2 owners in `staff_users` (access codes handed over privately, never stored in the repo) |
+| Visit hours | Provisional Mon–Fri 08:00–16:00, editable in the dashboard → Paramètres |
+| Allowed origins | `settings.site.allowed_origins`: proferforge.ca, www.proferforge.ca, `https://*.vercel.app` |
+| Website | Vercel, project root `proferforge/`, serves the committed `dist/` (see `proferforge/vercel.json`) |
+
+**Still needed to make Félix answer:** add `ANTHROPIC_API_KEY` in Supabase → Edge Functions → Secrets. Until then the widget replies with a polite "call us" message and still records the conversation.

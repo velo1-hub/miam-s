@@ -35,15 +35,20 @@ export const BIZ = {
   ],
 };
 
+// Production Supabase project "pro-fer-forge" (ca-central-1). The URL and publishable key are public by design:
+// row-level security protects the data. Override with env vars for another project; set PF_ASSISTANT_URL="" to hide Félix.
+const SUPABASE = { url: "https://dmslnxnqpqlkqqxaxwyl.supabase.co", key: "sb_publishable_l_nmPpb_4DtIbnDcDGRWAA_UfaiXZpP" };
+const envOr = (name, fallback) => (process.env[name] !== undefined ? process.env[name] : fallback);
+
 // Runtime integrations, read from environment at build time. Nothing secret goes in the repo.
 export const ENV = {
   formEndpoint: process.env.PF_FORM_ENDPOINT || "",   // Formspree / Netlify / Supabase function URL
   gaId: process.env.PF_GA_ID || "",                   // G-XXXXXXXXXX (loaded only after consent)
   heroVideoUrl: process.env.PF_HERO_VIDEO_URL || "", // optional remote mp4 for the hero until a local hero.mp4 exists (self-host before launch)
-  assistantUrl: process.env.PF_ASSISTANT_URL || "",      // assistant endpoint (Supabase Edge Function URL). Empty = no assistant on the site
+  assistantUrl: envOr("PF_ASSISTANT_URL", `${SUPABASE.url}/functions/v1/assistant`), // Félix endpoint. Empty = no assistant on the site
   assistantDemo: process.env.PF_ASSISTANT_DEMO === "1",  // label the widget as a demo (local dev server)
-  supabaseUrl: process.env.PF_SUPABASE_URL || "",          // staff dashboard (/admin/): project URL
-  supabaseAnonKey: process.env.PF_SUPABASE_ANON_KEY || "", // public anon key (safe in the browser; RLS protects the data)
+  supabaseUrl: envOr("PF_SUPABASE_URL", SUPABASE.url),          // staff dashboard (/admin/): project URL
+  supabaseAnonKey: envOr("PF_SUPABASE_ANON_KEY", SUPABASE.key), // public publishable key (safe in the browser; RLS protects the data)
   turnstileKey: process.env.PF_TURNSTILE_KEY || "",   // Cloudflare Turnstile site key
 };
 

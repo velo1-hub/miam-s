@@ -29,16 +29,17 @@ async function makeLLM() {
 
 // ---------- DEMO brain (no AI): asks for the first missing field reported by update_dossier ----------
 const Q = {
-  "org.client_type": ["Pour quel type de bâtiment ?", ["Copropriété", "Coopérative", "Immeuble locatif", "Maison"]],
-  "project.work_type": ["Il s’agit de peinture, de soudure, ou des deux ?", ["Peinture", "Soudure", "Les deux"]],
-  "project.structures": ["Quelles structures et combien ? Par exemple : 2 escaliers de service de 3 étages et 6 balcons.", []],
-  "project.condition": ["Dans quel état est le métal ?", ["Peinture écaillée", "Rouillé", "Rouille qui perce", "Bon état"]],
-  "site.address_or_postal": ["Quelle est l’adresse des travaux (ou au moins le code postal) ?", []],
-  "timing.urgency": ["Quand souhaitez-vous faire les travaux ?", ["Dès que possible", "D’ici 1 à 3 mois", "Cette saison", "Je planifie"]],
-  "org.approval_status": ["Les travaux sont-ils déjà approuvés par le conseil ou l’assemblée ?", ["Oui, approuvés", "Conseil à venir", "Assemblée à venir"]],
-  "org.is_decision_maker": ["Êtes-vous la personne qui décide pour ce projet ?", ["Oui", "Non"]],
-  "contact.name": ["À quel nom dois-je ouvrir votre dossier ?", []],
-  "contact.phone_or_email": ["Quel est le meilleur numéro de téléphone ou courriel pour vous joindre ?", []],
+  "org.client_type": ["Parfait ! C’est pour quel genre de bâtiment ?", ["Copropriété", "Coopérative", "Immeuble locatif", "Maison"]],
+  "project.work_type": ["Ça marche. On parle de peinture, de soudure, ou des deux ?", ["Peinture", "Soudure", "Les deux", "Je sais pas trop"]],
+  "site.location": ["Dans quel coin êtes-vous ? Quel quartier ou quelle ville ?", []],
+  "project.structures": ["Bonne nouvelle, on couvre votre secteur. Qu’est-ce qu’on a à faire exactement ? Par exemple : 2 escaliers de service de 3 étages et 6 galeries.", []],
+  "project.condition": ["Ok, c’est un beau projet. Le métal est dans quel état ?", ["Peinture écaillée", "Rouillé", "Rouille qui perce", "Bon état"]],
+  "timing.urgency": ["Avec nos hivers, la rouille avance vite. Vous aimeriez faire ça quand ?", ["Dès que possible", "D’ici 1 à 3 mois", "Cette saison", "Je planifie"]],
+  "org.approval_status": ["Est-ce que le CA ou l’AG a déjà approuvé les travaux ?", ["Oui, c’est approuvé", "CA à venir", "AG à venir"]],
+  "org.is_decision_maker": ["Et c’est vous qui prenez la décision pour le projet ?", ["Oui", "Non"]],
+  "contact.name": ["Parfait, je vous ouvre un dossier. À quel nom ?", []],
+  "contact.phone_or_email": ["Merci ! Quel est le meilleur numéro ou courriel pour vous joindre ?", []],
+  "site.address": ["Dernière chose pour la visite gratuite : quelle est l’adresse exacte ?", []],
 };
 const has = (t, re) => re.test(t.toLowerCase());
 function patchFor(field, t) {
@@ -58,7 +59,8 @@ function patchFor(field, t) {
       return { project: { structures: s.length ? s : [{ type: "balcony", qty: 1 }], description: t } };
     }
     case "project.condition": return { project: { condition: has(t, /perc|trou|through/) ? "rust_through" : has(t, /rouill|rust/) ? "rusted" : has(t, /écaill|ecaill|flak/) ? "flaking" : has(t, /bon|good/) ? "good" : "unknown", safety_concern: has(t, /bouge|danger|branl/) } };
-    case "site.address_or_postal": return { site: { address: t.slice(0, 120), postal, city: has(t, /laval/) ? "Laval" : has(t, /longueuil/) ? "Longueuil" : "Montréal" } };
+    case "site.location": return { site: { borough: t.slice(0, 60), postal, city: has(t, /laval/) ? "Laval" : has(t, /longueuil/) ? "Longueuil" : "Montréal" } };
+    case "site.address": return { site: { address: t.slice(0, 120), postal } };
     case "timing.urgency": return { timing: { urgency: has(t, /possible|vite|asap|urgent/) ? "asap" : has(t, /mois|month/) ? "1_3_months" : has(t, /saison|été|automne|season/) ? "this_season" : "planning" } };
     case "org.approval_status": return { org: { approval_status: has(t, /oui|approuv|yes/) ? "approved" : has(t, /assembl/) ? "pending_agm" : has(t, /conseil|board/) ? "pending_board" : "unknown" } };
     case "org.is_decision_maker": return { org: { is_decision_maker: has(t, /^\s*(oui|yes)/) } };
@@ -90,9 +92,9 @@ function demoLLM() {
         if (r.missing?.length) { const [q, o] = Q[r.missing[0]] ?? ["Pouvez-vous préciser ?", []]; return say(q, o); }
         return tool("get_available_slots", {});
       }
-      if (prevName === "get_available_slots") return r.available ? say("Merci, votre dossier est complet ! Choisissez une plage pour la visite gratuite sur place :") : tool("complete_intake", { summary_for_owner: "Dossier complété par l’assistant (mode démo)." });
+      if (prevName === "get_available_slots") return r.available ? say("Votre dossier est complet ! On vient voir ça sur place, gratuitement. Quelle plage vous arrange le mieux ?") : tool("complete_intake", { summary_for_owner: "Dossier complété par l’assistant (mode démo)." });
       if (prevName === "book_visit") return r.booked ? tool("complete_intake", { summary_for_owner: "Dossier complété et visite demandée par l’assistant (mode démo)." }) : say("Ce créneau vient d’être pris, en voici d’autres.");
-      if (prevName === "complete_intake") return say("C’est noté ! L’équipe confirmera votre visite et vous enverra une soumission. Vous pouvez aussi nous envoyer des photos par le formulaire de soumission.");
+      if (prevName === "complete_intake") return say("C’est noté ! L’équipe va vous confirmer la visite, et vous aurez une soumission claire après. Si vous avez des photos, envoyez-les par le formulaire de soumission, ça aide. Bonne journée !");
       return say("Merci !");
     },
   };

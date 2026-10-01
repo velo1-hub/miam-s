@@ -2,7 +2,7 @@
 // The model client is injected (`llm.create` = Anthropic `messages.create`), so this file has no SDK import
 // and runs unchanged in the Edge Function (Deno) and in Node tests.
 import { canBook, canComplete, mergeDossier, missingFields, sanitizePatch, type Dossier } from "./dossier.ts";
-import { scoreLead } from "./scoring.ts";
+import { areaOf, scoreLead } from "./scoring.ts";
 import { availableSlots, labelSlot, type Slot } from "./slots.ts";
 import { buildQuote, joinAddress } from "./quote.ts";
 import { suggestActions, visitQuestions } from "./suggestions.ts";
@@ -140,7 +140,9 @@ export async function runTurn(deps: Deps, input: TurnInput): Promise<TurnResult>
           email: dossier.contact?.email ?? null, client_type: dossier.org?.client_type ?? null,
         });
         const dropped = JSON.stringify(args).length > JSON.stringify(patch).length + 40;
+        const area = areaOf(dossier);
         return { saved: true, missing: missingFields(dossier), can_book: canBook(dossier), can_complete: canComplete(dossier),
+          service_area: { core: "inside the service area", near: "nearby South Shore: covered", ring: "outer ring: say the team will confirm travel", outside: "outside the service area: say so kindly, still take their details", unknown: "not known yet" }[area],
           ...(dropped ? { note: "Some values were not valid (e.g. phone, email or postal code format) and were not saved; ask again if needed." } : {}) };
       }
       case "get_available_slots": {

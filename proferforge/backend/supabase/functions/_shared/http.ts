@@ -17,7 +17,8 @@ function limited(key: string, max: number, windowMs: number, now: number) {
 export function createHandler(deps: Deps, opts: { allowedOrigins: string[] }) {
   const cors = (req: Request): Record<string, string> => {
     const origin = req.headers.get("origin") ?? "";
-    const ok = opts.allowedOrigins.includes("*") || opts.allowedOrigins.includes(origin);
+    // Entries may be exact origins or "https://*.example.com" (any subdomain, e.g. Vercel preview URLs).
+    const ok = opts.allowedOrigins.some((a) => a === "*" || a === origin || (a.startsWith("https://*.") && origin.startsWith("https://") && origin.endsWith(a.slice(9))));
     return { ...(ok && origin ? { "access-control-allow-origin": origin, vary: "Origin" } : {}),
       "access-control-allow-methods": "GET, POST, OPTIONS", "access-control-allow-headers": "content-type, authorization, apikey, x-client-info", "access-control-max-age": "86400" };
   };

@@ -7,6 +7,21 @@ export type ScoreResult = { score: number; temperature: Temperature; reasons: { 
 // Postal-code prefixes: H = Montréal island and Laval; J3/J4 = South Shore (Longueuil, Brossard…); J5/J6/J7 = wider ring.
 const AREA = { core: /^H/, near: /^J[34]/, ring: /^J[5-7]/ };
 
+/** Where the job is, relative to the service area: from postal code first, then city / borough. */
+export function areaOf(d: Dossier): "core" | "near" | "ring" | "outside" | "unknown" {
+  const postal = d.site?.postal?.replace(/\s/g, "") ?? "";
+  const place = `${d.site?.city ?? ""} ${d.site?.borough ?? ""} ${d.site?.address ?? ""}`.toLowerCase();
+  if (AREA.core.test(postal)) return "core";
+  if (AREA.near.test(postal)) return "near";
+  if (AREA.ring.test(postal)) return "ring";
+  if (postal) return "outside";
+  if (/montr[ée]al|laval|plateau|rosemont|villeray|verdun|hochelaga|outremont|westmount|ahuntsic|c[ôo]te-des-neiges|ndg|notre-dame-de-gr[âa]ce|sud-ouest|saint-henri|pointe-saint-charles|mile[- ]end|petite-patrie|ville-marie|lachine|lasalle|anjou|saint-l[ée]onard|montr[ée]al-nord|rivi[èe]re-des-prairies|pierrefonds|saint-laurent|mont-royal/.test(place)) return "core";
+  if (/longueuil|brossard|saint-lambert|boucherville|greenfield|la prairie|candiac/.test(place)) return "near";
+  if (/terrebonne|repentigny|blainville|boisbriand|ch[âa]teauguay|vaudreuil|mirabel|saint-j[ée]r[ôo]me|chambly|beloeil/.test(place)) return "ring";
+  if (place.trim()) return "unknown";
+  return "unknown";
+}
+
 export function structureUnits(d: Dossier): number {
   return (d.project?.structures ?? []).reduce((n, s) => {
     if (s.type === "railing" || s.type === "fence") return n + Math.max(1, Math.round((s.linear_m ?? 10) / 10)); // ~10 m ≈ one unit of work
@@ -32,12 +47,11 @@ export function scoreLead(d: Dossier, opts: { estimatedSubtotal?: number | null;
   else if (ct === "other") add(3, "Autre type de client", "Other client type");
 
   // Area
-  const postal = d.site?.postal?.replace(/\s/g, "") ?? "";
-  const city = (d.site?.city ?? "").toLowerCase();
-  if (AREA.core.test(postal) || /montr[ée]al|laval/.test(city)) add(10, "Dans la zone desservie", "Inside the service area");
-  else if (AREA.near.test(postal) || /longueuil|brossard|saint-lambert/.test(city)) add(7, "Rive-Sud proche", "Nearby South Shore");
-  else if (AREA.ring.test(postal)) { add(0, "Couronne : déplacement à confirmer", "Outer ring: travel to confirm"); flags.push("travel_to_confirm"); }
-  else if (postal) { add(-15, "Hors zone desservie", "Outside the service area"); flags.push("outside_area"); }
+  const area = areaOf(d);
+  if (area === "core") add(10, "Dans la zone desservie", "Inside the service area");
+  else if (area === "near") add(7, "Rive-Sud proche", "Nearby South Shore");
+  else if (area === "ring") { add(0, "Couronne : déplacement à confirmer", "Outer ring: travel to confirm"); flags.push("travel_to_confirm"); }
+  else if (area === "outside") { add(-15, "Hors zone desservie", "Outside the service area"); flags.push("outside_area"); }
 
   // Size
   const units = structureUnits(d);

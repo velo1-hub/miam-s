@@ -166,3 +166,12 @@ test("truncated tool call (max_tokens) and mid-turn refusal leave a replayable h
   assert.deepEqual(uses, results);
   assert.ok(msgs.every((m) => !Array.isArray(m.content) || m.content.length > 0));
 });
+
+test("CORS accepts wildcard subdomains like *.vercel.app, rejects others", async () => {
+  const repo = new MemoryRepo({ rules });
+  const handle = createHandler({ repo, llm: scripted([]), model: "m", now: () => NOW }, { allowedOrigins: ["https://proferforge.ca", "https://*.vercel.app"] });
+  const get = (origin) => handle(new Request("http://x/assistant?session_id=sess_cors_aaaaaaaaaaaa", { headers: { origin } }));
+  assert.equal((await get("https://pro-fer-forge.vercel.app")).headers.get("access-control-allow-origin"), "https://pro-fer-forge.vercel.app");
+  assert.equal((await get("https://evilvercel.app")).headers.get("access-control-allow-origin"), null);
+  assert.equal((await get("http://x.vercel.app")).headers.get("access-control-allow-origin"), null);
+});

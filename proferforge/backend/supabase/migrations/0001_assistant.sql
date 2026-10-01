@@ -131,6 +131,7 @@ create table appointments (
 );
 -- One crew: a time slot can be held by only one live appointment (prevents double booking under concurrency).
 create unique index appointments_one_per_slot on appointments (starts_at) where status in ('requested', 'confirmed');
+create index appointments_lead_idx on appointments (lead_id);
 
 -- ---------- Quote drafts (brouillons de soumission) ----------
 create table quote_drafts (
@@ -146,7 +147,7 @@ create table quote_drafts (
 );
 
 -- ---------- updated_at ----------
-create or replace function touch_updated_at() returns trigger language plpgsql as $$
+create or replace function touch_updated_at() returns trigger language plpgsql set search_path = public as $$
 begin new.updated_at = now(); return new; end $$;
 create trigger leads_touch before update on leads for each row execute function touch_updated_at();
 create trigger quote_drafts_touch before update on quote_drafts for each row execute function touch_updated_at();
@@ -188,3 +189,4 @@ from leads l;
 
 -- Defence in depth: revoke default privileges from the public-facing roles.
 revoke all on all tables in schema public from anon;
+revoke execute on function is_staff() from anon;

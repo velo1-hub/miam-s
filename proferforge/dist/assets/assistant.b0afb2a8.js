@@ -4,15 +4,15 @@
   if (window.PFAssistant) return;
   const d = document, b = d.body, lang = b.dataset.lang === "en" ? "en" : "fr", API = b.dataset.assistant;
   const T = {
-    fr: { title: "Assistant Pro Fer Forgé", status: "Répond en quelques secondes", close: "Fermer l’assistant", placeholder: "Écrivez votre message…", send: "Envoyer",
-      hello: "Bonjour ! Je peux préparer votre demande de soumission et réserver une visite gratuite. Parlez-moi de votre projet : balcons, escaliers, garde-corps ?",
+    fr: { title: "Félix · Pro Fer Forgé", status: "Conseiller virtuel · répond tout de suite", close: "Fermer la discussion", placeholder: "Écrivez votre message…", send: "Envoyer",
+      hello: "Bonjour ! Moi c’est Félix, le conseiller virtuel de Pro Fer Forgé. Je peux vous préparer une soumission et vous réserver une visite gratuite. C’est pour vos galeries, vos escaliers, vos rampes ?",
       consentT: "Avant de commencer", consent: "Vos réponses servent à préparer votre soumission et sont conservées de façon sécurisée. Elles sont traitées par un assistant d’intelligence artificielle (Anthropic) et un hébergeur infonuagique, possiblement hors Québec.",
-      privacy: "Politique de confidentialité", start: "J’accepte, commencer", typing: "L’assistant écrit…", error: "Connexion impossible. Réessayez ou appelez le (438) 815-7232.",
+      privacy: "Politique de confidentialité", start: "J’accepte, commencer", typing: "Félix écrit…", error: "Connexion impossible. Réessayez ou appelez le (438) 815-7232.",
       booked: "Visite demandée", ics: "Ajouter à mon calendrier", call: "Parler à quelqu’un : (438) 815-7232", restart: "Nouvelle conversation", privacyUrl: "/politique-de-confidentialite/", demo: "Mode démonstration" },
-    en: { title: "Pro Fer Forgé assistant", status: "Replies in seconds", close: "Close the assistant", placeholder: "Type your message…", send: "Send",
-      hello: "Hello! I can prepare your quote request and book a free visit. Tell me about your project: balconies, stairs, railings?",
+    en: { title: "Félix · Pro Fer Forgé", status: "Virtual advisor · replies right away", close: "Close the chat", placeholder: "Type your message…", send: "Send",
+      hello: "Hi! I’m Félix, Pro Fer Forgé’s virtual advisor. I can prepare your quote and book a free visit. Is it for your balconies, stairs or railings?",
       consentT: "Before we start", consent: "Your answers are used to prepare your quote and are stored securely. They are processed by an AI assistant (Anthropic) and a cloud host, possibly outside Québec.",
-      privacy: "Privacy policy", start: "I agree, start", typing: "The assistant is typing…", error: "Connection failed. Try again or call (438) 815-7232.",
+      privacy: "Privacy policy", start: "I agree, start", typing: "Félix is typing…", error: "Connection failed. Try again or call (438) 815-7232.",
       booked: "Visit requested", ics: "Add to my calendar", call: "Talk to someone: (438) 815-7232", restart: "New conversation", privacyUrl: "/en/privacy-policy/", demo: "Demo mode" },
   }[lang];
   const store = { get: (k) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch {} }, del: (k) => { try { sessionStorage.removeItem(k); } catch {} } };
@@ -22,7 +22,7 @@
   const el = (tag, attrs = {}, ...kids) => { const n = d.createElement(tag); for (const [k, v] of Object.entries(attrs)) k === "class" ? (n.className = v) : k.startsWith("on") ? n.addEventListener(k.slice(2), v) : n.setAttribute(k, v); kids.flat().forEach((c) => c != null && n.append(c)); return n; };
   const ICON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
   const panel = el("section", { class: "asst", role: "dialog", "aria-modal": "false", "aria-labelledby": "asst-t", hidden: "" });
-  panel.innerHTML = `<header class="asst-h"><div class="asst-av" aria-hidden="true">PF</div><div><h2 id="asst-t">${T.title}</h2><p><i class="asst-dot"></i>${T.status}${b.dataset.assistantDemo ? ` · <strong>${T.demo}</strong>` : ""}</p></div>
+  panel.innerHTML = `<header class="asst-h"><div class="asst-av" aria-hidden="true">F</div><div><h2 id="asst-t">${T.title}</h2><p><i class="asst-dot"></i>${T.status}${b.dataset.assistantDemo ? ` · <strong>${T.demo}</strong>` : ""}</p></div>
 <button type="button" class="asst-x" aria-label="${T.close}">${ICON}<path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
 <div class="asst-log" role="log" aria-live="polite" aria-relevant="additions"></div>
 <div class="asst-choices" aria-label="${lang === "fr" ? "Choix rapides" : "Quick choices"}"></div>

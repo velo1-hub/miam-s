@@ -52,3 +52,4 @@ details summary{cursor:pointer;font-weight:600}
 .fld{display:grid;gap:4px;margin-bottom:10px}.fld span{font-size:13px;color:var(--mute)}
 .rules{padding-left:18px}.inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 @media (max-width:900px){.split{grid-template-columns:1fr}.list{position:static;max-height:50vh}.reasons{columns:1}}
+.small{font-size:12.5px}

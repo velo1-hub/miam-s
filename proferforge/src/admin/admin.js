@@ -32,7 +32,12 @@ function supabaseApi() {
   return {
     async session() { return (await sb.auth.getSession()).data.session; },
     onAuth(cb) { sb.auth.onAuthStateChange((_e, s) => cb(s)); },
-    async login(email) { const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.href.split("#")[0], shouldCreateUser: false } }); if (error) throw error; },
+    async login(email, password) {
+      const { error } = password
+        ? await sb.auth.signInWithPassword({ email, password })
+        : await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.href.split("#")[0], shouldCreateUser: false } });
+      if (error) throw error;
+    },
     async logout() { await sb.auth.signOut(); },
     async isStaff() { return !!must(await sb.from("staff_users").select("auth_user_id").maybeSingle()); },
     async leads() { return must(await sb.from("lead_overview").select("*").order("updated_at", { ascending: false }).limit(300)); },
@@ -98,12 +103,17 @@ async function route() {
   if (m) openLead(m[1]);
 }
 function loginView() {
-  const msg = el("p", { class: "muted" });
-  const input = el("input", { type: "email", required: true, placeholder: "vous@proferforge.ca", autocomplete: "email", "aria-label": "Courriel" });
-  main.replaceChildren(el("form", { class: "card login", onsubmit: async (e) => { e.preventDefault(); try { await api.login(input.value); msg.textContent = "Lien de connexion envoyé. Vérifiez vos courriels."; } catch (err) { msg.textContent = "Erreur : " + err.message; } } },
-    el("h2", {}, "Connexion équipe"), el("p", { class: "muted" }, "Recevez un lien de connexion par courriel."), input, el("button", { class: "btn" }, "Recevoir le lien"), msg));
+  const msg = el("p", { class: "muted", role: "status" });
+  const email = el("input", { type: "email", required: true, placeholder: "vous@proferforge.ca", autocomplete: "username", "aria-label": "Courriel" });
+  const pass = el("input", { type: "password", placeholder: "Code d’accès", autocomplete: "current-password", "aria-label": "Code d’accès" });
+  main.replaceChildren(el("form", { class: "card login", onsubmit: async (e) => {
+      e.preventDefault(); msg.textContent = "Connexion…";
+      try { await api.login(email.value.trim(), pass.value); if (!pass.value) msg.textContent = "Lien de connexion envoyé. Vérifiez vos courriels."; else route(); }
+      catch (err) { msg.textContent = /invalid/i.test(err.message) ? "Courriel ou code d’accès incorrect." : "Erreur : " + err.message; } } },
+    el("h2", {}, "Connexion équipe"), el("p", { class: "muted" }, "Entrez votre courriel et votre code d’accès."), email, pass,
+    el("button", { class: "btn" }, "Se connecter"),
+    el("p", { class: "muted small" }, "Code oublié ? Laissez le code vide et cliquez « Se connecter » pour recevoir un lien par courriel."), msg));
 }
-
 async function refresh() {
   state.leads = await api.leads();
   renderList();

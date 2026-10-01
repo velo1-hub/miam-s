@@ -103,18 +103,21 @@ export function mergeDossier(base: Dossier, patch: Dossier): Dossier {
 /** The ordered list of what is still missing. The assistant asks for the first items next. */
 export function missingFields(d: Dossier): string[] {
   const m: string[] = [];
+  const located = !!(d.site?.city || d.site?.borough || d.site?.postal || d.site?.address);
   if (!d.org?.client_type) m.push("org.client_type");
   if (!d.project?.work_type || d.project.work_type === "unknown") m.push("project.work_type");
+  if (!located) m.push("site.location"); // neighbourhood / city / postal code: asked early to confirm the service area
   if (!d.project?.structures?.length) m.push("project.structures");
   if (!d.project?.condition) m.push("project.condition");
-  if (!d.site?.address && !d.site?.postal) m.push("site.address_or_postal");
   if (!d.timing?.urgency) m.push("timing.urgency");
   if (d.org?.client_type && ["condo", "coop"].includes(d.org.client_type) && d.org.approval_status === undefined) m.push("org.approval_status");
   if (d.org?.is_decision_maker === undefined) m.push("org.is_decision_maker");
   if (!d.contact?.name) m.push("contact.name");
   if (!d.contact?.phone && !d.contact?.email) m.push("contact.phone_or_email");
+  if (!d.site?.address) m.push("site.address"); // full street address, needed for the visit
   return m;
 }
 
-export const canBook = (d: Dossier) => !!(d.contact?.name && (d.contact.phone || d.contact.email) && (d.site?.address || d.site?.postal));
+/** A visit needs a name, a way to reach the client and the street address. */
+export const canBook = (d: Dossier) => !!(d.contact?.name && (d.contact.phone || d.contact.email) && d.site?.address);
 export const canComplete = (d: Dossier) => canBook(d) && !!d.project?.structures?.length;
