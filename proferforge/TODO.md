@@ -20,7 +20,8 @@ Nothing below is invented on the site. Each item is either hidden until provided
 
 ## Media
 - [ ] **AI-generated brand images are in use** (Higgsfield): hero, spiral, welding, street, before/after (`proferforge/src/assets/img/*.webp`). They are mood imagery, **not the client's work**; the before/after slider is labelled "Image illustrative". Replace them with real project photos (same file names, same aspect ratios) before launch, and do not describe them as the client's projects.
-- [ ] **AI hero video generated** (Higgsfield job `3904296b-907c-48fa-a6e1-5612f96aea72`, 4 s, 720p). Download it, then run `PINGPONG=1 bash proferforge/tools/make-hero-video.sh clip.mp4` for a seamless 8 s loop. Replace with real footage when available.
+- [x] **AI hero video installed** (self-hosted `hero.mp4` / `hero.webm` / `hero-poster.jpg`, ping-pong loop). Original job below; replace with real footage when available.
+- [ ] (history) AI hero video (Higgsfield job `3904296b-907c-48fa-a6e1-5612f96aea72`, 4 s, 720p). Download it, then run `PINGPONG=1 bash proferforge/tools/make-hero-video.sh clip.mp4` for a seamless 8 s loop. Replace with real footage when available.
 - [ ] **Second AI clip: autumn street** (Higgsfield job `f3ab8580-13ac-43f9-a8a2-9d4fb2cdbaab`, 3 s, 720p, Kling 3.0 Turbo). Same download + `PINGPONG=1` step; usable as an alternative hero or a section background.
 - [ ] **Hero video (real footage):** 8 to 15 s of real footage. Run `bash proferforge/tools/make-hero-video.sh footage.mov 0 12`; the build picks up `hero.mp4`, `hero.webm` and `hero-poster.jpg` automatically. Until then the hero uses an animated ironwork backdrop.
   Shots to film (horizontal, steady, no audio needed): 1) grinder with sparks on a railing, 2) welder at work, 3) brush or roller on a spiral stair, 4) wide shot of a finished façade stair, 5) before/after of the same balcony, 6) the van on a Montréal street.
