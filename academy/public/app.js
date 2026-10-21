@@ -418,7 +418,7 @@ function videoBlock(url) {
   if (yt) return `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${yt[1]}?rel=0" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen title="Vidéo"></iframe></div>`;
   const vm = /vimeo\.com\/(?:video\/)?(\d+)/.exec(url);
   if (vm) return `<div class="video"><iframe src="https://player.vimeo.com/video/${vm[1]}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Vidéo"></iframe></div>`;
-  if (/\.(mp4|webm|mov)(\?|$)/i.test(url) || url.startsWith("/media/")) return `<div class="video"><video controls preload="metadata" controlsList="nodownload" src="${esc(url)}"></video></div>`;
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url) || url.startsWith("/media/") || /blob\.vercel-storage\.com/.test(url)) return `<div class="video"><video controls preload="metadata" controlsList="nodownload" src="${esc(url)}"></video></div>`;
   return `<div class="video"><iframe src="${esc(url)}" allowfullscreen title="Vidéo"></iframe></div>`;
 }
 async function learn({ slug, id }) {

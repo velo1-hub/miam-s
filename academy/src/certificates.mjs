@@ -3,31 +3,32 @@ import { randomBytes } from "node:crypto";
 import { q } from "./db.mjs";
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+export const toDate = (v) => (v instanceof Date ? v : new Date(String(v).includes("T") ? v : String(v).replace(" ", "T") + "Z"));
 
-export function courseCompletion(userId, courseId) {
-  const lessons = q.get("SELECT COUNT(*) n FROM lessons l JOIN modules m ON m.id = l.module_id WHERE m.course_id = ?", courseId).n;
-  const done = q.get("SELECT COUNT(*) n FROM progress p JOIN lessons l ON l.id = p.lesson_id JOIN modules m ON m.id = l.module_id WHERE p.user_id = ? AND m.course_id = ?", userId, courseId).n;
-  const quizzes = q.all("SELECT id FROM quizzes WHERE course_id = ?", courseId);
-  const passed = quizzes.filter((z) => q.get("SELECT 1 FROM quiz_attempts WHERE user_id = ? AND quiz_id = ? AND passed = 1 LIMIT 1", userId, z.id)).length;
+export async function courseCompletion(userId, courseId) {
+  const lessons = (await q.get("SELECT COUNT(*) n FROM lessons l JOIN modules m ON m.id = l.module_id WHERE m.course_id = ?", courseId)).n;
+  const done = (await q.get("SELECT COUNT(*) n FROM progress p JOIN lessons l ON l.id = p.lesson_id JOIN modules m ON m.id = l.module_id WHERE p.user_id = ? AND m.course_id = ?", userId, courseId)).n;
+  const quizzes = await q.all("SELECT id FROM quizzes WHERE course_id = ?", courseId);
+  let passed = 0;
+  for (const z of quizzes) if (await q.get("SELECT 1 FROM quiz_attempts WHERE user_id = ? AND quiz_id = ? AND passed = 1 LIMIT 1", userId, z.id)) passed++;
   return { lessons, done, quizzes: quizzes.length, quizzesPassed: passed, pct: lessons ? Math.round((done / lessons) * 100) : 0, complete: lessons > 0 && done >= lessons && passed >= quizzes.length };
 }
 
-export function issueIfComplete(userId, courseId) {
-  const existing = q.get("SELECT * FROM certificates WHERE user_id = ? AND course_id = ?", userId, courseId);
+export async function issueIfComplete(userId, courseId) {
+  const existing = await q.get("SELECT * FROM certificates WHERE user_id = ? AND course_id = ?", userId, courseId);
   if (existing) return existing;
-  const c = courseCompletion(userId, courseId);
+  const c = await courseCompletion(userId, courseId);
   if (!c.complete) return null;
   const code = `1P-${randomBytes(4).toString("hex").toUpperCase()}-${randomBytes(2).toString("hex").toUpperCase()}`;
-  q.run("INSERT INTO certificates(code,user_id,course_id) VALUES(?,?,?)", code, userId, courseId);
+  await q.run("INSERT INTO certificates(code,user_id,course_id) VALUES(?,?,?)", code, userId, courseId);
   return q.get("SELECT * FROM certificates WHERE code = ?", code);
 }
 
-export function certificateHtml(code, brand) {
-  const cert = q.get(
-    `SELECT c.code, c.issued_at, u.name, co.title, co.hours
-       FROM certificates c JOIN users u ON u.id = c.user_id JOIN courses co ON co.id = c.course_id WHERE c.code = ?`, code);
+export async function certificateHtml(code, brand) {
+  const cert = await q.get(
+    `SELECT c.code, c.issued_at, u.name, co.title, co.hours FROM certificates c JOIN users u ON u.id = c.user_id JOIN courses co ON co.id = c.course_id WHERE c.code = ?`, code);
   if (!cert) return null;
-  const date = new Date(cert.issued_at + "Z").toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" });
+  const date = toDate(cert.issued_at).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" });
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Certificat ${esc(cert.code)} — ${esc(brand)}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>

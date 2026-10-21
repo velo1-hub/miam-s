@@ -32,16 +32,16 @@ async function call(who, method, path, body, raw) {
 }
 
 before(async () => {
-  seed({ log: () => {} });
+  await seed({ log: () => {} });
   server = createApp();
   await new Promise((r) => server.listen(0, r));
   base = `http://127.0.0.1:${server.address().port}`;
 });
-after(async () => { await new Promise((r) => server.close(r)); closeDb(); rmSync(dir, { recursive: true, force: true }); });
+after(async () => { await new Promise((r) => server.close(r)); await closeDb(); if (!process.env.DATABASE_URL) rmSync(dir, { recursive: true, force: true }); });
 
 test("catalogue public : 2 formations, programme vedette à 20 000 $ en 3 versements", async () => {
   const r = await call("anon", "GET", "/api/courses");
-  assert.equal(r.status, 200);
+  assert.equal(r.status, 200, JSON.stringify(r.data));
   const flag = r.data.find((c) => c.slug === "the-1-percent");
   assert.equal(flag.price_cents, 2000000);
   assert.equal(flag.modules, 14);

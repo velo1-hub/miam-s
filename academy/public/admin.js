@@ -115,6 +115,13 @@ async function settingsView() {
 
 // ---------- Médias (téléversement de vidéos et fichiers) ----------
 export async function uploadFile(file, onProgress) {
+  if (state.config.uploads === "blob") {
+    // Téléversement direct du navigateur vers Vercel Blob (jeton client émis par /api/admin/upload-token), puis enregistrement.
+    const { upload } = await import("https://esm.sh/@vercel/blob@2.8.2/client");
+    const safe = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9._-]+/g, "-");
+    const blob = await upload(`media/${safe}`, file, { access: "public", handleUploadUrl: "/api/admin/upload-token", multipart: true, contentType: file.type || "application/octet-stream", onUploadProgress: (e) => onProgress && onProgress(Math.round(e.percentage)) });
+    return api("/api/admin/uploads/register", { method: "POST", body: { url: blob.url, name: file.name, size: file.size, mime: file.type } });
+  }
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", `/api/admin/upload?name=${encodeURIComponent(file.name)}`);
@@ -132,7 +139,7 @@ function dropzone(id, after) {
     z.onclick = (e) => { if (e.target !== input) input.click(); }; input.onchange = () => go(input.files);
     z.ondragover = (e) => { e.preventDefault(); z.classList.add("over"); }; z.ondragleave = () => z.classList.remove("over"); z.ondrop = (e) => { e.preventDefault(); z.classList.remove("over"); go(e.dataTransfer.files); };
   }, 0);
-  return `<div class="drop" id="${id}"><input type="file" multiple accept=".mp4,.webm,.mov,.pdf,.png,.jpg,.jpeg,.webp,.zip,.xlsx,.csv" hidden><div><b>Déposez vos vidéos (MP4, WebM, MOV), PDF ou images ici</b></div><div class="small dim">ou cliquez pour choisir. Jusqu'à 2 Go par fichier. Les vidéos sont diffusées uniquement aux inscrits.</div><div class="progress" style="margin-top:12px"><span style="width:0"></span></div><div class="st small muted" style="margin-top:6px"></div></div>`;
+  return `<div class="drop" id="${id}"><input type="file" multiple accept=".mp4,.webm,.mov,.pdf,.png,.jpg,.jpeg,.webp,.zip,.xlsx,.csv" hidden><div><b>Déposez vos vidéos (MP4, WebM, MOV), PDF ou images ici</b></div><div class="small dim">ou cliquez pour choisir. Jusqu'à 2 Go par fichier.${state.config.uploads === "blob" ? " Stockage infonuagique : l'adresse du fichier est longue et imprévisible, et n'est affichée qu'aux inscrits." : " Les vidéos sont diffusées uniquement aux inscrits."}</div><div class="progress" style="margin-top:12px"><span style="width:0"></span></div><div class="st small muted" style="margin-top:6px"></div></div>`;
 }
 async function mediaView() {
   const files = await api("/api/admin/uploads");
@@ -140,7 +147,7 @@ async function mediaView() {
   return `${head("Médias", `<span class="badge">${files.length} fichiers</span>`)}
   <p class="muted">Téléversez vos vidéos ici, puis collez l'URL dans le champ « Vidéo » d'une leçon (ou téléversez directement depuis l'éditeur de leçon). Vous pouvez aussi héberger les vidéos sur YouTube (non répertorié), Vimeo ou Bunny Stream et coller leur lien.</p>
   ${dropzone("dz", () => renderAdmin(current()))}
-  <div class="table-wrap" style="margin-top:20px"><table class="table"><thead><tr><th>Fichier</th><th>Type</th><th>Taille</th><th>URL</th><th>Ajouté</th><th></th></tr></thead><tbody>${files.map((f) => `<tr><td>${esc(f.original_name)}</td><td class="dim">${esc(f.mime)}</td><td>${size(f.size_bytes)}</td><td><code style="font-size:12px">/media/${esc(f.filename)}</code> <button class="btn btn-sm btn-ghost" data-copy="/media/${esc(f.filename)}">Copier</button></td><td class="dim">${fmtDate(f.created_at)}</td><td><button class="btn btn-sm btn-danger" data-del="${f.id}">Supprimer</button></td></tr>`).join("") || "<tr><td colspan='6' class='muted'>Aucun fichier.</td></tr>"}</tbody></table></div>
+  <div class="table-wrap" style="margin-top:20px"><table class="table"><thead><tr><th>Fichier</th><th>Type</th><th>Taille</th><th>URL</th><th>Ajouté</th><th></th></tr></thead><tbody>${files.map((f) => `<tr><td>${esc(f.original_name)}</td><td class="dim">${esc(f.mime)}</td><td>${size(f.size_bytes)}</td><td><code style="font-size:12px;word-break:break-all">${esc(f.url || "/media/" + f.filename)}</code> <button class="btn btn-sm btn-ghost" data-copy="${esc(f.url || "/media/" + f.filename)}">Copier</button></td><td class="dim">${fmtDate(f.created_at)}</td><td><button class="btn btn-sm btn-danger" data-del="${f.id}">Supprimer</button></td></tr>`).join("") || "<tr><td colspan='6' class='muted'>Aucun fichier.</td></tr>"}</tbody></table></div>
   ${bindLater(() => { on("[data-copy]", "onclick", (e) => { navigator.clipboard.writeText(e.target.dataset.copy); toast("URL copiée."); }); on("[data-del]", "onclick", (e) => confirmDo("Supprimer ce fichier ? Les leçons qui l'utilisent n'auront plus de vidéo.", () => api(`/api/admin/uploads/${e.target.dataset.del}`, { method: "DELETE" }))); })}`;
 }
 
