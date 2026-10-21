@@ -635,6 +635,12 @@ export function ensureReady() {
 export async function handler(req, res) {
   security(res);
   let pathname = "/";
+  // Diagnostic sans base de données (utile sur un hébergeur sans accès aux journaux).
+  if (/^\/api\/diag(\?|$)/.test(req.url) || /__path=api%2Fdiag|__path=api\/diag/.test(req.url)) {
+    const out = { node: process.version, cwd: process.cwd(), db: isPg ? "postgres" : "sqlite", blob: BLOB, stripe: stripeEnabled(), publicDir: existsSync(join(PUBLIC, "index.html")), contentDir: existsSync(join(here, "content", "index.mjs")) };
+    try { await openDb(); out.dbOk = true; out.courses = (await q.get("SELECT COUNT(*) n FROM courses")).n; } catch (e) { out.dbOk = false; out.dbError = String(e && e.message || e); }
+    return send(res, 200, out);
+  }
   try {
     await ensureReady();
     const c = await ctx(req);
