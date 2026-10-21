@@ -22,6 +22,7 @@ Everything needed to launch and run Miam's Resto Café: strategy, identity, menu
 | 11 | Meta Ads | [docs/11-meta-ads.md](docs/11-meta-ads.md) | Campaign structure, 10 ad concepts FR/EN, reporting template |
 | 12 | Loyalty & CRM | [docs/12-loyalty-crm.md](docs/12-loyalty-crm.md) | Program design, email/SMS flows with full copy |
 | 13 | Launch & 90 days | [docs/13-launch-roadmap.md](docs/13-launch-roadmap.md) | Timeline, RACI, budget tiers, scorecard, risks |
+| 14 | **The 1% academy** (separate product) | [academy/README.md](academy/README.md) · [academy/OFFRE.md](academy/OFFRE.md) | E-commerce training platform (LMS): 14 modules, 63 lessons, quizzes, certificates, Stripe 3-installment plan, admin with video upload. `cd academy && npm start` |
 | ⚠️ | All owner-only actions | [docs/owner-actions.md](docs/owner-actions.md) | One checklist of everything only the owner can do |
 
 ## Commands

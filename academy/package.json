@@ -1,0 +1,15 @@
+{
+  "name": "ecom-academy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Plateforme de formation e-commerce : LMS complet (cours, quiz, certificats, paiements Stripe, admin) sans dépendance externe.",
+  "type": "module",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server.mjs",
+    "dev": "ACADEMY_DEV=1 node --no-warnings=ExperimentalWarning --watch server.mjs",
+    "seed": "node --no-warnings=ExperimentalWarning src/seed.mjs",
+    "reset": "node --no-warnings=ExperimentalWarning src/seed.mjs --reset",
+    "test": "node --no-warnings=ExperimentalWarning --test test/*.test.mjs"
+  }
+}
