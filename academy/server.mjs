@@ -13,6 +13,8 @@ import * as auth from "./src/auth.mjs";
 import { createOrder, checkoutUrl, markInstallmentPaid, verifyStripeSignature, stripeEnabled } from "./src/payments.mjs";
 import { courseCompletion, issueIfComplete, certificateHtml } from "./src/certificates.mjs";
 import { seed } from "./src/seed.mjs";
+import { handleUpload } from "@vercel/blob/client";
+import { del as blobDel } from "@vercel/blob";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(here, "public");
@@ -546,7 +548,6 @@ route("PUT", "/api/admin/upload", async (c, p, req) => {
 route("POST", "/api/admin/upload-token", async (c, p, req) => {
   requireAdmin(c);
   if (!BLOB) throw bad("Stockage Blob non configuré");
-  const { handleUpload } = await import("@vercel/blob/client");
   const body = await readJson(req);
   const json = await handleUpload({
     body, request: new Request(c.baseUrl + c.url.pathname, { method: "POST", headers: { "content-type": "application/json" } }),
@@ -574,7 +575,7 @@ route("DELETE", "/api/admin/uploads/:id", async (c, p, req) => {
   requireHeader(req); requireAdmin(c);
   const u = await q.get("SELECT * FROM uploads WHERE id = ?", Number(p.id));
   if (u) {
-    if (u.url.startsWith("https://") && BLOB) { try { const { del } = await import("@vercel/blob"); await del(u.url); } catch (e) { console.error("blob del", e.message); } }
+    if (u.url.startsWith("https://") && BLOB) { try { await blobDel(u.url); } catch (e) { console.error("blob del", e.message); } }
     else { try { unlinkSync(join(UPLOAD_DIR, u.filename)); } catch {} }
     await q.run("DELETE FROM uploads WHERE id = ?", u.id);
   }

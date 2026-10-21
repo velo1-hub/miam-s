@@ -5,6 +5,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import pg from "pg";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const DB_PATH = process.env.ACADEMY_DB || join(here, "..", "data", "academy.db");
@@ -209,7 +210,6 @@ async function sqliteBackend(path) {
 
 // ---------- Moteur Postgres ----------
 async function pgBackend(url) {
-  const pg = (await import("pg")).default;
   pg.types.setTypeParser(20, (v) => Number(v));   // int8 (COUNT)
   pg.types.setTypeParser(1700, (v) => Number(v)); // numeric (SUM)
   // Les pooleurs Supabase sont nommés aws-0-<région> ou aws-1-<région> selon l'âge du projet : on tente l'autre en cas d'hôte introuvable.
