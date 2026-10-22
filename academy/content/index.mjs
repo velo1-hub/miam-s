@@ -25,7 +25,7 @@ Le prix est tout inclus : il n'y a aucun frais supplémentaire, ni abonnement, n
     hours: 20,
     price_cents: 2000000,
     currency: "USD",
-    accent: "#3B82F6",
+    accent: "#0E1F44",
     featured: 1,
     sort: 1,
     outcomes: [

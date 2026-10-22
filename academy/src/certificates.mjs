@@ -32,16 +32,16 @@ export async function certificateHtml(code, brand) {
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Certificat ${esc(cert.code)} — ${esc(brand)}</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body{margin:0;background:#070B14;color:#EEF2FA;font-family:Georgia,"Times New Roman",serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
-.cert{max-width:900px;width:100%;border:2px solid #3B82F6;padding:56px 48px;position:relative;background:linear-gradient(160deg,#0D1424,#070B14)}
-.cert:before{content:"";position:absolute;inset:10px;border:1px solid rgba(59,130,246,.45);pointer-events:none}
-.brand{font-family:Inter,system-ui,sans-serif;letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#3B82F6}
-h1{font-weight:400;font-size:40px;margin:18px 0 6px}
-.name{font-size:34px;color:#3B82F6;margin:28px 0 8px;font-style:italic}
-p{line-height:1.6;color:#C7D0E6}
-.meta{display:flex;justify-content:space-between;gap:24px;margin-top:40px;font-family:Inter,system-ui,sans-serif;font-size:13px;color:#9AA6C2;flex-wrap:wrap}
-.verify{font-family:Inter,system-ui,sans-serif;font-size:12px;color:#66728F;margin-top:28px}
-@media print{body{background:#fff;color:#111}.cert{background:#fff;color:#111}p{color:#222}.meta{color:#444}}
+body{margin:0;background:#F6F8FC;color:#0B1220;font-family:Georgia,"Times New Roman",serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
+.cert{max-width:900px;width:100%;border:2px solid #0E1F44;padding:56px 48px;position:relative;background:#fff;box-shadow:0 32px 64px -24px rgba(11,18,32,.25)}
+.cert:before{content:"";position:absolute;inset:10px;border:1px solid rgba(37,99,235,.45);pointer-events:none}
+.brand{font-family:Inter,system-ui,sans-serif;letter-spacing:.35em;font-size:12px;text-transform:uppercase;color:#2563EB;font-weight:700}
+h1{font-weight:400;font-size:40px;margin:18px 0 6px;color:#0E1F44}
+.name{font-size:34px;color:#2563EB;margin:28px 0 8px;font-style:italic}
+p{line-height:1.6;color:#334155}
+.meta{display:flex;justify-content:space-between;gap:24px;margin-top:40px;font-family:Inter,system-ui,sans-serif;font-size:13px;color:#64748B;flex-wrap:wrap}
+.verify{font-family:Inter,system-ui,sans-serif;font-size:12px;color:#94A3B8;margin-top:28px}
+@media print{body{background:#fff}.cert{box-shadow:none}}
 </style></head><body>
 <article class="cert">
   <div class="brand">${esc(brand)} · Certificat de réussite</div>

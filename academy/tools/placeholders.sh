@@ -12,9 +12,9 @@ for name, meta in m["images"].items():
     d = ImageDraw.Draw(img)
     for y in range(h):
         t = y / h
-        d.line([(0, y), (w, y)], fill=(int(7 + 10 * t), int(11 + 24 * t), int(20 + 60 * t)))
-    d.ellipse([w*0.55, -h*0.3, w*1.3, h*0.6], fill=(14, 38, 90))
-    d.text((24, h - 40), f"{name} (substitut local)", fill=(124, 177, 255))
+        d.line([(0, y), (w, y)], fill=(int(226 + 14 * t), int(232 + 12 * t), int(244 + 8 * t)))
+    d.ellipse([w*0.55, -h*0.3, w*1.3, h*0.6], fill=(214, 226, 250))
+    d.text((24, h - 40), f"{name} (substitut local)", fill=(14, 31, 68))
     img.save(f"public/img/{name}.webp", "WEBP", quality=70)
 print("substituts générés")
 PY
