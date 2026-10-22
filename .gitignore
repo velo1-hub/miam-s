@@ -1,3 +1,4 @@
 node_modules/
 shots/
 academy/data/
+academy/public/img/*.webp

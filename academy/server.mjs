@@ -12,6 +12,7 @@ import { openDb, q, getSetting, setSetting, isPg } from "./src/db.mjs";
 import * as auth from "./src/auth.mjs";
 import { createOrder, checkoutUrl, markInstallmentPaid, verifyStripeSignature, stripeEnabled } from "./src/payments.mjs";
 import { courseCompletion, issueIfComplete, certificateHtml } from "./src/certificates.mjs";
+import { btcEnabled, btcInvoice, checkInvoice, btcPriceUsd, btcAddress } from "./src/bitcoin.mjs";
 import { seed } from "./src/seed.mjs";
 import { handleUpload } from "@vercel/blob/client";
 import { del as blobDel } from "@vercel/blob";
@@ -127,7 +128,14 @@ const route = (method, pattern, handler) => routes.push({ method, re: new RegExp
 
 // Public
 route("GET", "/api/health", async () => ({ ok: true, stripe: stripeEnabled(), db: isPg ? "postgres" : "sqlite", uploads: BLOB ? "blob" : "local" }));
-route("GET", "/api/config", async () => ({ brand: await getSetting("brand_name", "The 1%"), supportEmail: await getSetting("support_email", ""), stripe: stripeEnabled(), currency: "USD", uploads: BLOB ? "blob" : "local" }));
+async function paymentMethods() {
+  const btc = await btcEnabled();
+  const pref = await getSetting("payment_methods", "bitcoin,card"); // ordre d'affichage ; "bitcoin" seul = Bitcoin uniquement
+  const list = pref.split(",").map((x) => x.trim()).filter((m) => (m === "bitcoin" ? btc : m === "card"));
+  return list.length ? list : (btc ? ["bitcoin"] : ["card"]);
+}
+route("GET", "/api/config", async () => ({ brand: await getSetting("brand_name", "The 1%"), supportEmail: await getSetting("support_email", ""), tagline: await getSetting("tagline", ""), founder: await getSetting("founder", ""), founderBio: await getSetting("founder_bio", ""), companyLegal: await getSetting("company_legal", ""), companyAddress: await getSetting("company_address", ""), stripe: stripeEnabled(), bitcoin: await btcEnabled(), methods: await paymentMethods(), currency: "USD", uploads: BLOB ? "blob" : "local" }));
+route("GET", "/api/btc/price", async () => { try { return { usd: await btcPriceUsd() }; } catch (e) { throw new HttpError(503, e.message); } });
 route("GET", "/api/courses", async (c) => { const out = []; for (const r of await q.all("SELECT * FROM courses WHERE published = 1 ORDER BY sort, id")) out.push(await courseRow(r, c.user)); return out; });
 route("GET", "/api/courses/:slug", async (c, p) => {
   const row = await q.get("SELECT * FROM courses WHERE slug = ? AND (published = 1 OR ? = 'admin')", p.slug, c.user?.role || "");
@@ -295,8 +303,14 @@ route("POST", "/api/checkout", async (c, p, req) => {
     await q.run("INSERT OR IGNORE INTO enrollments(user_id,course_id,source) VALUES(?,?,'free')", u.id, course.id);
     return { enrolled: true, redirect: `/apprendre/${course.slug}` };
   }
+  const methods = await paymentMethods();
+  const method = methods.includes(b.method) ? b.method : methods[0];
   const pending = await q.get("SELECT id FROM orders WHERE user_id = ? AND course_id = ? AND status = 'pending' ORDER BY id DESC LIMIT 1", u.id, course.id);
   const order = pending ? { orderId: pending.id } : await createOrder({ user: u, course, plan: b.plan === "3x" ? "3x" : "full", coupon: b.coupon ? String(b.coupon).trim() : "" });
+  if (method === "bitcoin") {
+    await q.run("UPDATE orders SET provider = 'bitcoin' WHERE id = ?", order.orderId);
+    return { enrolled: false, order_id: order.orderId, url: `/paiement/bitcoin?order=${order.orderId}&n=1` };
+  }
   const out = await checkoutUrl({ orderId: order.orderId, installmentNumber: 1, course, user: u, baseUrl: c.baseUrl });
   return { enrolled: false, order_id: order.orderId, ...out };
 });
@@ -305,7 +319,38 @@ route("POST", "/api/orders/:id/pay/:n", async (c, p, req) => {
   const o = await q.get("SELECT * FROM orders WHERE id = ? AND user_id = ?", Number(p.id), u.id);
   if (!o) throw new HttpError(404, "Commande introuvable");
   const course = await q.get("SELECT * FROM courses WHERE id = ?", o.course_id);
+  const methods = await paymentMethods();
+  const method = methods.includes(c.url.searchParams.get("method")) ? c.url.searchParams.get("method") : (o.provider === "bitcoin" ? "bitcoin" : methods[0]);
+  if (method === "bitcoin") return { url: `/paiement/bitcoin?order=${o.id}&n=${Number(p.n)}` };
   return checkoutUrl({ orderId: o.id, installmentNumber: Number(p.n), course, user: u, baseUrl: c.baseUrl });
+});
+// Bitcoin : facture d'un versement (montant figé en sats) et vérification sur la blockchain.
+route("GET", "/api/orders/:id/btc/:n", async (c, p) => {
+  const u = requireUser(c);
+  const o = await q.get("SELECT * FROM orders WHERE id = ? AND user_id = ?", Number(p.id), u.id);
+  if (!o) throw new HttpError(404, "Commande introuvable");
+  const inst = await q.get("SELECT * FROM installments WHERE order_id = ? AND number = ?", o.id, Number(p.n));
+  if (!inst) throw new HttpError(404, "Versement introuvable");
+  const course = await q.get("SELECT slug, title FROM courses WHERE id = ?", o.course_id);
+  if (inst.status === "paid") return { paid: true, redirect: `/apprendre/${course.slug}`, course, installment: { number: inst.number, label: inst.label, amount_cents: inst.amount_cents, currency: o.currency } };
+  let invoice;
+  try { invoice = await btcInvoice(inst); } catch (e) { throw new HttpError(e.status || 503, e.message); }
+  return { paid: false, invoice, course, installment: { number: inst.number, label: inst.label, amount_cents: inst.amount_cents, currency: o.currency }, price_usd: await btcPriceUsd().catch(() => null) };
+});
+route("POST", "/api/btc/invoices/:id/check", async (c, p, req) => {
+  requireHeader(req); const u = requireUser(c);
+  const inv = await q.get("SELECT i.*, o.user_id, o.id order_id, ins.number FROM btc_invoices i JOIN installments ins ON ins.id = i.installment_id JOIN orders o ON o.id = ins.order_id WHERE i.id = ?", Number(p.id));
+  if (!inv || (inv.user_id !== u.id && u.role !== "admin")) throw new HttpError(404, "Facture introuvable");
+  if (!auth.rateLimit(`btc:${u.id}`, 60, 10 * 60e3)) throw new HttpError(429, "Trop de vérifications");
+  let r;
+  try { r = await checkInvoice(inv.id); } catch (e) { throw new HttpError(503, e.message); }
+  if (r.status === "paid") {
+    await markInstallmentPaid(inv.order_id, inv.number, `btc:${r.txid}`);
+    const o = await q.get("SELECT course_id FROM orders WHERE id = ?", inv.order_id);
+    const course = await q.get("SELECT slug FROM courses WHERE id = ?", o.course_id);
+    return { status: "paid", txid: r.txid, confirmations: r.confirmations, redirect: `/apprendre/${course.slug}` };
+  }
+  return { status: r.status, txid: r.txid, confirmations: r.confirmations };
 });
 route("POST", "/api/checkout/simulate", async (c, p, req) => {
   requireHeader(req); const u = requireUser(c);
@@ -346,6 +391,7 @@ route("GET", "/api/admin/stats", async (c) => {
       (SELECT COUNT(*) FROM certificates x WHERE x.course_id = c.id) certified,
       (SELECT COALESCE(SUM(i.amount_cents),0) FROM installments i JOIN orders o ON o.id = i.order_id WHERE o.course_id = c.id AND i.status = 'paid') revenue_cents FROM courses c ORDER BY c.sort`),
     recent: await q.all("SELECT u.name, u.email, u.created_at FROM users u WHERE role = 'student' ORDER BY id DESC LIMIT 8"),
+    btc_pending: await q.all(`SELECT i.id, i.sats, i.status, i.txid, i.confirmations, i.created_at, u.name, u.email, ins.number, ins.amount_cents FROM btc_invoices i JOIN installments ins ON ins.id = i.installment_id JOIN orders o ON o.id = ins.order_id JOIN users u ON u.id = o.user_id WHERE i.status IN ('pending','seen') AND ins.status != 'paid' ORDER BY i.id DESC LIMIT 50`),
     overdue: await q.all(`SELECT i.id, i.number, i.amount_cents, i.due_at, u.name, u.email, c.title course_title, o.id order_id FROM installments i JOIN orders o ON o.id = i.order_id JOIN users u ON u.id = o.user_id JOIN courses c ON c.id = o.course_id
       WHERE i.status = 'pending' AND o.status = 'active' AND i.due_at < datetime('now') ORDER BY i.due_at LIMIT 50`),
   };
@@ -420,11 +466,11 @@ route("POST", "/api/admin/coupons", async (c, p, req) => {
   return { ok: true };
 });
 route("DELETE", "/api/admin/coupons/:code", async (c, p, req) => { requireHeader(req); requireAdmin(c); await q.run("UPDATE coupons SET active = 0 WHERE code = ?", p.code); return { ok: true }; });
-route("GET", "/api/admin/settings", async (c) => { requireAdmin(c); return Object.fromEntries((await q.all("SELECT key, value FROM settings")).map((r) => [r.key, r.value])); });
+route("GET", "/api/admin/settings", async (c) => { requireAdmin(c); const o = Object.fromEntries((await q.all("SELECT key, value FROM settings")).map((r) => [r.key, r.value])); o.__btc_env = Boolean(process.env.BTC_ADDRESS); return o; });
 route("PUT", "/api/admin/settings", async (c, p, req) => {
   requireHeader(req); requireAdmin(c);
   const b = await readJson(req);
-  for (const k of ["brand_name", "support_email", "tagline", "calendly_url", "community_url"]) if (b[k] !== undefined) await setSetting(k, String(b[k]).slice(0, 300));
+  for (const k of ["brand_name", "support_email", "tagline", "calendly_url", "community_url", "btc_address", "payment_methods", "founder", "founder_bio", "company_legal", "company_address"]) if (b[k] !== undefined) await setSetting(k, String(b[k]).slice(0, 2000));
   return { ok: true };
 });
 route("GET", "/api/admin/export/students.csv", async (c, p, req, res) => {
@@ -669,8 +715,8 @@ export async function handler(req, res) {
   } catch (e) {
     const status = e.status || 500;
     if (status >= 500) console.error(e);
-    if (pathname.startsWith("/api/")) return send(res, status, { error: status >= 500 ? "Erreur interne" : e.message });
-    return html(res, status, `<h1>${status}</h1><p>${status >= 500 ? "Erreur interne" : e.message}</p>`);
+    if (pathname.startsWith("/api/")) return send(res, status, { error: status === 500 ? "Erreur interne" : e.message });
+    return html(res, status, `<h1>${status}</h1><p>${status === 500 ? "Erreur interne" : e.message}</p>`);
   }
 }
 export const createApp = () => createServer(handler);

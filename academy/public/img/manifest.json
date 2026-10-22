@@ -1,0 +1,66 @@
+{
+  "_comment": "Visuels de marque générés (Higgsfield, gpt_image_2_5), style photographique bleu nuit. Téléchargés et convertis en WebP par bootstrap.mjs au déploiement ; en local, des substituts sont générés par tools/placeholders.sh.",
+  "base": "https://d8j0ntlcm91z4.cloudfront.net/user_3DiixnprlBAt6MCKt00ArtefnnS/",
+  "images": {
+    "hero": {
+      "file": "hf_20261022_145047_a584e543-b4e5-41f8-9c57-8a72a2974a58.png",
+      "w": 1344,
+      "h": 752
+    },
+    "method": {
+      "file": "hf_20261022_145044_24197085-41b6-4b89-8d96-24ffa8ce4587.png",
+      "w": 1344,
+      "h": 752
+    },
+    "coaching": {
+      "file": "hf_20261022_145044_b955cdbd-e969-4042-84f2-f3d92bfa9a0c.png",
+      "w": 1168,
+      "h": 880
+    },
+    "community": {
+      "file": "hf_20261022_145045_5fe86809-5431-44d5-85da-9576839db021.png",
+      "w": 1168,
+      "h": 880
+    },
+    "certificate": {
+      "file": "hf_20261022_145044_db7cfe46-6d96-4298-b2a1-c46bbe9c3c13.png",
+      "w": 1168,
+      "h": 880
+    },
+    "box": {
+      "file": "hf_20261022_145044_0039c08f-0aac-4ceb-944c-643c44c596f2.png",
+      "w": 1024,
+      "h": 1024
+    },
+    "masterclass": {
+      "file": "hf_20261022_145046_d05e40cf-60c9-41e8-88bf-cdd99a0eaba9.png",
+      "w": 1344,
+      "h": 752
+    },
+    "bitcoin": {
+      "file": "hf_20261022_145047_b9456b5b-8122-4f31-9f42-e46597660604.png",
+      "w": 1168,
+      "h": 880
+    },
+    "logistics": {
+      "file": "hf_20261022_145045_a9887baf-13f9-4194-947f-74bb7a924dde.png",
+      "w": 1344,
+      "h": 752
+    },
+    "store": {
+      "file": "hf_20261022_145046_ea3ac7ad-20b2-4a2e-8859-83281c504780.png",
+      "w": 1344,
+      "h": 752
+    },
+    "ads": {
+      "file": "hf_20261022_145046_97b31964-e3e3-4067-9c4b-9dfa4d283ffb.png",
+      "w": 1344,
+      "h": 752
+    },
+    "finance": {
+      "file": "hf_20261022_145045_f82bd09b-0408-4c8b-a428-3cf3e5c0bc75.png",
+      "w": 1344,
+      "h": 752
+    }
+  }
+}

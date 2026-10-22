@@ -68,7 +68,7 @@ function topbar() {
   const path = location.pathname;
   const link = (href, label) => `<a href="${href}" class="${path === href || (href !== "/" && path.startsWith(href)) ? "active" : ""}">${label}</a>`;
   $("#topbar").innerHTML = `<div class="wrap">
-    <a class="brand" href="/">The <b>1%</b></a>
+    <a class="brand" href="/"><span class="logo-mark">1%</span><span>The 1%</span></a>
     <button class="menu-btn" aria-label="Menu" id="menuBtn">☰</button>
     <nav class="nav ${state.menuOpen ? "open" : ""}">
       ${link("/formations", "Formations")}
@@ -81,9 +81,15 @@ function topbar() {
   const lo = $("#logout"); if (lo) lo.onclick = async (e) => { e.preventDefault(); await api("/api/auth/logout", { method: "POST" }); state.user = null; toast("À bientôt."); navigate("/"); };
 }
 function footer() {
-  $("#footer").innerHTML = `<div class="wrap"><div><strong style="color:var(--text)">The 1%</strong> — Académie e-commerce<br>${esc(state.config.supportEmail || "")}</div>
-  <div><a href="/formations">Formations</a> · <a href="/offre">L'offre</a> · <a href="/conditions">Conditions</a> · <a href="/confidentialite">Confidentialité</a></div>
-  <div>© ${new Date().getFullYear()} The 1%. Les résultats présentés sont des études de cas de membres ; ils ne garantissent pas vos résultats.</div></div>`;
+  const c = state.config;
+  $("#footer").innerHTML = `<div class="wrap">
+    <div><a class="brand" href="/" style="margin-bottom:12px"><span class="logo-mark">1%</span><span>The 1%</span></a><p class="muted small" style="max-width:320px">${esc(c.tagline || "L'académie e-commerce de ceux qui exécutent. Programme élite de 12 semaines avec coaching individuel jusqu'au résultat.")}</p>${c.supportEmail ? `<a href="mailto:${esc(c.supportEmail)}">${esc(c.supportEmail)}</a>` : ""}</div>
+    <div><h5>Programme</h5><a href="/formation/the-1-percent">The 1% — Programme Élite</a><a href="/formation/masterclass-7-piliers">Masterclass gratuite</a><a href="/offre">L'offre et les versements</a><a href="/formations">Toutes les formations</a></div>
+    <div><h5>Compte</h5><a href="/connexion">Connexion</a><a href="/inscription">Créer un compte</a><a href="/tableau-de-bord">Mon espace</a></div>
+    <div><h5>Confiance</h5><a href="/conditions">Conditions et garantie</a><a href="/confidentialite">Confidentialité</a><a href="/offre#faq">Questions fréquentes</a>${c.bitcoin ? '<span class="badge" style="margin-top:4px">₿ Paiement Bitcoin accepté</span>' : ""}</div>
+    <div class="legal">© ${new Date().getFullYear()} The 1%${c.companyLegal ? " · " + esc(c.companyLegal) : ""}${c.companyAddress ? " · " + esc(c.companyAddress) : ""}. Les études de cas présentées sont celles de membres et ne garantissent pas vos résultats. Tous les prix sont en dollars américains, taxes incluses lorsque applicables.</div>
+  </div>`;
+  $("#footer").className = "footer footer-v2";
 }
 const main = (html) => { $("#main").innerHTML = html; window.scrollTo({ top: 0 }); };
 const loading = () => main(`<div class="wrap section-tight muted">Chargement…</div>`);
@@ -95,7 +101,7 @@ const routes = [
   ["/connexion", login], ["/inscription", register], ["/mot-de-passe-oublie", forgot], ["/reinitialiser/:token", resetPw],
   ["/tableau-de-bord", dashboard], ["/profil", profile],
   ["/apprendre/:slug", learn], ["/apprendre/:slug/lecon/:id", learn], ["/quiz/:id", quizPage],
-  ["/paiement/simulation", paySimulation], ["/paiement/succes", paySuccess],
+  ["/paiement/simulation", paySimulation], ["/paiement/succes", paySuccess], ["/paiement/bitcoin", bitcoinPay],
   ["/conditions", terms], ["/confidentialite", privacy],
   ["/admin", renderAdmin], ["/admin/:section", renderAdmin], ["/admin/:section/:id", renderAdmin],
 ];
@@ -117,79 +123,99 @@ async function home() {
   const flag = courses.find((c) => c.slug === "the-1-percent") || courses[0];
   const free = courses.find((c) => c.price_cents === 0);
   const outline = flag ? await api(`/api/courses/${flag.slug}`) : null;
+  const cfg = state.config;
+  const covers = ["method", "store", "logistics", "box", "store", "finance", "ads", "ads", "ads", "community", "finance", "coaching", "method", "certificate"];
   main(`
-<section class="hero"><div class="wrap">
+<section class="hero-v2"><div class="bg"><img src="/img/hero.webp" alt="" loading="eager"></div><div class="wrap">
   <div>
-    <div class="eyebrow">Programme élite e-commerce · 12 semaines</div>
+    <div class="kicker"><i></i> Programme élite e-commerce · 12 semaines</div>
     <h1>Rejoignez le <em>1 %</em> des boutiques qui sont réellement rentables.</h1>
-    <p class="lead">Un système d'exécution complet : produit validé par les chiffres, fournisseur sous contrat, boutique révisée point par point, publicité Meta et TikTok avec règles écrites, rétention, finances, et une marque que vous pourrez vendre. Avec un coach, jusqu'au résultat.</p>
-    <div class="cta"><a class="btn btn-gold btn-lg" href="/formation/${esc(flag?.slug || "")}">Voir le programme et l'offre</a>${free ? `<a class="btn btn-ghost btn-lg" href="/formation/${esc(free.slug)}">Masterclass gratuite</a>` : ""}</div>
-    <div class="proof"><div><b>${outline?.modules || 14}</b>modules</div><div><b>${outline?.lessons || 63}</b>leçons</div><div><b>${hours(outline?.minutes || 1240)}</b>de vidéo</div><div><b>6</b>appels individuels</div><div><b>60+</b>gabarits</div></div>
+    <p class="lead">Un système d'exécution complet, du choix du produit à la vente de la marque, avec un coach jusqu'au résultat. ${outline?.modules || 14} modules, ${outline?.lessons || 63} leçons, révision de votre boutique et de vos campagnes, communauté privée et certificat vérifiable.</p>
+    <div class="cta"><a class="btn btn-gold btn-lg" href="/formation/${esc(flag?.slug || "")}#inscription">Rejoindre The 1%</a>${free ? `<a class="btn btn-ghost btn-lg" href="/formation/${esc(free.slug)}">Masterclass gratuite</a>` : ""}</div>
+    <div class="proof"><div><b>${outline?.modules || 14}</b>modules</div><div><b>${outline?.lessons || 63}</b>leçons</div><div><b>${hours(outline?.minutes || 1183)}</b>de vidéo</div><div><b>6</b>appels individuels</div><div><b>60+</b>gabarits</div></div>
   </div>
   ${flag ? offerCard(flag) : ""}
 </div></section>
 
-<section class="section-tight"><div class="wrap"><div class="grid grid-4">
-  <div class="stat"><div class="n">99 %</div><div class="l">des boutiques ferment dans l'année : produit sans demande, marges impossibles, publicité sans structure</div></div>
-  <div class="stat"><div class="n">3,5×</div><div class="l">multiplicateur minimal entre coût rendu et prix de vente pour passer le test publicitaire</div></div>
-  <div class="stat"><div class="n">300–500 $</div><div class="l">budget de test par produit, avec des règles de coupe écrites avant de lancer</div></div>
-  <div class="stat"><div class="n">25–35 %</div><div class="l">des ventes d'une marque mature viennent du courriel et du SMS, sans publicité</div></div>
-</div></div></section>
+<section class="trust-band"><div class="wrap">
+  <div class="t"><span class="ic">✓</span><div><b>Garantie d'exécution</b>Coaching prolongé gratuitement jusqu'à vos 10 premières ventes</div></div>
+  <div class="t"><span class="ic">◆</span><div><b>Certificat vérifiable</b>Code public de vérification pour chaque diplômé</div></div>
+  <div class="t"><span class="ic">${cfg.bitcoin ? "₿" : "▣"}</span><div><b>${cfg.bitcoin ? "Paiement Bitcoin" : "Paiement sécurisé"}</b>${cfg.bitcoin ? "Facture en BTC, vérification automatique sur la blockchain" : "Via Stripe, 3 versements possibles"}${cfg.bitcoin && cfg.methods?.includes("card") ? " · carte acceptée" : ""}</div></div>
+  <div class="t"><span class="ic">∞</span><div><b>Accès à vie</b>Mises à jour du programme et communauté Alumni incluses</div></div>
+</div></section>
 
-<section class="section"><div class="wrap">
-  <div class="eyebrow">Pour qui</div>
-  <h2>Ce programme n'est pas pour tout le monde.</h2>
-  <div class="grid grid-2" style="margin-top:28px">
-    <div class="card"><h3>C'est pour vous si…</h3><ul class="tick-list">
-      <li>Vous voulez une marque e-commerce rentable en 12 semaines, pas « un revenu passif ».</li>
-      <li>Vous pouvez bloquer 90 minutes par jour, 5 jours par semaine.</li>
-      <li>Vous disposez de 2 000 à 3 500 $ de capital de travail en plus du programme (échantillons, boutique, tests publicitaires).</li>
-      <li>Vous acceptez de suivre un système et de montrer vos chiffres à un coach.</li>
-      <li>Vous voulez bâtir un actif (marque déposée, procédures, équipe) et non une boutique jetable.</li>
-    </ul></div>
-    <div class="card"><h3>Ce n'est pas pour vous si…</h3><ul class="tick-list">
-      <li>Vous cherchez un « produit gagnant » à copier sans travail.</li>
-      <li>Vous n'avez aucun budget pour tester.</li>
-      <li>Vous voulez des résultats en 2 semaines : les premiers résultats significatifs arrivent entre la semaine 6 et 10.</li>
-      <li>Vous n'êtes pas prêt à couper un produit qui ne passe pas le test, même si vous l'aimez.</li>
-    </ul></div>
+<section class="section"><div class="wrap split">
+  <div>
+    <div class="eyebrow">Pour qui</div>
+    <h2>Ce programme n'est pas pour tout le monde.</h2>
+    <p class="muted">Il est conçu pour les personnes qui veulent une marque e-commerce rentable en 12 semaines, pas « un revenu passif ». Vous bloquez 90 minutes par jour, vous disposez de 2 000 à 3 500 $ de capital de travail et vous acceptez de montrer vos chiffres à un coach.</p>
+    <ul class="tick-list">
+      <li>Vous voulez bâtir un actif : marque déposée, procédures, équipe, et non une boutique jetable.</li>
+      <li>Vous êtes prêt à couper un produit qui ne passe pas le test, même si vous l'aimez.</li>
+      <li>Vous préférez un système et des chiffres aux promesses.</li>
+    </ul>
   </div>
+  <div class="photo"><img src="/img/coaching.webp" alt="Espace de coaching privé" loading="lazy"><span class="cap">Coaching individuel</span></div>
 </div></section>
 
 <section class="section" style="background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
-  <div class="eyebrow">La méthode</div>
-  <h2>Trois paliers. Vous ne passez au suivant que lorsque les chiffres le confirment.</h2>
-  <div class="steps" style="margin-top:36px;max-width:820px">
-    <div class="step"><h3>Preuve (semaines 1 à 6)</h3><p class="muted">Grille de sélection à 12 critères, fournisseur et coût rendu, boutique révisée sur 60 points, puis un test publicitaire à budget fixe. Objectif : 10 premières ventes payées par des inconnus.</p></div>
-    <div class="step"><h3>Rentabilité (semaines 6 à 10)</h3><p class="muted">CPA inférieur à la marge brute pendant 14 jours consécutifs. Flux courriel et SMS, compte de résultat hebdomadaire, plan de trésorerie, CPA maximal connu.</p></div>
-    <div class="step"><h3>Échelle (semaines 10 à 12 et après)</h3><p class="muted">Scaling vertical et horizontal, usine à créatifs, TikTok et Google, gamme, premières embauches, international, et une marque prête à être vendue.</p></div>
+  <div class="split rev">
+    <div class="photo wide"><img src="/img/method.webp" alt="Les trois paliers de la méthode" loading="lazy"><span class="cap">La méthode</span></div>
+    <div>
+      <div class="eyebrow">La méthode</div>
+      <h2>Trois paliers. Vous ne passez au suivant que lorsque les chiffres le confirment.</h2>
+      <p class="muted">Chaque palier a sa liste de contrôle, ses indicateurs et sa revue avec un coach.</p>
+    </div>
+  </div>
+  <div class="steps-h" style="margin-top:40px">
+    <div class="s"><b>01</b><h4>Preuve · semaines 1 à 6</h4><p class="muted small" style="margin:0">Grille de sélection à 12 critères, fournisseur et coût rendu, boutique révisée sur 60 points, test publicitaire à budget fixe. Objectif : 10 premières ventes payées par des inconnus.</p></div>
+    <div class="s"><b>02</b><h4>Rentabilité · semaines 6 à 10</h4><p class="muted small" style="margin:0">CPA inférieur à la marge brute pendant 14 jours, flux courriel et SMS, compte de résultat hebdomadaire, plan de trésorerie, CPA maximal connu.</p></div>
+    <div class="s"><b>03</b><h4>Échelle · semaines 10 à 12 et après</h4><p class="muted small" style="margin:0">Scaling vertical et horizontal, usine à créatifs, TikTok et Google, gamme, premières embauches, international, marque prête à être vendue.</p></div>
   </div>
 </div></section>
 
 <section class="section"><div class="wrap">
   <div class="eyebrow">Le programme</div>
-  <h2>14 modules, ${outline?.lessons || 63} leçons, chacune avec un livrable.</h2>
+  <h2>${outline?.modules || 14} modules, ${outline?.lessons || 63} leçons, chacune avec un livrable.</h2>
   <p class="muted" style="max-width:720px">Chaque leçon se termine par une action révisée par un coach. Chaque module se termine par un quiz. L'examen final émet votre certificat vérifiable.</p>
-  <div style="margin-top:28px">${(outline?.modulesList || []).map((m, i) => `<div class="module-row"><div class="num">${String(i + 1).padStart(2, "0")}</div><div><h4>${esc(m.title.replace(/^Module \d+ — /, ""))}</h4><p class="muted small" style="margin:0">${esc(m.summary)}</p></div><div class="meta">${m.lessons.length} leçons · ${hours(m.lessons.reduce((s, l) => s + l.duration_min, 0))}</div></div>`).join("")}</div>
-  <p style="margin-top:24px"><a class="btn btn-ghost" href="/formation/${esc(flag?.slug || "")}">Voir le détail de chaque leçon</a></p>
+  <div class="module-grid" style="margin-top:28px">${(outline?.modulesList || []).map((m, i) => `<a class="module-card" href="/formation/${esc(flag.slug)}" style="color:inherit;text-decoration:none"><div class="ph"><img src="/img/${covers[i % covers.length]}.webp" alt="" loading="lazy"><span class="n">${String(i + 1).padStart(2, "0")}</span></div><div class="bd"><h4>${esc(m.title.replace(/^Module \d+ — /, ""))}</h4><p>${esc(m.summary)}</p><div class="meta">${m.lessons.length} leçons · ${hours(m.lessons.reduce((s, l) => s + l.duration_min, 0))}${m.quiz ? " · quiz" : ""}</div></div></a>`).join("")}</div>
 </div></section>
 
 <section class="section" style="background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap">
   <div class="eyebrow">Ce qui est inclus</div>
-  <h2>Tout est compris dans les 20 000 $. Aucun frais caché.</h2>
-  <div class="grid grid-3" style="margin-top:28px">${(flag?.includes || []).map((x) => `<div class="card"><h4>${esc(x.title)}</h4><p class="muted small" style="margin:0">${esc(x.detail)}</p></div>`).join("")}</div>
+  <h2>Tout est compris dans les ${money(flag?.price_cents || 2000000, flag?.currency || "USD")}. Aucun frais caché.</h2>
+  <div class="grid grid-3" style="margin-top:28px">
+    <div class="img-card"><div class="ph"><img src="/img/coaching.webp" alt="" loading="lazy"></div><div class="bd"><h4>Coaching individuel</h4><p class="muted small" style="margin:0">6 appels d'une heure sur 12 semaines avec un coach qui a opéré une marque à 7 chiffres, plus un appel de groupe chaque semaine.</p></div></div>
+    <div class="img-card"><div class="ph"><img src="/img/community.webp" alt="" loading="lazy"></div><div class="bd"><h4>Communauté privée et partenaires</h4><p class="muted small" style="margin:0">Revue hebdomadaire des chiffres, réseau d'agents de sourcing, 3PL, créateurs UGC, comptables et avocats avec conditions préférentielles.</p></div></div>
+    <div class="img-card"><div class="ph"><img src="/img/certificate.webp" alt="" loading="lazy"></div><div class="bd"><h4>Certificat vérifiable</h4><p class="muted small" style="margin:0">Émis après les 14 quiz et l'examen final, avec une page de vérification publique que vos partenaires peuvent consulter.</p></div></div>
+  </div>
+  <div class="grid grid-3" style="margin-top:18px">${(flag?.includes || []).slice(3).map((x) => `<div class="card"><h4>${esc(x.title)}</h4><p class="muted small" style="margin:0">${esc(x.detail)}</p></div>`).join("")}</div>
 </div></section>
+
+<section class="section"><div class="wrap">
+  <div class="guarantee"><div class="seal">GARANTIE<br>D'EXÉCUTION</div><div><h3 style="margin-bottom:6px">Si vous exécutez et que les ventes ne viennent pas, nous continuons gratuitement.</h3><p class="muted" style="margin:0">Complétez les 14 modules, livrez chaque action et assistez aux appels : si vous n'obtenez pas vos 10 premières ventes en 12 semaines, le coaching est prolongé sans frais jusqu'à ce que vous les obteniez. Les conditions complètes sont publiées dans nos <a href="/conditions">conditions</a>.</p></div></div>
+</div></section>
+
+${cfg.founder ? `<section class="section" style="background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap founder">
+  <div class="photo sq"><img src="/img/box.webp" alt="" loading="lazy"><span class="cap">The 1%</span></div>
+  <div><div class="eyebrow">Qui est derrière The 1%</div><h2>${esc(cfg.founder)}</h2><div class="prose">${md(cfg.founderBio || "")}</div><div class="sig">${esc(cfg.founder)}</div></div>
+</div></section>` : ""}
 
 <section class="section"><div class="wrap">
   <div class="eyebrow">Études de cas</div>
   <h2>Des chiffres, pas des promesses.</h2>
   <div class="grid grid-3" style="margin-top:28px">
-    <div class="card"><div class="badge badge-gold">Luminothérapie</div><p class="quote" style="font-size:18px;margin:14px 0">« Grille 49/60, CPA de test 19 $, profit par commande 24 $. Marque privée dès la semaine 8. »</p><p class="muted small" style="margin:0">38 000 $ de ventes le quatrième mois. Détails au module 2.</p></div>
-    <div class="card"><div class="badge badge-gold">Tapis d'acupression</div><p class="quote" style="font-size:18px;margin:14px 0">« De 50 $ à 1 800 $ de publicité par jour en 31 jours, MER 3,1. »</p><p class="muted small" style="margin:0">Profit net mensuel d'environ 19 000 $. Chronologie complète au module 7.</p></div>
-    <div class="card"><div class="badge badge-gold">Brosse lissante · TikTok</div><p class="quote" style="font-size:18px;margin:14px 0">« 14 créateurs, 38 vidéos, 6 succès. 121 000 $ en 90 jours. »</p><p class="muted small" style="margin:0">34 % des ventes par affiliation TikTok Shop. Détails au module 8.</p></div>
+    <div class="img-card"><div class="ph"><img src="/img/store.webp" alt="" loading="lazy"></div><div class="bd"><span class="badge badge-gold">Luminothérapie</span><p class="quote" style="font-size:18px;margin:10px 0 6px">« Grille 49/60, CPA de test 19 $, profit par commande 24 $. Marque privée dès la semaine 8. »</p><p class="muted small" style="margin:0">38 000 $ de ventes le quatrième mois. Détails au module 2.</p></div></div>
+    <div class="img-card"><div class="ph"><img src="/img/ads.webp" alt="" loading="lazy"></div><div class="bd"><span class="badge badge-gold">Tapis d'acupression</span><p class="quote" style="font-size:18px;margin:10px 0 6px">« De 50 $ à 1 800 $ de publicité par jour en 31 jours, MER 3,1. »</p><p class="muted small" style="margin:0">Profit net mensuel d'environ 19 000 $. Chronologie au module 7.</p></div></div>
+    <div class="img-card"><div class="ph"><img src="/img/logistics.webp" alt="" loading="lazy"></div><div class="bd"><span class="badge badge-gold">Brosse lissante · TikTok</span><p class="quote" style="font-size:18px;margin:10px 0 6px">« 14 créateurs, 38 vidéos, 6 succès. 121 000 $ en 90 jours. »</p><p class="muted small" style="margin:0">34 % des ventes par affiliation TikTok Shop. Détails au module 8.</p></div></div>
   </div>
   <p class="dim small" style="margin-top:16px">Études de cas de membres, documentées dans les leçons. Vos résultats dépendent de votre produit, de votre capital et de votre exécution.</p>
 </div></section>
+
+${cfg.bitcoin ? `<section class="section" style="background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap split">
+  <div><div class="eyebrow">Paiement</div><h2>Payez en Bitcoin, accès immédiat.</h2><p class="muted">Choisissez Bitcoin à l'inscription : une facture à montant fixe en BTC est générée, vous la réglez depuis n'importe quel portefeuille, et votre accès s'ouvre dès que la transaction est détectée sur la blockchain. Le plan en 3 versements s'applique aussi en Bitcoin.${cfg.methods?.includes("card") ? " La carte bancaire reste disponible via Stripe." : ""}</p><a class="btn btn-ghost" href="/offre">Voir les modalités</a></div>
+  <div class="photo"><img src="/img/bitcoin.webp" alt="Paiement en Bitcoin" loading="lazy"><span class="cap">Bitcoin accepté</span></div>
+</div></section>` : ""}
 
 <section class="section"><div class="wrap">
   <div class="eyebrow">Questions fréquentes</div>
@@ -200,15 +226,23 @@ async function home() {
 <section class="section"><div class="wrap"><div class="cta-band">
   <div class="eyebrow">Prochaine étape</div>
   <h2>Rejoignez The 1 %.</h2>
-  <p class="muted" style="max-width:600px;margin:0 auto 24px">20 000 $ tout inclus, payable en 3 versements (5 000 $ à l'inscription, 5 000 $ à 30 jours, 10 000 $ à 60 jours). Accès immédiat au premier versement.</p>
-  <a class="btn btn-gold btn-lg" href="/formation/${esc(flag?.slug || "")}">Voir l'offre complète</a>
+  <p class="muted" style="max-width:600px;margin:0 auto 24px">${money(flag?.price_cents || 2000000, flag?.currency || "USD")} tout inclus, payable en 3 versements (5 000 $ à l'inscription, 5 000 $ à 30 jours, 10 000 $ à 60 jours)${cfg.bitcoin ? ", en Bitcoin" + (cfg.methods?.includes("card") ? " ou par carte" : "") : ""}. Accès immédiat au premier versement.</p>
+  <a class="btn btn-gold btn-lg" href="/formation/${esc(flag?.slug || "")}#inscription">Voir l'offre complète</a>
 </div></div></section>`);
+  revealOnScroll();
+}
+function revealOnScroll() {
+  const els = document.querySelectorAll(".section .wrap > *, .trust-band .t");
+  if (!("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .08 });
+  els.forEach((el) => { el.classList.add("reveal"); io.observe(el); });
 }
 
 function faq() {
   return [
     ["Est-ce que 20 000 $ est vraiment tout inclus ?", "Oui. Le prix couvre les 14 modules, les 6 appels individuels, les appels de groupe, les révisions de boutique et de campagne, la communauté, les gabarits, l'annuaire de partenaires, le certificat et le programme Alumni. Il n'y a ni abonnement, ni frais de plateforme, ni module payant supplémentaire. Les seuls coûts hors programme sont ceux de votre propre entreprise (Shopify, échantillons, budget publicitaire), détaillés en toute transparence au module 1."],
-    ["Comment fonctionne le plan en 3 versements ?", "5 000 $ à l'inscription (accès immédiat à tout le programme), 5 000 $ 30 jours plus tard, 10 000 $ 60 jours après l'inscription. Les versements sont prélevés par carte via Stripe, ou par virement sur demande. Vous pouvez aussi payer les 20 000 $ en une fois."],
+    ["Comment fonctionne le plan en 3 versements ?", "5 000 $ à l'inscription (accès immédiat à tout le programme), 5 000 $ 30 jours plus tard, 10 000 $ 60 jours après l'inscription. Chaque versement se règle en Bitcoin (facture à montant fixe, vérification automatique) ou par carte via Stripe lorsque cette option est activée. Vous pouvez aussi payer les 20 000 $ en une fois."],
+    ["Comment se passe le paiement en Bitcoin ?", "À l'inscription, une facture indique le montant exact en BTC (calculé au taux du moment et figé pendant 1 heure) et une adresse de réception avec code QR. Vous payez depuis n'importe quel portefeuille. La plateforme surveille la blockchain et ouvre votre accès dès que la transaction est détectée, en général en moins d'une heure. Les frais de réseau sont à la charge de l'expéditeur. Conservez votre identifiant de transaction : il figure sur votre reçu."],
     ["Combien de temps dois-je consacrer ?", "90 minutes par jour, 5 jours par semaine, pendant 12 semaines, plus un appel de groupe hebdomadaire et deux appels individuels par mois. Vous gardez l'accès à vie et vous pouvez avancer plus lentement, mais le coaching est calibré sur 12 semaines."],
     ["Quel budget faut-il en plus pour lancer ma boutique ?", "Prévoyez 2 000 à 3 500 $ : Shopify et applications, échantillons, contenu UGC et 3 tests publicitaires de 300 à 500 $. Le module 2 présente aussi les modèles à faible capital (précommande, impression à la demande, produits numériques)."],
     ["Quelle est la garantie ?", "Garantie d'exécution : si vous complétez les 14 modules, livrez chaque action et n'obtenez pas vos 10 premières ventes en 12 semaines, nous prolongeons le coaching gratuitement jusqu'à ce que vous les obteniez. La garantie est conditionnelle à l'exécution, pas au résultat seul : nous ne pouvons pas exécuter à votre place."],
@@ -230,7 +264,7 @@ export function offerCard(c, { compact = false } = {}) {
     <div style="margin-top:18px;display:grid;gap:10px">
       ${enrolled ? `<a class="btn btn-gold btn-block" href="/apprendre/${esc(c.slug)}">Continuer la formation</a>` : `<a class="btn btn-gold btn-block" href="/formation/${esc(c.slug)}#inscription">Rejoindre The 1% — ${plan ? money(plan.installments[0].amount_cents, c.currency) + " aujourd'hui" : money(c.price_cents, c.currency)}</a>`}
     </div>
-    <p class="dim small center" style="margin:12px 0 0">Paiement sécurisé par Stripe · Garantie d'exécution · Accès à vie</p>
+    <p class="dim small center" style="margin:12px 0 0">${state.config.bitcoin ? "₿ Bitcoin" + (state.config.methods?.includes("card") ? " ou carte" : "") : "Paiement sécurisé par Stripe"} · Garantie d'exécution · Accès à vie</p>
   </div>`;
 }
 
@@ -296,9 +330,10 @@ function buyCard(c) {
   ${plan ? `<div class="field" style="margin-top:18px"><label>Mode de paiement</label>
     <label class="opt" style="margin-bottom:8px"><input type="radio" name="plan" value="3x" checked><span><b>${esc(plan.label)}</b><br><span class="muted small">${plan.installments.map((i) => money(i.amount_cents, c.currency)).join(" + ")} · accès immédiat au 1er versement</span></span></label>
     <label class="opt"><input type="radio" name="plan" value="full"><span><b>Paiement intégral</b><br><span class="muted small">${money(c.price_cents, c.currency)} aujourd'hui</span></span></label></div>` : ""}
+  ${(state.config.methods || []).length > 1 ? `<div class="field"><label>Moyen de paiement</label><div class="pay-methods">${(state.config.methods || []).map((m, i) => m === "bitcoin" ? `<label class="opt btc"><input type="radio" name="method" value="bitcoin" ${i === 0 ? "checked" : ""}><span class="pm-ic">₿</span><span><b>Bitcoin</b><br><span class="muted small">Facture en BTC, accès dès détection sur la blockchain</span></span></label>` : `<label class="opt"><input type="radio" name="method" value="card" ${i === 0 ? "checked" : ""}><span class="pm-ic">▣</span><span><b>Carte bancaire</b><br><span class="muted small">Paiement sécurisé par Stripe</span></span></label>`).join("")}</div></div>` : ""}
   <div class="field"><label for="coupon">Code promo (facultatif)</label><input id="coupon" placeholder="CODE"></div>
   <button class="btn btn-gold btn-block btn-lg" id="buyBtn">${state.user ? (plan ? `Payer ${money(plan.installments[0].amount_cents, c.currency)} et commencer` : `Payer ${money(c.price_cents, c.currency)}`) : "Créer mon compte pour m'inscrire"}</button>
-  <p class="dim small center" style="margin:12px 0 0">Paiement sécurisé par Stripe${state.config.stripe ? "" : " (mode démonstration : aucun paiement réel)"}.</p>
+  <p class="dim small center" style="margin:12px 0 0">${(state.config.methods || []).includes("bitcoin") ? "₿ Paiement en Bitcoin" + ((state.config.methods || []).includes("card") ? " ou par carte" : "") : "Paiement sécurisé par Stripe"}${!state.config.stripe && (state.config.methods || []).includes("card") ? " (carte en mode démonstration)" : ""}.</p>
   <div id="buyErr" class="error"></div></div>`;
 }
 function bindBuy(c) {
@@ -308,15 +343,17 @@ function bindBuy(c) {
     btn.disabled = true;
     try {
       const plan = $('input[name="plan"]:checked')?.value || "full";
-      const r = await api("/api/checkout", { method: "POST", body: { course_id: c.id, plan, coupon: $("#coupon")?.value || "" } });
+      const method = $('input[name="method"]:checked')?.value || (state.config.methods || [])[0] || "card";
+      const r = await api("/api/checkout", { method: "POST", body: { course_id: c.id, plan, coupon: $("#coupon")?.value || "", method } });
       if (r.enrolled) { toast("Inscription réussie !"); return navigate(r.redirect); }
+      if (r.url.startsWith("/")) return navigate(r.url);
       location.href = r.url;
     } catch (e) { $("#buyErr").textContent = e.message; btn.disabled = false; }
   };
   document.querySelectorAll("[data-pay]").forEach((b) => (b.onclick = async () => {
     const [order, n] = b.dataset.pay.split(":");
     b.disabled = true;
-    try { const r = await api(`/api/orders/${order}/pay/${n}`, { method: "POST" }); location.href = r.url; } catch (e) { toast(e.message, true); b.disabled = false; }
+    try { const r = await api(`/api/orders/${order}/pay/${n}${b.dataset.method ? "?method=" + b.dataset.method : ""}`, { method: "POST" }); if (r.url.startsWith("/")) return navigate(r.url); location.href = r.url; } catch (e) { toast(e.message, true); b.disabled = false; }
   }));
 }
 
@@ -397,7 +434,7 @@ async function dashboard() {
     <a class="btn btn-gold btn-sm" href="${c.nextLesson ? `/apprendre/${esc(c.slug)}/lecon/${c.nextLesson.id}` : `/apprendre/${esc(c.slug)}`}">${c.progress.pct ? "Continuer" : "Commencer"}</a></div></article>`).join("")}</div>`
     : `<div class="empty">Vous n'êtes inscrit à aucune formation. <a href="/formations">Voir le catalogue</a></div>`}
   ${d.orders.length ? `<h2 style="font-size:28px;margin-top:48px">Paiements</h2><div class="table-wrap"><table class="table"><thead><tr><th>Formation</th><th>Versement</th><th>Échéance</th><th>Montant</th><th>Statut</th><th></th></tr></thead><tbody>
-    ${d.orders.flatMap((o) => o.installments.map((i) => `<tr><td>${esc(o.course_title)}</td><td>${esc(i.label.split(" — ")[0])}</td><td>${fmtDate(i.due_at)}</td><td>${money(i.amount_cents, o.currency)}</td><td>${i.status === "paid" ? `<span class="badge badge-ok">Payé le ${fmtDate(i.paid_at)}</span>` : new Date(i.due_at) < new Date() ? '<span class="badge badge-err">En retard</span>' : '<span class="badge badge-warn">À venir</span>'}</td><td>${i.status !== "paid" && o.status !== "pending" ? `<button class="btn btn-sm btn-ghost" data-pay="${o.id}:${i.number}">Payer</button>` : ""}</td></tr>`)).join("")}</tbody></table></div>` : ""}
+    ${d.orders.flatMap((o) => o.installments.map((i) => `<tr><td>${esc(o.course_title)}</td><td>${esc(i.label.split(" — ")[0])}</td><td>${fmtDate(i.due_at)}</td><td>${money(i.amount_cents, o.currency)}</td><td>${i.status === "paid" ? `<span class="badge badge-ok">Payé le ${fmtDate(i.paid_at)}</span>` : new Date(i.due_at) < new Date() ? '<span class="badge badge-err">En retard</span>' : '<span class="badge badge-warn">À venir</span>'}</td><td>${i.status !== "paid" && o.status !== "pending" ? (state.config.methods || []).map((m) => `<button class="btn btn-sm btn-ghost" data-pay="${o.id}:${i.number}" data-method="${m}" style="margin:2px">${m === "bitcoin" ? "₿ Payer en Bitcoin" : "Payer par carte"}</button>`).join("") : ""}</td></tr>`)).join("")}</tbody></table></div>` : ""}
   </div>`);
   bindBuy({});
 }
@@ -510,6 +547,59 @@ async function paySimulation() {
   main(`<div class="wrap"><div class="auth"><div class="eyebrow">Mode démonstration</div><h1>Paiement simulé</h1><p class="muted">Stripe n'est pas configuré sur ce serveur. En production, cette page est remplacée par la page de paiement sécurisée de Stripe. Cliquez pour simuler un paiement réussi du versement ${esc(n)}.</p>
   <button class="btn btn-gold btn-block btn-lg" id="ok">Simuler le paiement</button><p class="center small" style="margin-top:12px"><a href="/tableau-de-bord">Annuler</a></p></div></div>`);
   $("#ok").onclick = async () => { try { const r = await api("/api/checkout/simulate", { method: "POST", body: { order_id: Number(order), n: Number(n) } }); toast("Paiement enregistré. Bienvenue !"); navigate(r.redirect); } catch (e) { toast(e.message, true); } };
+}
+async function bitcoinPay() {
+  if (!requireLogin()) return;
+  const sp = new URLSearchParams(location.search);
+  const order = sp.get("order"), n = sp.get("n") || "1";
+  loading();
+  let d;
+  try { d = await api(`/api/orders/${order}/btc/${n}`); } catch (e) { return main(`<div class="wrap section"><div class="empty">${esc(e.message)}</div></div>`); }
+  if (d.paid) { toast("Versement déjà réglé."); return navigate(d.redirect); }
+  const inv = d.invoice;
+  main(`<div class="wrap section-tight"><div class="btc-page">
+    <div>
+      <div class="eyebrow">Paiement en Bitcoin</div>
+      <h1 style="font-size:36px">${esc(d.installment.label.split(" — ")[0])} · ${esc(d.course.title.replace(/^The 1% — /, ""))}</h1>
+      <p class="muted">Envoyez exactement le montant ci-dessous à l'adresse indiquée. Votre accès s'ouvre automatiquement dès que la transaction est détectée${d.price_usd ? ` (taux figé : 1 BTC = ${money(Math.round(d.price_usd * 100))})` : ""}. La facture est valable 1 heure ; passé ce délai, un nouveau montant est calculé.</p>
+      <div class="card card-gold">
+        <div class="small muted">Montant à envoyer</div>
+        <div class="amount-big">${esc(inv.btc)} BTC</div>
+        <div class="muted small" style="margin:6px 0 16px">= ${money(d.installment.amount_cents, d.installment.currency)} · ${inv.sats.toLocaleString("fr-CA")} sats</div>
+        <label>Adresse de réception</label>
+        <div class="mono" id="addr">${esc(inv.address)}</div>
+        <div class="toolbar" style="margin-top:12px"><button class="btn btn-ghost btn-sm" id="copyAddr">Copier l'adresse</button><button class="btn btn-ghost btn-sm" id="copyAmt">Copier le montant</button><a class="btn btn-ghost btn-sm" href="${esc(inv.uri)}">Ouvrir dans mon portefeuille</a></div>
+        <hr>
+        <div id="st"><span class="status-dot"></span><b>En attente de votre paiement…</b><div class="muted small" style="margin-top:6px">Vérification automatique toutes les 20 secondes. Vous pouvez fermer cette page : votre tableau de bord reflétera le paiement.</div></div>
+        <button class="btn btn-gold btn-block" id="check" style="margin-top:14px">J'ai payé, vérifier maintenant</button>
+      </div>
+      <p class="dim small" style="margin-top:14px">Frais de réseau à la charge de l'expéditeur. Si vous payez depuis une plateforme d'échange, assurez-vous que le montant reçu après frais est au moins celui indiqué. Besoin d'aide ? ${esc(state.config.supportEmail || "")}</p>
+    </div>
+    <div>
+      <div class="card"><div class="qr" id="qr"><img alt="Code QR" src="" id="qrimg" hidden></div><p class="center muted small" style="margin:12px 0 0">Scannez avec votre portefeuille Bitcoin</p></div>
+      <div class="card" style="margin-top:16px"><h4>Comment ça marche</h4><ol class="small muted" style="padding-left:18px;margin:0"><li>Ouvrez votre portefeuille (Ledger, Trezor, Coinbase, Binance, Cash App…).</li><li>Scannez le code QR ou collez l'adresse et le montant.</li><li>Confirmez l'envoi. Dès que la transaction apparaît sur la blockchain, cette page se met à jour et votre accès s'ouvre.</li></ol></div>
+      <div class="photo" style="margin-top:16px"><img src="/img/bitcoin.webp" alt="" loading="lazy"></div>
+    </div>
+  </div></div>`);
+  // QR : bibliothèque chargée à la demande ; repli sur le texte si indisponible.
+  try {
+    const QR = (await import("https://esm.sh/qrcode@1.5.4")).default;
+    const url = await QR.toDataURL(inv.uri, { width: 440, margin: 1, color: { dark: "#111111", light: "#ffffff" } });
+    const img = $("#qrimg"); img.src = url; img.hidden = false;
+  } catch { $("#qr").innerHTML = `<div class="small" style="color:#111;padding:8px;max-width:220px;word-break:break-all">${esc(inv.uri)}</div>`; }
+  $("#copyAddr").onclick = () => { navigator.clipboard.writeText(inv.address); toast("Adresse copiée."); };
+  $("#copyAmt").onclick = () => { navigator.clipboard.writeText(inv.btc); toast("Montant copié."); };
+  let timer;
+  const check = async (manual) => {
+    try {
+      const r = await api(`/api/btc/invoices/${inv.id}/check`, { method: "POST" });
+      if (r.status === "paid") { clearInterval(timer); $("#st").innerHTML = `<span class="status-dot ok"></span><b>Paiement confirmé.</b><div class="muted small" style="margin-top:6px">Transaction ${esc(r.txid)}</div>`; toast("Paiement reçu. Bienvenue dans The 1%."); setTimeout(() => navigate(r.redirect), 1500); }
+      else if (r.status === "seen") $("#st").innerHTML = `<span class="status-dot"></span><b>Transaction détectée, en attente de confirmation.</b><div class="muted small" style="margin-top:6px">${esc(r.txid)} · ${r.confirmations} confirmation(s)</div>`;
+      else if (manual) toast("Aucune transaction détectée pour le moment. Réessayez dans quelques minutes.");
+    } catch (e) { if (manual) toast(e.message, true); }
+  };
+  $("#check").onclick = () => check(true);
+  timer = setInterval(() => { if (location.pathname !== "/paiement/bitcoin") return clearInterval(timer); check(false); }, 20000);
 }
 async function paySuccess() {
   main(`<div class="wrap"><div class="auth center"><div class="eyebrow">Merci</div><h1>Paiement reçu</h1><p class="muted">Votre accès est activé (ou le sera dans quelques secondes, le temps que Stripe nous confirme le paiement).</p><a class="btn btn-gold" href="/tableau-de-bord">Accéder à mon espace</a></div></div>`);

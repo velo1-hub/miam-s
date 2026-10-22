@@ -157,6 +157,16 @@ CREATE TABLE IF NOT EXISTS password_resets (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   expires_at {{TS}} NOT NULL
 );
+CREATE TABLE IF NOT EXISTS btc_invoices (
+  id {{ID}},
+  installment_id INTEGER NOT NULL REFERENCES installments(id) ON DELETE CASCADE,
+  address TEXT NOT NULL,
+  sats INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','seen','paid','expired')),
+  txid TEXT,
+  confirmations INTEGER NOT NULL DEFAULT 0,
+  created_at {{TS}} NOT NULL DEFAULT {{NOW}}
+);
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
@@ -174,7 +184,7 @@ const schemaFor = (pg) => TABLES
   .replaceAll("{{REAL}}", pg ? "DOUBLE PRECISION" : "REAL");
 
 // Tables dont les INSERT renvoient un id (pour lastInsertRowid côté Postgres).
-const ID_TABLES = /^\s*INSERT\s+(?:OR\s+IGNORE\s+)?INTO\s+(users|courses|modules|lessons|quizzes|enrollments|quiz_attempts|orders|installments|uploads|certificates|comments)\b/i;
+const ID_TABLES = /^\s*INSERT\s+(?:OR\s+IGNORE\s+)?INTO\s+(users|courses|modules|lessons|quizzes|enrollments|quiz_attempts|orders|installments|uploads|certificates|comments|btc_invoices)\b/i;
 
 // Traduction du dialecte portable (écrit pour SQLite) vers Postgres.
 export function toPg(sql) {

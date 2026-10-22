@@ -3,7 +3,7 @@
 //   .vercel/output/functions/api/index.func/  ← serveur complet + node_modules (pg, @vercel/blob)
 // Utilisé comme buildCommand ("node bootstrap.mjs"). Variables : BOOTSTRAP_REPO, BOOTSTRAP_REF, BOOTSTRAP_SUBDIR.
 import { execSync } from "node:child_process";
-import { writeFileSync, mkdirSync, mkdtempSync, cpSync, rmSync, existsSync } from "node:fs";
+import { writeFileSync, readFileSync, mkdirSync, mkdtempSync, cpSync, rmSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -31,6 +31,25 @@ mkdirSync(join(out, "static"), { recursive: true });
 mkdirSync(fn, { recursive: true });
 const skip = (p) => !/\/(data|node_modules|test|\.vercel)(\/|$)/.test(p) && !/\.(md|db)$/.test(p);
 cpSync(join(src, "public"), join(out, "static"), { recursive: true });
+// Visuels de marque : téléchargement depuis le manifeste et conversion WebP (sharp installé le temps de la construction).
+const manifestPath = join(src, "public", "img", "manifest.json");
+if (existsSync(manifestPath)) {
+  const m = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const imgDir = join(out, "static", "img");
+  mkdirSync(imgDir, { recursive: true });
+  const tools = mkdtempSync(join(tmpdir(), "img-tools-"));
+  writeFileSync(join(tools, "package.json"), '{"name":"img-tools","private":true}');
+  execSync("npm install sharp@0.34 --no-audit --no-fund", { cwd: tools, stdio: "inherit" });
+  const sharp = (await import(join(tools, "node_modules", "sharp", "lib", "index.js"))).default;
+  for (const [name, meta] of Object.entries(m.images)) {
+    const res = await fetch(m.base + meta.file);
+    if (!res.ok) { console.warn(`[bootstrap] image ${name} : ${res.status}`); continue; }
+    const buf = Buffer.from(await res.arrayBuffer());
+    await sharp(buf).webp({ quality: 82 }).toFile(join(imgDir, `${name}.webp`));
+    await sharp(buf).resize({ width: 640 }).webp({ quality: 74 }).toFile(join(imgDir, `${name}-sm.webp`));
+    console.log(`[bootstrap] image ${name} ok`);
+  }
+}
 for (const item of ["package.json", "package-lock.json", "server.mjs", "api", "src", "content", "public"]) if (existsSync(join(src, item))) cpSync(join(src, item), join(fn, item), { recursive: true, filter: skip });
 execSync("npm install --omit=dev --no-audit --no-fund", { cwd: fn, stdio: "inherit" });
 writeFileSync(join(fn, ".vc-config.json"), JSON.stringify({ runtime: "nodejs22.x", handler: "api/index.js", launcherType: "Nodejs", maxDuration: 30, memory: 1024, environment: {}, shouldAddHelpers: false, supportsResponseStreaming: false }, null, 2));
