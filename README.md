@@ -44,3 +44,7 @@ node tools/shots.mjs shots    # QA screenshots + OG image (Playwright)
 | In-store menu board that switches by daypart | Screen hardware and signage player |
 | Master menu database + menu engineering generator | Custom MIAM OS application (MVP plan in Phase 9 §9.6) |
 | MIAM OS database schema with roles and row-level security | POS, delivery aggregator, accounting and payroll connections |
+
+## Secrets and local setup
+
+Copy `.env.example` to `.env` and fill in real values. `.env`, `*.pem`, `*.key` and `secrets/` are git-ignored, so keys never enter this repository; keep the real ones in your private `~/.secrets` folder. `tools/desktop-organizer/` tidies a Desktop into named project folders and moves stray API keys into that locked folder (see its README).
