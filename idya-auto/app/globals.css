@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
-/*
- * Phase 0: only the tokens the placeholder page needs, taken verbatim from brief §3.2 and §3.4.
- * Phase 1 completes the full token system (glass levels, radii, motion, spacing, type scale).
- * --text-3 is 0.50 alpha instead of the brief's 0.44, which measures 4.07:1 on --bg and
- * fails WCAG AA for the 12 px captions it is used for (Phase 0 technical review, item 1).
- */
+/* =====================================================================================
+   Idya Auto design tokens — brief §3. Single dark theme. Every colour, radius, duration,
+   easing, type size and spacing step used anywhere in the UI is declared here.
+   Deviations from the brief are commented with their Phase 0 review item.
+   ===================================================================================== */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Fonts */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
+  /* Stage — black */
   --color-bg: #08080a;
   --color-bg-raised: #0e0e11;
   --color-surface: #141418;
@@ -16,42 +17,341 @@
   --color-line: rgb(255 255 255 / 0.08);
   --color-line-strong: rgb(255 255 255 / 0.14);
 
+  /* Text */
   --color-text: #f5f5f7;
   --color-text-2: rgb(245 245 247 / 0.68);
+  /* C2: 0.50 instead of 0.44 → 4.97:1 on --bg (0.44 measured 4.07:1, fails AA) */
   --color-text-3: rgb(245 245 247 / 0.5);
   --color-white: #ffffff;
 
-  --color-red: #e10600;
-  --color-red-hover: #f21b12;
-  --color-red-pressed: #b80500;
-  --color-red-text: #ff5a52;
-  --color-red-deep: #5a0603;
-  --color-red-glow: rgb(225 6 0 / 0.45);
+  /* Signal — red */
+  --color-red: #e21f26;        /* Rouge Idya, sampled from the official logo (logo-sync §3.2) */
+  --color-red-hover: #f0343b;
+  --color-red-pressed: #b9161c;
+  --color-red-text: #ff6064;   /* 6.8:1 on --bg, the only red allowed as text */
+  --color-red-deep: #5c0b0e;
+  --color-red-glow: rgb(226 31 38 / 0.45);
 
+  /* Metal */
   --color-titanium: #a1a1a6;
+
+  /* Status */
   --color-success: #30d158;
   --color-warning: #ffd60a;
   --color-danger: #ff5a52;
 
+  /* 360° studio backdrop */
+  --color-studio-top: #17171b;
+  --color-studio-bottom: #08080a;
+
+  /* Type scale — §3.4 */
+  --text-display-xl: clamp(56px, 9vw, 128px);
+  --text-display-xl--line-height: 0.95;
+  --text-display-xl--letter-spacing: -0.045em;
+  --text-display-xl--font-weight: 600;
+  --text-display: clamp(44px, 6vw, 88px);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.04em;
+  --text-display--font-weight: 600;
   --text-h1: clamp(36px, 4.5vw, 64px);
   --text-h1--line-height: 1.05;
   --text-h1--letter-spacing: -0.035em;
+  --text-h1--font-weight: 600;
+  --text-h2: clamp(28px, 3vw, 44px);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.03em;
+  --text-h2--font-weight: 600;
+  --text-h3: 24px;
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.02em;
+  --text-h3--font-weight: 600;
+  --text-body-lg: 19px;
+  --text-body-lg--line-height: 1.5;
+  --text-body-lg--letter-spacing: -0.01em;
   --text-body: 17px;
   --text-body--line-height: 1.55;
   --text-body--letter-spacing: -0.005em;
+  --text-small: 14px;
+  --text-small--line-height: 1.45;
+  --text-small--letter-spacing: 0;
   --text-eyebrow: 12px;
   --text-eyebrow--line-height: 1.3;
   --text-eyebrow--letter-spacing: 0.08em;
   --text-eyebrow--font-weight: 500;
+  --text-price-xl: 40px;
+  --text-price-xl--line-height: 1;
+  --text-price-xl--letter-spacing: -0.03em;
+  --text-price-xl--font-weight: 600;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.3;
+  --text-admin: 15px;
+  --text-admin--line-height: 1.5;
+
+  /* Radii — §3.6 */
+  --radius-chip: 8px;
+  --radius-input: 14px;
+  --radius-card-sm: 20px;
+  --radius-card: 28px;
+  --radius-hero: 40px;
+  --radius-pill: 999px;
+
+  /* Motion — §3.7 */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Breakpoints — §3.5 */
+  --breakpoint-xs: 390px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+  --breakpoint-3xl: 1920px;
+
+  /* Layout */
+  --container-content: 1280px;
+  --container-media: 1920px;
+  --container-nav: 1120px;
+
+  /* Component geometry */
+  --spacing-btn-lg: 52px;
+  --spacing-btn-md: 44px;
+  --spacing-input: 52px;
+  --spacing-chip: 36px;
+  --spacing-badge: 24px;
+  --spacing-navbar: 60px;
+  --spacing-search: 72px;
+  --spacing-sticky-bar: 76px;
+  --spacing-launcher: 56px;
+  --spacing-tap: 44px;
 }
 
-html {
-  color-scheme: dark;
+/* Non-Tailwind design variables (durations, glass alphas, gutters) */
+:root {
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-reveal: 450ms;
+  --dur-hero: 800ms;
+  --dur-shimmer: 1600ms;
+
+  --gutter: 20px;
+  --section-y: clamp(96px, 14vw, 200px);
+
+  --glass-1-top: rgb(255 255 255 / 0.08);
+  --glass-1-bottom: rgb(255 255 255 / 0.03);
+  --glass-2-top: rgb(255 255 255 / 0.1);
+  --glass-2-bottom: rgb(255 255 255 / 0.04);
+  --glass-3-top: rgb(255 255 255 / 0.14);
+  --glass-3-bottom: rgb(255 255 255 / 0.08);
+  --glass-lite: rgb(255 255 255 / 0.04);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-specular: rgb(255 255 255 / 0.18);
+  --glass-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.65);
+  --glass-fallback: rgb(20 22 28 / 0.92);
 }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  font-feature-settings: "cv11", "ss01";
+@media (min-width: 768px) {
+  :root { --gutter: 32px; }
+}
+@media (min-width: 1280px) {
+  :root { --gutter: 48px; }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+  /* Flex and grid children default to `min-width: auto`, which lets an input or a long label widen
+     a column past the phone viewport. `min-width: 0` lets them shrink; `shrink-0` still opts out. */
+  .flex > *,
+  .grid > * {
+    min-width: 0;
+  }
+  /* Layering (z-index): 30 sticky bars · 40 consent + assistant launcher · 45 mobile menu · 46 nav ·
+     50 dialogs and assistant panel · 60 toasts. */
+  body {
+    /* Safety net against horizontal page scroll on phones; `clip` keeps `position: sticky` working. */
+    overflow-x: clip;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    font-feature-settings: "cv11", "ss01", "ss03";
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgb(226 31 38 / 0.35);
+    color: var(--color-text);
+  }
+  /* Focus ring — §3.8: 2 px red-text, offset 3 px. Forms override to white (no-red zone). */
+  :focus-visible {
+    outline: 2px solid var(--color-red-text);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  .no-red :focus-visible,
+  .no-red:focus-visible {
+    outline-color: var(--color-text);
+  }
+  button, [role="button"] { cursor: pointer; }
+  img, video, canvas { display: block; max-width: 100%; }
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+}
+
+/* ---------- Liquid glass — §3.3 ---------- */
+@utility glass-1 {
+  background: linear-gradient(180deg, var(--glass-1-top) 0%, var(--glass-1-bottom) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-specular), inset 0 -1px 0 rgb(255 255 255 / 0.04), var(--glass-shadow);
+  @supports not (backdrop-filter: blur(1px)) { background: var(--glass-fallback); }
+}
+@utility glass-2 {
+  background: linear-gradient(180deg, var(--glass-2-top) 0%, var(--glass-2-bottom) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-specular), inset 0 -1px 0 rgb(255 255 255 / 0.04), var(--glass-shadow);
+  @supports not (backdrop-filter: blur(1px)) { background: var(--glass-fallback); }
+}
+@utility glass-3 {
+  /* Sheets and dialogs sit over arbitrary content: a dark base layer keeps AA contrast over bright frames */
+  background: linear-gradient(180deg, var(--glass-3-top) 0%, var(--glass-3-bottom) 100%), rgb(8 8 10 / 0.78);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-specular), inset 0 -1px 0 rgb(255 255 255 / 0.04), var(--glass-shadow);
+  @supports not (backdrop-filter: blur(1px)) { background: var(--glass-fallback); }
+}
+@utility glass-lite {
+  background: var(--glass-lite);
+  border: 1px solid var(--color-line);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* Pointer-follow highlight for cards (desktop only) — §3.3 */
+@utility glass-hover {
+  position: relative;
+  overflow: hidden;
+  @media (hover: hover) {
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--dur-base) var(--ease-out);
+      background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.08), transparent 60%);
+    }
+    &:hover::after { opacity: 1; }
+  }
+}
+
+/* Red top-edge indicator for the active element — §3.3 "red appears as light" */
+@utility red-edge {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    top: -1px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-red), transparent);
+  }
+}
+
+/* Soft red bloom behind the one primary action */
+@utility red-bloom {
+  box-shadow: 0 0 24px var(--color-red-glow);
+}
+
+/* Layout helpers */
+@utility container-content {
+  width: 100%;
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+@utility section-y {
+  padding-block: var(--section-y);
+}
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+@utility eyebrow {
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  font-weight: var(--text-eyebrow--font-weight);
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+@utility press {
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  &:active { transform: scale(0.97); }
+}
+@utility hide-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+@utility studio-bg {
+  background: radial-gradient(120% 80% at 50% 20%, var(--color-studio-top) 0%, var(--color-studio-bottom) 70%);
+}
+
+/* Skeleton shimmer — §3.8 */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.05), transparent);
+    animation: shimmer var(--dur-shimmer) ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &::after { animation: none; }
+  }
+}
+@keyframes shimmer {
+  to { transform: translateX(100%); }
+}
+
+/* Scroll cue */
+@keyframes scroll-cue {
+  0% { transform: translateY(-100%); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+/* View transitions — card photo morphs into the viewer cover (§3.7) */
+::view-transition-group(*) {
+  animation-duration: 450ms;
+  animation-timing-function: var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Overlay / dialog keyframes */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes dialog-in { from { opacity: 0; transform: translate(var(--tw-translate-x, 0), calc(var(--tw-translate-y, 0) + 16px)) scale(0.98); } to { opacity: 1; transform: translate(var(--tw-translate-x, 0), var(--tw-translate-y, 0)) scale(1); } }
+@keyframes dialog-out { from { opacity: 1; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  [data-state] { animation-duration: 1ms !important; }
 }

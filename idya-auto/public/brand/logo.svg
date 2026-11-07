@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 92" width="200" height="92">
+  <title>Idya Auto</title>
+  <g fill="#E21F26">
+    <path d="M0 37C34 24 70 9 114 5c33-3 62 5 86 22l-3 3C173 16 146 10 115 11 73 13 38 27 3 40z"/>
+    <path d="M56 34c30-10 68-15 112-8l-2 3c-42-5-78-1-108 9z"/>
+  </g>
+  <text x="2" y="84" font-family="Inter, Helvetica, Arial, sans-serif" font-weight="800" font-style="italic" font-size="40" letter-spacing="-0.5">
+    <tspan fill="#F5F5F7">IDYA</tspan><tspan fill="#E21F26" dx="9">AUTO</tspan>
+  </text>
+</svg>
