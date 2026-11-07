@@ -10,7 +10,7 @@ Status: ☐ open · ☑ received / validated
 
 | | Item | Where it is used | Brief |
 |---|---|---|---|
-| ☐ | Logo as SVG, with the exact red sampled from it | `<Logo />`, favicon, OG images; triggers the logo-sync step (re-derive `--red` tints, re-run contrast table) | §3.2, §3.9 |
+| ☑ / ☐ | Logo received as a storefront photo (swoosh + « IDYA AUTO », red `#E21F26` sampled); the **vector SVG file** is still needed to replace the traced paths in `components/ui/logo.tsx` and `public/brand/logo.svg` | `<Logo />`, favicon, OG images; logo-sync done on the sampled red (`docs/decisions.md`) | §3.2, §3.9 |
 | ☐ | Approval of the assistant's name (default « Assistant Idya ») | Chat launcher and panel header, privacy notice | §26, §27.1 |
 | ☐ | Approval of the hero headline (default « Votre prochaine voiture, sous tous ses angles. » / « Your next car, from every angle. »; two alternatives offered in the Phase 1 report) | Home hero | §6.1 |
 | ☐ | Approval of the final Higgsfield hero video (Version A loop for the site, Version B logo sting for the pitch and social) | Home hero | §11, §29.1 |
@@ -93,3 +93,13 @@ Everything below is hidden until confirmed in writing.
 | ☐ | Photoroom API key (optional) | Background removal in the image pipeline |
 | ☐ | SMS provider (optional, e.g. Twilio) | Booking notifications to sales |
 | ☐ | Higgsfield credits | Hero video and demo imagery (pitch) |
+
+## 8. Demo mode — to clear before launch
+
+| | Item |
+|---|---|
+| ☐ | Set `DEMO_MODE=false`, remove `DEMO_ADMIN_*` variables, create real admin accounts in Supabase Auth |
+| ☐ | Replace locally rendered placeholder media (`public/media/`, `public/demo/vehicles/`) with the approved hero video and real 360° sets |
+| ☐ | Replace the 13 seed vehicles (`demo/seed.json`) with real inventory through the admin |
+| ☐ | Review `docs/decisions.md`: each default applied to a Phase 0 question can still be reversed |
+
