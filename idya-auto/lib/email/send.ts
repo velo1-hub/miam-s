@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { render } from "@react-email/components";
 import type { ReactElement } from "react";
+import { demoFile } from "@/lib/utils/demo-dir";
 
 interface Mail {
   to: string;
@@ -30,7 +31,7 @@ export async function sendEmail(mail: Mail): Promise<{ ok: boolean; id?: string 
     }
   }
   try {
-    const dir = path.join(process.cwd(), ".cache", "outbox");
+    const dir = demoFile("outbox");
     mkdirSync(dir, { recursive: true });
     const file = path.join(dir, `${Date.now()}-${mail.subject.replace(/[^a-z0-9]+/gi, "-").slice(0, 60)}.html`);
     writeFileSync(file, html);

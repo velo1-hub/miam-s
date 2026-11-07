@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { buildVehicleSlug } from "./slug";
 import type { Vehicle, VehicleStatus } from "./types";
+import { demoFile } from "@/lib/utils/demo-dir";
 
 /** Admin-side vehicle access (drafts included) with writes. Demo: overlay persisted to .cache; Supabase: table writes. */
 export interface AdminVehicleRepository {
@@ -14,7 +15,7 @@ export interface AdminVehicleRepository {
   create(partial: Partial<Vehicle>): Promise<Vehicle>;
 }
 
-const FILE = path.join(process.cwd(), ".cache", "demo-vehicles.json");
+const FILE = demoFile("demo-vehicles.json");
 let overlay: Record<string, Vehicle | null> | null = null;
 const load = () => {
   if (overlay) return overlay;

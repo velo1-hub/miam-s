@@ -9,6 +9,9 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // The home page checks which hero files exist (brief §11.2); ship them with the server bundle so the
+  // check still works on serverless hosts, where public/ is served by the CDN, not the function.
+  outputFileTracingIncludes: { "/[locale]": ["./public/media/**"] },
   partialPrefetching: true,
   turbopack: {
     rules: {

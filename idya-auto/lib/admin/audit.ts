@@ -2,8 +2,9 @@ import "server-only";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { AuditEntry } from "./types";
+import { demoFile } from "@/lib/utils/demo-dir";
 
-const FILE = path.join(process.cwd(), ".cache", "demo-audit.json");
+const FILE = demoFile("demo-audit.json");
 let entries: AuditEntry[] | null = null;
 const load = () => {
   if (entries) return entries;

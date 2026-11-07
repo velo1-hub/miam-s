@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isUuid, type ChatMessageRow, type ChatSessionRow, type Json } from "@/lib/supabase/database.types";
+import { demoFile } from "@/lib/utils/demo-dir";
 
 export interface ChatSession {
   id: string;
@@ -38,7 +39,7 @@ interface State {
   sessions: ChatSession[];
   messages: ChatMessageRecord[];
 }
-const FILE = path.join(process.cwd(), ".cache", "demo-chat.json");
+const FILE = demoFile("demo-chat.json");
 let state: State | null = null;
 const load = (): State => {
   if (state) return state;

@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { buildDemoLeads } from "./demo-seed";
 import type { Booking, Lead, LeadAiBrief, LeadNote, LeadRepository, NewLead } from "./types";
+import { demoFile } from "@/lib/utils/demo-dir";
 
 /**
  * Demo-mode lead store: in memory, seeded with 25 demo leads, persisted to .cache/demo-leads.json
@@ -16,7 +17,7 @@ interface State {
   briefs: LeadAiBrief[];
 }
 
-const FILE = path.join(process.cwd(), ".cache", "demo-leads.json");
+const FILE = demoFile("demo-leads.json");
 let state: State | null = null;
 
 function load(): State {

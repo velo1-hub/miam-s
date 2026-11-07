@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PRICING } from "./client";
+import { demoFile } from "@/lib/utils/demo-dir";
 
 /**
  * Hard daily AI spend cap — brief §27.1 (`AI_DAILY_BUDGET_USD`, default 15). Spend is estimated from
@@ -22,7 +23,7 @@ interface DayTotals {
   calls: number;
 }
 
-const FILE = path.join(process.cwd(), ".cache", "ai-usage.json");
+const FILE = demoFile("ai-usage.json");
 const REMOTE_TTL_MS = 60_000;
 let state: Record<string, DayTotals> | null = null;
 

@@ -2,8 +2,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { defaultSettings } from "./defaults";
 import type { Settings } from "./types";
+import { demoFile } from "@/lib/utils/demo-dir";
 
-const FILE = path.join(process.cwd(), ".cache", "demo-settings.json");
+const FILE = demoFile("demo-settings.json");
 let overlay: Partial<Settings> | null = null;
 
 function loadOverlay(): Partial<Settings> {
