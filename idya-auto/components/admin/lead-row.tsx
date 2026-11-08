@@ -22,10 +22,12 @@ export function LeadRow({ lead, brief, vehicleTitle }: { lead: Lead; brief: Lead
           <p className="truncate text-caption text-text-3">{brief?.summary ?? lead.message ?? ""}</p>
         </div>
         <p className="min-w-0 truncate text-small text-text-2">{LEAD_TYPE_FR[lead.type]}{vehicleTitle ? ` · ${vehicleTitle}` : ""}</p>
-        <p className="text-caption text-text-3">{formatDateTime(lead.createdAt, "fr")}</p>
-        <div className="flex shrink-0 items-center gap-3">
-          <IntentBadge brief={brief} />
-          <span className={cn("rounded-pill border px-2 py-0.5 text-caption", lead.status === "new" ? "border-text text-text" : "border-line text-text-2")}>{LEAD_STATUS_FR[lead.status]}</span>
+        <div className="flex items-center justify-between gap-3 md:contents">
+          <p className="text-caption text-text-3">{formatDateTime(lead.createdAt, "fr")}</p>
+          <div className="flex shrink-0 items-center gap-3">
+            <IntentBadge brief={brief} />
+            <span className={cn("rounded-pill border px-2 py-0.5 text-caption", lead.status === "new" ? "border-text text-text" : "border-line text-text-2")}>{LEAD_STATUS_FR[lead.status]}</span>
+          </div>
         </div>
       </Link>
     </li>

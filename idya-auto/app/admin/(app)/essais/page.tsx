@@ -29,7 +29,7 @@ async function AdminBookingsContent({ searchParams }: { searchParams: Promise<{ 
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-h2">Essais routiers</h1>
-        <nav className="flex items-center gap-2 text-small"><Link href={`/admin/essais?week=${iso(prev)}`} className="rounded-pill border border-line px-3 py-1.5 text-text-2 hover:text-text">← Semaine précédente</Link><Link href="/admin/essais" className="rounded-pill border border-line px-3 py-1.5 text-text-2 hover:text-text">Cette semaine</Link><Link href={`/admin/essais?week=${iso(next)}`} className="rounded-pill border border-line px-3 py-1.5 text-text-2 hover:text-text">Semaine suivante →</Link></nav>
+        <nav aria-label="Semaine" className="flex items-center gap-2 text-small"><Link href={`/admin/essais?week=${iso(prev)}`} className="inline-flex h-10 items-center rounded-pill border border-line px-3 text-text-2 hover:text-text"><span aria-hidden>←</span><span className="ml-1 hidden sm:inline">Semaine précédente</span><span className="sr-only sm:hidden">Semaine précédente</span></Link><Link href="/admin/essais" className="inline-flex h-10 items-center rounded-pill border border-line px-3 text-text-2 hover:text-text">Cette semaine</Link><Link href={`/admin/essais?week=${iso(next)}`} className="inline-flex h-10 items-center rounded-pill border border-line px-3 text-text-2 hover:text-text"><span className="mr-1 hidden sm:inline">Semaine suivante</span><span className="sr-only sm:hidden">Semaine suivante</span><span aria-hidden>→</span></Link></nav>
       </div>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
         {days.map((d) => {

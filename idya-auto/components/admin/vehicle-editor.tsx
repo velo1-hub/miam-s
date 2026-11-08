@@ -121,16 +121,16 @@ export function VehicleEditor({ initial, settings, canDelete, demoMode, aiEnable
       )}
       <div role="tablist" aria-label="Sections" className="hide-scrollbar flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map(([k, label]) => (
-          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={cn("whitespace-nowrap border-b-2 px-3 py-2 text-small", tab === k ? "border-text text-text" : "border-transparent text-text-2 hover:text-text")}>{label}</button>
+          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={cn("shrink-0 whitespace-nowrap border-b-2 px-3 py-2.5 text-small", tab === k ? "border-text text-text" : "border-transparent text-text-2 hover:text-text")}>{label}</button>
         ))}
       </div>
 
       {tab === "infos" && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <label className={cn(lbl, "xl:col-span-2")}>NIV
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input value={v.vin ?? ""} onChange={(e) => set("vin", e.target.value.toUpperCase().slice(0, 17) || null)} maxLength={17} className={cn(field, "font-mono uppercase")} />
-              <Button type="button" variant="secondary" size="md" onClick={decodeVin}><Wand2 strokeWidth={1.5} aria-hidden />Décoder le NIV</Button>
+              <Button type="button" variant="secondary" size="md" onClick={decodeVin} className="shrink-0"><Wand2 strokeWidth={1.5} aria-hidden />Décoder le NIV</Button>
             </div>
           </label>
           <label className={lbl}>Numéro de stock<input value={v.stockNumber} onChange={(e) => set("stockNumber", e.target.value)} className={field} /></label>

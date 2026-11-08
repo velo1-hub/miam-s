@@ -35,7 +35,8 @@ in `.env.local`; `pnpm setup:demo` writes the default).
 | `pnpm e2e` | Playwright end-to-end + axe on every public page, both locales, 390 px and 1440 px. Needs a prior `pnpm build`. |
 | `pnpm eval` | AI assistant eval suite (50 cases, needs `ANTHROPIC_API_KEY`) |
 | `pnpm render:spin` | Render demo 36-frame spins from the parametric 3D scene (headless Chromium) |
-| `pnpm render:hero` | Render the placeholder hero loop frames, then `scripts/encode-hero.sh` encodes H.264 + AV1 |
+| `pnpm render:hero` | Render the 3D placeholder hero loop frames (superseded by the Higgsfield keyframes in `docs/brand/`) |
+| `scripts/animate-hero-still.sh` | Composite the « Signature rouge » light choreography over a still keyframe into a 7 s loop master; then `scripts/encode-hero.sh` encodes H.264 + AV1 |
 | `pnpm media:process` | Resize/encode rendered spins and galleries into `public/demo/vehicles` (AVIF + WebP, LQIP) |
 | `pnpm setup:demo` | Create demo admin credentials in `.env.local` |
 

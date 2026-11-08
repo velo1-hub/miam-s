@@ -355,3 +355,10 @@
 @media (prefers-reduced-motion: reduce) {
   [data-state] { animation-duration: 1ms !important; }
 }
+
+/* Admin on phones (brief §15): 16 px form controls stop iOS Safari from zooming into focused fields */
+@media (max-width: 767px) {
+  .admin-root :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+    font-size: 16px;
+  }
+}

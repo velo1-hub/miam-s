@@ -5,6 +5,22 @@ follow the build phases of `IDYA_AUTO_BRIEF.md` §24 until launch.
 
 ## [Unreleased]
 
+### Added
+- Hero « Signature rouge » (brief §11): the home loop is now built from Higgsfield studio keyframes
+  (`docs/brand/hero-keyframe-16x9.png`, `-9x16.png`, GPT Image 2.6) with the light choreography
+  composited by `scripts/animate-hero-still.sh` (red blade sweep, headlight flare, floor glow, exact
+  7.000 s seamless loop) and encoded by `scripts/encode-hero.sh`. Deliverables: 652 KB H.264,
+  164 KB AV1, 179 KB portrait, 12 KB / 6 KB AVIF posters.
+- Admin on phones: bottom tab bar (Accueil, Véhicules, Leads, Essais, Plus) with a « Plus » sheet for
+  Assistant, Paramètres, Journal and sign-out; sticky top bar with the demo flag and sign-out.
+
+### Changed
+- Admin vehicle list and journal render as cards below `md` instead of horizontally scrolling tables;
+  editor tabs no longer shrink into each other; the VIN decoder button stacks under its field on phones;
+  lead rows put date and badges on one line; booking week navigation uses arrow buttons on phones.
+- Admin form controls are 16 px on phones so iOS Safari no longer zooms into focused fields.
+- Demo admin login is a 5-digit passcode (`DEMO_ADMIN_PASSCODE`, default `00000`) instead of email/password.
+
 ## [0.1.0] — Phases 1–6, demo mode — 2026-11-07
 
 ### Added
