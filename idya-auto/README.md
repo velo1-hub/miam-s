@@ -101,6 +101,12 @@ Draft → Disponible → Réservé (pending) → Vendu. A sold vehicle stays rea
 « Vendu » and similar vehicles), then returns 404 with a « Ce véhicule a déjà trouvé preneur » page
 listing recent arrivals. The sitemap only lists visible vehicles.
 
+### « Vendre mon auto » offers
+`/fr/vendre-mon-auto` lets an owner offer their vehicle outright with an asking price. Each offer is a
+lead of type « Vente directe »: the list shows the vehicle and the asking price, the detail page shows
+flexibility (firm or negotiable), timeline, condition, accidents, loan balance and photo count.
+Photos are counted but not uploaded yet; the advisor asks for them by email (same as trade-ins).
+
 ### Leads
 Every form and booking creates a lead (admin → Leads) with consent text and timestamp, an AI brief
 (summary, intent, score, suggested reply) and a notification email. Bookings get an ICS file and a

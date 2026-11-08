@@ -22,7 +22,7 @@ export function useErrorText() {
   const t = useTranslations("forms.errors");
   return (key: string | undefined) => {
     if (!key) return undefined;
-    const known = ["required", "email", "phone", "emailOrPhone", "consent", "licence", "vin", "km", "min", "max", "rateLimited", "spam"] as const;
+    const known = ["required", "email", "phone", "emailOrPhone", "consent", "licence", "vin", "km", "min", "max", "price", "owner", "rateLimited", "spam"] as const;
     return (known as readonly string[]).includes(key) ? t(key as (typeof known)[number]) : t("required");
   };
 }

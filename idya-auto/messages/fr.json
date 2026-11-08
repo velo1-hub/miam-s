@@ -3,7 +3,7 @@
     "brand": "Idya Auto",
     "tagline": "Concessionnaire automobile",
     "taxesExtra": "Taxes en sus",
-    "allInPrice": "Prix tout inclus : comprend tous les frais, sauf la TPS et la TVQ.",
+    "allInPrice": "Prix tout inclus : comprend tous les frais, sauf la TPS et la TVQ.",
     "km": "km",
     "viewAll": "Tout l'inventaire",
     "seeVehicle": "Voir ce véhicule",
@@ -57,7 +57,8 @@
     "languageToggle": "Switch to English",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "favoritesCount": "{count, plural, =0 {Aucun favori} one {# favori} other {# favoris}}"
+    "favoritesCount": "{count, plural, =0 {Aucun favori} one {# favori} other {# favoris}}",
+    "sellCar": "Vendre mon auto"
   },
   "footer": {
     "dealership": "Idya Auto",
@@ -234,25 +235,26 @@
     "financingBody": "Estimez votre paiement en quelques secondes. Le taux affiché inclut tous les frais de crédit obligatoires. Aucune décision de crédit n'est prise en ligne.",
     "financingCta": "Faire une demande de financement",
     "tradeInEyebrow": "Échange",
-    "tradeInHeadline": "Combien vaut votre véhicule ?",
+    "tradeInHeadline": "Combien vaut votre véhicule ?",
     "tradeInBody": "Donnez-nous le NIV ou l'année, la marque et le modèle, le kilométrage et quelques photos. Un conseiller vous revient avec une estimation.",
     "tradeInCta": "Évaluer mon échange",
     "reviewsEyebrow": "Avis",
     "reviewsHeadline": "Ce que nos clients disent",
     "visitEyebrow": "Nous visiter",
     "visitHeadline": "Passez nous voir",
-    "finalHeadline": "Prêt pour un essai ?",
+    "finalHeadline": "Prêt pour un essai ?",
     "finalBody": "Choisissez votre véhicule, votre moment, et c'est réservé.",
     "finalCta": "Réserver un essai",
     "forYouEyebrow": "Choisis pour vous",
-    "forYouHeadline": "D'après les véhicules que vous avez consultés"
+    "forYouHeadline": "D'après les véhicules que vous avez consultés",
+    "sellLink": "Pas d'achat prévu ? Vendez-nous votre auto"
   },
   "inventory": {
     "title": "Inventaire",
-    "metaDescription": "Parcourez l'inventaire d'Idya Auto : VUS, berlines, camionnettes, neufs et d'occasion, photographiés à 360° et affichés à prix tout inclus.",
+    "metaDescription": "Parcourez l'inventaire d'Idya Auto : VUS, berlines, camionnettes, neufs et d'occasion, photographiés à 360° et affichés à prix tout inclus.",
     "count": "{count, plural, =0 {Aucun véhicule} one {# véhicule} other {# véhicules}}",
     "searchPlaceholder": "Marque, modèle, numéro de stock ou NIV",
-    "aiSearchPlaceholder": "Décrivez ce que vous cherchez, p. ex. « VUS hybride sous 40 000 $ »",
+    "aiSearchPlaceholder": "Décrivez ce que vous cherchez, p. ex. « VUS hybride sous 40 000 $ »",
     "filters": "Filtres",
     "filtersCount": "Filtres ({count})",
     "clearAll": "Tout effacer",
@@ -263,7 +265,7 @@
     "emptyBody": "Élargissez votre recherche ou laissez-nous vous avertir dès qu'un véhicule correspondant arrive.",
     "emptyReset": "Réinitialiser les filtres",
     "emptyAlert": "M'avertir quand un véhicule correspondant arrive",
-    "interpreted": "Votre recherche, telle que comprise :",
+    "interpreted": "Votre recherche, telle que comprise :",
     "interpretedHint": "Retirez un critère pour corriger l'interprétation.",
     "keywordFallback": "Recherche par mots-clés",
     "pagination": "Pagination",
@@ -359,19 +361,19 @@
       "manufacturer": "Garantie du fabricant",
       "legal": "Garantie légale (Québec)",
       "legalNote": "La catégorie est déterminée selon l'âge et le kilométrage du véhicule, conformément à la Loi sur la protection du consommateur. [CLIENT: à valider]",
-      "newVehicle": "Véhicule neuf : la garantie complète du fabricant s'applique."
+      "newVehicle": "Véhicule neuf : la garantie complète du fabricant s'applique."
     },
     "soldBanner": "Ce véhicule a été vendu.",
     "soldBody": "Voici des véhicules similaires encore disponibles.",
     "pendingBanner": "Ce véhicule est réservé. Contactez-nous pour en savoir plus.",
     "similarTitle": "Véhicules similaires",
-    "previousPrice": "Ancien prix : {price}",
+    "previousPrice": "Ancien prix : {price}",
     "notFoundTitle": "Ce véhicule a déjà trouvé preneur.",
     "notFoundBody": "Il n'est plus dans notre inventaire, mais d'autres arrivent chaque semaine.",
     "notFoundSearch": "Chercher dans l'inventaire",
     "recentArrivals": "Arrivages récents",
     "shareTitle": "{title} — {price} | Idya Auto",
-    "demoNotice": "Images de démonstration : rendus 3D en attendant les photos réelles du véhicule."
+    "demoNotice": "Images de démonstration : rendus 3D en attendant les photos réelles du véhicule."
   },
   "calculator": {
     "title": "Calculateur de financement",
@@ -386,7 +388,7 @@
     "payment": "Paiement",
     "paymentCount": "{count} paiements",
     "noDown": "Aucune mise de fonds requise",
-    "downAmount": "Mise de fonds : {amount}",
+    "downAmount": "Mise de fonds : {amount}",
     "cashPrice": "Prix au comptant",
     "taxes": "Taxes (TPS + TVQ)",
     "amountFinanced": "Montant financé",
@@ -433,7 +435,7 @@
     "submit": "Confirmer la réservation",
     "successTitle": "C'est réservé.",
     "successBody": "Nous vous attendons le {date} à {time}. Un courriel de confirmation est en route.",
-    "successNext": "Prochaines étapes : apportez votre permis de conduire ; un conseiller vous contactera pour confirmer. Vous pouvez modifier ou annuler en nous appelant.",
+    "successNext": "Prochaines étapes : apportez votre permis de conduire ; un conseiller vous contactera pour confirmer. Vous pouvez modifier ou annuler en nous appelant.",
     "addToCalendar": "Ajouter à mon calendrier",
     "errorSlot": "Cette plage vient d'être prise. Choisissez-en une autre.",
     "open": "Ouvrir la réservation d'essai"
@@ -467,7 +469,9 @@
       "min": "Valeur trop petite.",
       "max": "Valeur trop grande.",
       "rateLimited": "Trop de demandes. Réessayez dans une heure ou appelez-nous.",
-      "spam": "La vérification anti-pourriel a échoué. Réessayez."
+      "spam": "La vérification anti-pourriel a échoué. Réessayez.",
+      "price": "Entrez un prix entre 500 $ et 500 000 $.",
+      "owner": "Seul le propriétaire inscrit peut vendre le véhicule."
     },
     "question": {
       "title": "Poser une question",
@@ -522,8 +526,8 @@
         "Très bon",
         "Impeccable"
       ],
-      "accidents": "Accident(s) déclaré(s) ?",
-      "balance": "Solde de financement restant ?",
+      "accidents": "Accident(s) déclaré(s) ?",
+      "balance": "Solde de financement restant ?",
       "photos": "Photos (jusqu'à 8)",
       "photosHint": "Avant, arrière, côtés, tableau de bord, odomètre.",
       "addPhotos": "Ajouter des photos",
@@ -547,6 +551,28 @@
       "consent": "Je consens à recevoir des alertes par courriel pour cette recherche. Je peux me désabonner à tout moment.",
       "successTitle": "Alerte créée.",
       "successBody": "Nous vous écrirons dès qu'un véhicule correspond."
+    },
+    "sellCar": {
+      "title": "Proposer mon véhicule",
+      "intro": "Plus votre description est complète, plus notre réponse sera précise.",
+      "vehicleSection": "Votre véhicule",
+      "priceSection": "Votre prix",
+      "contactSection": "Vos coordonnées",
+      "color": "Couleur extérieure",
+      "askingPrice": "Prix demandé ($)",
+      "askingPriceHint": "Le montant que vous souhaitez recevoir pour votre véhicule.",
+      "flexibility": "Votre prix est-il négociable ?",
+      "flexibilityNegotiable": "Ouvert à la discussion",
+      "flexibilityFirm": "Prix ferme",
+      "timeline": "Quand souhaitez-vous vendre ?",
+      "timelineAsap": "Dès que possible",
+      "timelineMonth": "D'ici un mois",
+      "timelineExploring": "Je m'informe",
+      "comments": "Commentaires (entretien, options, pneus d'hiver…)",
+      "owner": "Je suis le propriétaire inscrit de ce véhicule.",
+      "consent": "Je consens à ce qu'Idya Auto utilise ces renseignements et photos pour étudier mon offre de vente et me contacter.",
+      "successTitle": "Offre reçue.",
+      "successBody": "Un conseiller étudie votre véhicule et votre prix demandé, puis vous contacte. [CLIENT: délai de réponse]"
     }
   },
   "financingPage": {
@@ -564,34 +590,36 @@
     "faqTitle": "Questions fréquentes",
     "faq": [
       {
-        "q": "Le taux affiché est-il garanti ?",
+        "q": "Le taux affiché est-il garanti ?",
         "a": "Non. Le calculateur fournit une estimation à partir d'un taux par défaut. Le taux final dépend de votre dossier et de l'approbation de l'institution financière."
       },
       {
-        "q": "Quels documents sont nécessaires ?",
+        "q": "Quels documents sont nécessaires ?",
         "a": "[CLIENT: documents requis pour une demande de financement]"
       },
       {
-        "q": "Puis-je inclure mon véhicule d'échange ?",
+        "q": "Puis-je inclure mon véhicule d'échange ?",
         "a": "Oui. La valeur d'échange réduit le montant financé et le montant taxable."
       }
     ]
   },
   "tradeInPage": {
     "title": "Échange",
-    "metaDescription": "Faites évaluer votre véhicule par Idya Auto : NIV ou description, kilométrage et photos. Un conseiller vous revient avec une estimation.",
-    "headline": "Combien vaut votre véhicule ?",
+    "metaDescription": "Faites évaluer votre véhicule par Idya Auto : NIV ou description, kilométrage et photos. Un conseiller vous revient avec une estimation.",
+    "headline": "Combien vaut votre véhicule ?",
     "intro": "Une estimation honnête, sans obligation. La valeur d'échange réduit le prix taxable de votre prochain véhicule.",
     "stepsTitle": "En trois étapes",
     "steps": [
       "Décrivez votre véhicule et ajoutez des photos.",
       "Un conseiller analyse le marché et l'état du véhicule.",
       "Vous recevez une estimation, puis une offre ferme après inspection."
-    ]
+    ],
+    "sellNote": "Vous ne prévoyez pas acheter de véhicule ? Vous pouvez aussi nous vendre le vôtre directement, au prix que vous demandez.",
+    "sellLink": "Vendre mon auto"
   },
   "aboutPage": {
     "title": "À propos",
-    "metaDescription": "Idya Auto, concessionnaire automobile à [CLIENT: ville], Québec : inventaire inspecté, prix tout inclus et essais routiers réservés en ligne.",
+    "metaDescription": "Idya Auto, concessionnaire automobile à [CLIENT: ville], Québec : inventaire inspecté, prix tout inclus et essais routiers réservés en ligne.",
     "headline": "Une façon plus claire d'acheter une voiture",
     "intro": "[CLIENT: histoire et mission de l'entreprise]",
     "valuesTitle": "Nos engagements",
@@ -614,7 +642,7 @@
   },
   "contactPage": {
     "title": "Contact",
-    "metaDescription": "Contactez Idya Auto : adresse, téléphone, heures d'ouverture et formulaire. Nous répondons pendant les heures d'ouverture.",
+    "metaDescription": "Contactez Idya Auto : adresse, téléphone, heures d'ouverture et formulaire. Nous répondons pendant les heures d'ouverture.",
     "headline": "Parlons de votre prochain véhicule",
     "intro": "Appelez-nous, passez nous voir ou écrivez-nous. Un conseiller vous répond pendant les heures d'ouverture.",
     "address": "Adresse",
@@ -646,7 +674,7 @@
   "legal": {
     "privacyTitle": "Politique de confidentialité",
     "termsTitle": "Conditions d'utilisation",
-    "updated": "Dernière mise à jour : {date}",
+    "updated": "Dernière mise à jour : {date}",
     "validate": "[CLIENT: texte à valider par un conseiller juridique]"
   },
   "consent": {
@@ -658,28 +686,28 @@
   "assistant": {
     "name": "Assistant Idya",
     "label": "Assistant Idya · IA",
-    "launcher": "Une question ?",
+    "launcher": "Une question ?",
     "openLabel": "Ouvrir l'assistant",
     "closeLabel": "Fermer l'assistant",
     "human": "Parler à un humain",
     "disclosure": "Je suis un assistant IA. Les conversations sont enregistrées pour améliorer le service et conservées {days} jours.",
     "privacy": "Politique de confidentialité",
-    "greeting": "Bonjour ! Je suis l'Assistant Idya. Je connais l'inventaire, les prix tout inclus et les disponibilités d'essai routier. Comment puis-je vous aider ?",
-    "greetingVehicle": "Bonjour ! Je peux répondre à vos questions sur la {title}, estimer un paiement ou réserver un essai routier.",
+    "greeting": "Bonjour ! Je suis l'Assistant Idya. Je connais l'inventaire, les prix tout inclus et les disponibilités d'essai routier. Comment puis-je vous aider ?",
+    "greetingVehicle": "Bonjour ! Je peux répondre à vos questions sur la {title}, estimer un paiement ou réserver un essai routier.",
     "suggestionsHome": [
-      "Quels VUS avez-vous sous 40 000 $ ?",
-      "Quelles sont vos heures d'ouverture ?",
-      "Comment réserver un essai routier ?"
+      "Quels VUS avez-vous sous 40 000 $ ?",
+      "Quelles sont vos heures d'ouverture ?",
+      "Comment réserver un essai routier ?"
     ],
     "suggestionsVehicle": [
-      "Est-il encore disponible ?",
+      "Est-il encore disponible ?",
       "Estimer un paiement",
       "Réserver un essai"
     ],
     "suggestionsInventory": [
-      "Lequel a le moins de kilométrage ?",
+      "Lequel a le moins de kilométrage ?",
       "Comparer deux véhicules",
-      "Avez-vous des hybrides ?"
+      "Avez-vous des hybrides ?"
     ],
     "placeholder": "Écrivez votre question…",
     "send": "Envoyer",
@@ -688,15 +716,15 @@
     "error": "Désolé, je n'arrive pas à répondre pour le moment. Appelez-nous au {phone} ou réessayez dans un instant.",
     "handoffTitle": "Un conseiller prendra le relais.",
     "handoffBody": "Laissez vos coordonnées et nous vous rappelons pendant les heures d'ouverture.",
-    "handoffAfterHours": "Nous sommes fermés pour le moment ; nous vous répondrons dès {time}.",
-    "nudge": "Voulez-vous que je compare ces véhicules ?",
+    "handoffAfterHours": "Nous sommes fermés pour le moment ; nous vous répondrons dès {time}.",
+    "nudge": "Voulez-vous que je compare ces véhicules ?",
     "nudgeDismiss": "Non merci",
     "budgetTitle": "Laissez-nous un message",
     "budgetBody": "L'assistant fait une pause. Écrivez-nous et un conseiller vous répondra.",
     "limitReached": "Vous avez atteint la limite de messages pour cette session. Appelez-nous ou laissez vos coordonnées.",
     "confirmBooking": "Confirmer",
-    "bookingPrepared": "Votre essai est prêt à être confirmé :",
-    "leadPrepared": "Votre demande est prête à être envoyée :",
+    "bookingPrepared": "Votre essai est prêt à être confirmé :",
+    "leadPrepared": "Votre demande est prête à être envoyée :",
     "newChat": "Nouvelle conversation",
     "disabled": "L'assistant est désactivé pour le moment."
   },
@@ -714,5 +742,26 @@
   "dates": {
     "today": "Aujourd'hui",
     "tomorrow": "Demain"
+  },
+  "sellCarPage": {
+    "title": "Vendre mon auto",
+    "metaDescription": "Vendez votre véhicule directement à Idya Auto : décrivez-le, ajoutez des photos et indiquez votre prix demandé. Un conseiller vous revient avec une réponse.",
+    "headline": "Vendez-nous votre auto, à votre prix.",
+    "intro": "Vous n'achetez rien chez nous ? Pas de problème : nous achetons aussi des véhicules. Décrivez le vôtre, dites-nous combien vous en demandez, et un conseiller vous répond.",
+    "stepsTitle": "Comment ça fonctionne",
+    "steps": [
+      "Décrivez votre véhicule, ajoutez des photos et indiquez votre prix demandé.",
+      "Un conseiller compare votre prix au marché et vous répond : il accepte, ou il vous fait une contre-offre.",
+      "Si l'entente vous convient, on fixe un rendez-vous pour l'inspection et la signature."
+    ],
+    "bringTitle": "À prévoir le jour de la vente",
+    "bring": [
+      "Le certificat d'immatriculation du véhicule",
+      "Une pièce d'identité avec photo",
+      "Toutes les clés et télécommandes",
+      "S'il reste un solde de financement : le nom de votre institution financière"
+    ],
+    "tradeInNote": "Vous achetez aussi un véhicule chez nous ? Faites plutôt évaluer votre échange : sa valeur réduit le prix taxable de votre prochain véhicule.",
+    "tradeInLink": "Évaluer mon échange"
   }
 }

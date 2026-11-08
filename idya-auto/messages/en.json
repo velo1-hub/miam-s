@@ -57,7 +57,8 @@
     "languageToggle": "Passer au français",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "favoritesCount": "{count, plural, =0 {No favorites} one {# favorite} other {# favorites}}"
+    "favoritesCount": "{count, plural, =0 {No favorites} one {# favorite} other {# favorites}}",
+    "sellCar": "Sell my car"
   },
   "footer": {
     "dealership": "Idya Auto",
@@ -245,7 +246,8 @@
     "finalBody": "Pick your vehicle, pick your time, and it's booked.",
     "finalCta": "Book a test drive",
     "forYouEyebrow": "Picked for you",
-    "forYouHeadline": "Based on the vehicles you viewed"
+    "forYouHeadline": "Based on the vehicles you viewed",
+    "sellLink": "Not buying? Sell us your car"
   },
   "inventory": {
     "title": "Inventory",
@@ -467,7 +469,9 @@
       "min": "Value too small.",
       "max": "Value too large.",
       "rateLimited": "Too many requests. Try again in an hour or call us.",
-      "spam": "The anti-spam check failed. Please try again."
+      "spam": "The anti-spam check failed. Please try again.",
+      "price": "Enter a price between $500 and $500,000.",
+      "owner": "Only the registered owner can sell the vehicle."
     },
     "question": {
       "title": "Ask a question",
@@ -547,6 +551,28 @@
       "consent": "I consent to receiving email alerts for this search. I can unsubscribe at any time.",
       "successTitle": "Alert created.",
       "successBody": "We'll email you as soon as a vehicle matches."
+    },
+    "sellCar": {
+      "title": "Offer my vehicle",
+      "intro": "The more complete your description, the more precise our answer.",
+      "vehicleSection": "Your vehicle",
+      "priceSection": "Your price",
+      "contactSection": "Your details",
+      "color": "Exterior colour",
+      "askingPrice": "Asking price ($)",
+      "askingPriceHint": "The amount you want to receive for your vehicle.",
+      "flexibility": "Is your price negotiable?",
+      "flexibilityNegotiable": "Open to discussion",
+      "flexibilityFirm": "Firm price",
+      "timeline": "When do you want to sell?",
+      "timelineAsap": "As soon as possible",
+      "timelineMonth": "Within a month",
+      "timelineExploring": "Just exploring",
+      "comments": "Comments (maintenance, options, winter tires…)",
+      "owner": "I am the registered owner of this vehicle.",
+      "consent": "I consent to Idya Auto using this information and these photos to review my offer to sell and to contact me.",
+      "successTitle": "Offer received.",
+      "successBody": "An advisor reviews your vehicle and asking price, then contacts you. [CLIENT: response time]"
     }
   },
   "financingPage": {
@@ -587,7 +613,9 @@
       "Describe your vehicle and add photos.",
       "An advisor reviews the market and the vehicle's condition.",
       "You receive an estimate, then a firm offer after inspection."
-    ]
+    ],
+    "sellNote": "Not planning to buy a vehicle? You can also sell us yours outright, at the price you ask.",
+    "sellLink": "Sell my car"
   },
   "aboutPage": {
     "title": "About",
@@ -714,5 +742,26 @@
   "dates": {
     "today": "Today",
     "tomorrow": "Tomorrow"
+  },
+  "sellCarPage": {
+    "title": "Sell my car",
+    "metaDescription": "Sell your vehicle directly to Idya Auto: describe it, add photos and state your asking price. An advisor gets back to you with an answer.",
+    "headline": "Sell us your car, at your price.",
+    "intro": "Not buying from us? No problem: we buy vehicles too. Describe yours, tell us what you're asking, and an advisor will answer.",
+    "stepsTitle": "How it works",
+    "steps": [
+      "Describe your vehicle, add photos and state your asking price.",
+      "An advisor compares your price with the market and answers: they accept, or make you a counter-offer.",
+      "If the deal suits you, we book a time for the inspection and the paperwork."
+    ],
+    "bringTitle": "What to bring on sale day",
+    "bring": [
+      "The vehicle registration certificate",
+      "Photo ID",
+      "All keys and remotes",
+      "If there is a loan balance: the name of your lender"
+    ],
+    "tradeInNote": "Buying a vehicle from us too? Get a trade-in appraisal instead: its value lowers the taxable price of your next vehicle.",
+    "tradeInLink": "Appraise my trade-in"
   }
 }

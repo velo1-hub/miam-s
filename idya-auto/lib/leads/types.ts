@@ -1,4 +1,4 @@
-export const LEAD_TYPES = ["test_drive", "question", "financing", "trade_in", "contact", "inventory_alert"] as const;
+export const LEAD_TYPES = ["test_drive", "question", "financing", "trade_in", "sell_car", "contact", "inventory_alert"] as const;
 export type LeadType = (typeof LEAD_TYPES)[number];
 export const LEAD_STATUSES = ["new", "contacted", "qualified", "won", "lost", "spam"] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];

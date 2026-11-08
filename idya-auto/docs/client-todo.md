@@ -94,6 +94,15 @@ Everything below is hidden until confirmed in writing.
 | ☐ | SMS provider (optional, e.g. Twilio) | Booking notifications to sales |
 | ☐ | Higgsfield credits | Hero video and demo imagery (pitch) |
 
+## 7b. « Vendre mon auto » (direct purchase from private owners)
+
+| | Item | Where |
+|---|---|---|
+| ☐ | Confirm Idya Auto buys vehicles outright from private owners, and any limits (age, mileage, makes) | `/fr/vendre-mon-auto`, assistant |
+| ☐ | `[CLIENT: délai de réponse]` for an offer | Success message of the sale form |
+| ☐ | Validate the « À prévoir le jour de la vente » list (registration, photo ID, keys, lender for a loan balance) and the payment method to mention, if any | Sale page |
+| ☐ | Whether to store photos for trade-ins and sales (needs the Supabase `originals` bucket); today they are counted, not uploaded | Both forms |
+
 ## 8. Demo mode — to clear before launch
 
 | | Item |

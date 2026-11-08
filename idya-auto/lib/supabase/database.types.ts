@@ -14,7 +14,7 @@ export type TransmissionDb = "automatic" | "manual" | "cvt" | "dct";
 export type FuelTypeDb = "gasoline" | "hybrid" | "plug_in_hybrid" | "electric" | "diesel";
 export type WarrantyClassDb = "A" | "B" | "C" | "D";
 export type MediaKindDb = "spin" | "interior" | "gallery" | "panorama";
-export type LeadTypeDb = "test_drive" | "question" | "financing" | "trade_in" | "contact" | "inventory_alert";
+export type LeadTypeDb = "test_drive" | "question" | "financing" | "trade_in" | "sell_car" | "contact" | "inventory_alert";
 export type LeadStatusDb = "new" | "contacted" | "qualified" | "won" | "lost" | "spam";
 export type StaffRoleDb = "owner" | "manager" | "sales";
 

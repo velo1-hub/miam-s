@@ -19,6 +19,7 @@ export const routing = defineRouting({
     "/favorites": { fr: "/favoris", en: "/favorites" },
     "/financing": { fr: "/financement", en: "/financing" },
     "/trade-in": { fr: "/echange", en: "/trade-in" },
+    "/sell-my-car": { fr: "/vendre-mon-auto", en: "/sell-my-car" },
     "/about": { fr: "/a-propos", en: "/about" },
     "/contact": "/contact",
     "/privacy": { fr: "/confidentialite", en: "/privacy" },

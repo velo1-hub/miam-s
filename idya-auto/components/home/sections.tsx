@@ -142,12 +142,15 @@ export async function TradeInTeaser() {
           <h2 className="text-h2">{t("tradeInHeadline")}</h2>
           <p className="mt-4 text-body-lg text-text-2">{t("tradeInBody")}</p>
         </div>
-        <Button asChild variant="light" size="lg" className="shrink-0">
-          <Link href="/trade-in">
-            {t("tradeInCta")}
-            <ArrowRight strokeWidth={1.5} aria-hidden />
-          </Link>
-        </Button>
+        <div className="flex shrink-0 flex-col items-start gap-4 md:items-end">
+          <Button asChild variant="light" size="lg">
+            <Link href="/trade-in">
+              {t("tradeInCta")}
+              <ArrowRight strokeWidth={1.5} aria-hidden />
+            </Link>
+          </Button>
+          <ArrowLink href="/sell-my-car" className="text-small text-text-2 hover:text-text">{t("sellLink")}</ArrowLink>
+        </div>
       </Reveal>
     </Section>
   );

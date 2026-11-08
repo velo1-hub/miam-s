@@ -57,9 +57,17 @@ export function offlineAssistantResponse(args: Args): Response {
         const availability = /\b(disponible|encore|toujours|available|still)/.test(q) && args.ctx.vehicle;
         const booking = /\b(essai|reserv|test drive|book)/.test(q);
         const compare = /\b(compar)/.test(q);
+        const sell = /\b(vendre (mon|ma|notre)|vends (mon|ma)|racheter (mon|ma)|achetez.{0,20}(auto|voiture|vehicule|char)|sell (my|our)|buy my (car|vehicle|truck))/.test(q);
         if (human) {
           const r = (await callTool("request_human", { reason: args.lastText })) as { phone: string; openNow: boolean } | null;
           say(fr ? `C'est noté : un conseiller prendra le relais. Vous pouvez aussi nous appeler au ${r?.phone ?? ""}.` : `Noted: an advisor will take over. You can also call us at ${r?.phone ?? ""}.`);
+        } else if (sell) {
+          const page = fr ? "/fr/vendre-mon-auto" : "/en/sell-my-car";
+          say(
+            fr
+              ? `Oui, nous achetons aussi des véhicules. Sur la page « Vendre mon auto » (${page}), décrivez votre véhicule, ajoutez des photos et indiquez votre prix demandé : un conseiller vous répond. Si vous achetez aussi chez nous, l'échange est souvent plus avantageux, car il réduit le prix taxable.`
+              : `Yes, we buy vehicles too. On the "Sell my car" page (${page}), describe your vehicle, add photos and state your asking price: an advisor will get back to you. If you're also buying from us, a trade-in is often better because it lowers the taxable price.`,
+          );
         } else if (hours) {
           await callTool("get_dealer_info", { topic: "all" });
           say(fr ? "Voici nos coordonnées et nos heures. Voulez-vous réserver un essai routier ?" : "Here are our details and hours. Would you like to book a test drive?");

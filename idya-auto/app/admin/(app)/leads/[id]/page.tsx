@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LeadActions } from "@/components/admin/lead-actions";
-import { IntentBadge, LEAD_STATUS_FR, LEAD_TYPE_FR } from "@/components/admin/lead-row";
+import { IntentBadge, LEAD_STATUS_FR, LEAD_TYPE_FR, sellOffer } from "@/components/admin/lead-row";
 import { getChatStore } from "@/lib/ai/chat-store";
 import { formatDateTime } from "@/lib/format/date";
 import { formatPhone } from "@/lib/format/phone";
@@ -24,6 +24,7 @@ async function AdminLeadPageContent({ params }: { params: Promise<{ id: string }
   const transcript = lead.chatSessionId ? await chat.transcript(lead.chatSessionId) : [];
   const name = [lead.firstName, lead.lastName].filter(Boolean).join(" ") || lead.email || "—";
   const payload = Object.entries(lead.payload).filter(([k]) => !["kind", "source", "sessionId"].includes(k));
+  const offer = sellOffer(lead);
   return (
     <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
       <div className="flex flex-col gap-6">
@@ -32,6 +33,18 @@ async function AdminLeadPageContent({ params }: { params: Promise<{ id: string }
           <h1 className="text-h2">{name}</h1>
           <p className="text-small text-text-2">{formatDateTime(lead.createdAt, "fr")} · {LEAD_STATUS_FR[lead.status]} · {lead.locale.toUpperCase()}{lead.preferredContact ? ` · contact ${lead.preferredContact}` : ""}</p>
         </div>
+        {offer && (
+          <div className="rounded-card-sm border border-line-strong bg-surface p-5">
+            <p className="text-caption text-text-3">Véhicule proposé à l’achat</p>
+            <p className="mt-1 text-h3">{offer.title}</p>
+            <p className="text-small text-text-2">{[offer.km, offer.flexibility && `prix ${offer.flexibility}`, offer.timeline && `vente ${offer.timeline}`].filter(Boolean).join(" · ")}</p>
+            {offer.price && (
+              <p className="mt-3 text-small text-text-3">
+                Prix demandé <span className="tabular ml-2 text-[28px] font-semibold leading-none text-text">{offer.price}</span>
+              </p>
+            )}
+          </div>
+        )}
         <dl className="grid gap-x-6 gap-y-1 text-small sm:grid-cols-2">
           {lead.email && <><dt className="text-text-3">Courriel</dt><dd><a href={`mailto:${lead.email}`} className="text-text hover:underline">{lead.email}</a></dd></>}
           {lead.phone && <><dt className="text-text-3">Téléphone</dt><dd><a href={`tel:${lead.phone}`} className="text-text hover:underline">{formatPhone(lead.phone)}</a></dd></>}

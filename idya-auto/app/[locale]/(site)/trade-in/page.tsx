@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { TradeInForm } from "@/components/forms/forms";
+import { ArrowLink } from "@/components/ui/arrow-link";
 import { Reveal } from "@/components/ui/reveal";
 import { resolveLocale } from "@/i18n/server";
 import { getSettings } from "@/lib/settings";
@@ -34,6 +35,10 @@ export default async function TradeInPage({ params }: { params: Promise<{ locale
               </li>
             ))}
           </ol>
+          <div className="mt-12 rounded-card-sm border border-line p-5">
+            <p className="text-small text-text-2">{t("sellNote")}</p>
+            <ArrowLink href="/sell-my-car" className="mt-3 text-small">{t("sellLink")}</ArrowLink>
+          </div>
         </div>
         <Reveal className="glass-lite rounded-card p-6 md:p-10">
           <h2 className="mb-6 text-h3">{tf("title")}</h2>

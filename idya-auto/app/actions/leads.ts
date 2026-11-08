@@ -12,7 +12,7 @@ import { env } from "@/lib/env";
 import { formatDateLong, formatTime } from "@/lib/format/date";
 import { formatPhone, toE164 } from "@/lib/format/phone";
 import { getLeadRepository } from "@/lib/leads";
-import { alertSchema, bookingSchema, contactSchema, financingSchema, humanSchema, questionSchema, tradeInSchema } from "@/lib/leads/schemas";
+import { alertSchema, bookingSchema, contactSchema, financingSchema, humanSchema, questionSchema, sellCarSchema, tradeInSchema } from "@/lib/leads/schemas";
 import type { LeadType, NewLead } from "@/lib/leads/types";
 import { rateLimit } from "@/lib/security/rate-limit";
 import { verifyTurnstile } from "@/lib/security/turnstile";
@@ -24,10 +24,10 @@ export type ActionResult =
   | { ok: true; id: string; bookingId?: string; startsAt?: string }
   | { ok: false; error: "validation" | "spam" | "rateLimited" | "slot" | "generic"; fieldErrors?: Record<string, string> };
 
-const SCHEMAS = { question: questionSchema, contact: contactSchema, financing: financingSchema, trade_in: tradeInSchema, inventory_alert: alertSchema, human: humanSchema } as const;
+const SCHEMAS = { question: questionSchema, contact: contactSchema, financing: financingSchema, trade_in: tradeInSchema, sell_car: sellCarSchema, inventory_alert: alertSchema, human: humanSchema } as const;
 export type FormKind = keyof typeof SCHEMAS;
-const LEAD_TYPE: Record<FormKind, LeadType> = { question: "question", contact: "contact", financing: "financing", trade_in: "trade_in", inventory_alert: "inventory_alert", human: "question" };
-const TYPE_LABEL: Record<LeadType, string> = { test_drive: "Essai routier", question: "Question", financing: "Financement", trade_in: "Échange", contact: "Contact", inventory_alert: "Alerte inventaire" };
+const LEAD_TYPE: Record<FormKind, LeadType> = { question: "question", contact: "contact", financing: "financing", trade_in: "trade_in", sell_car: "sell_car", inventory_alert: "inventory_alert", human: "question" };
+const TYPE_LABEL: Record<LeadType, string> = { test_drive: "Essai routier", question: "Question", financing: "Financement", trade_in: "Échange", sell_car: "Vente directe", contact: "Contact", inventory_alert: "Alerte inventaire" };
 
 async function clientIp(): Promise<string> {
   const h = await headers();
@@ -79,7 +79,7 @@ export async function submitLead(kind: FormKind, formData: FormData): Promise<Ac
   const blocked = await guard(formData);
   if (blocked) return blocked;
   const raw = obj(formData);
-  const data = { ...raw, consent: bool(raw, "consent"), licence: bool(raw, "licence") };
+  const data = { ...raw, consent: bool(raw, "consent"), licence: bool(raw, "licence"), owner: bool(raw, "owner") };
   const parsed = SCHEMAS[kind].safeParse(data);
   if (!parsed.success) return { ok: false, error: "validation", fieldErrors: fieldErrors(parsed.error) };
   const d = parsed.data as Record<string, unknown>;

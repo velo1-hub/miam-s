@@ -49,6 +49,7 @@ export function Footer({ settings, demoMode }: { settings: Settings; demoMode: b
               <li><Link href="/inventory" className="text-text-2 hover:text-text">{tn("inventory")}</Link></li>
               <li><Link href="/financing" className="text-text-2 hover:text-text">{tn("financing")}</Link></li>
               <li><Link href="/trade-in" className="text-text-2 hover:text-text">{tn("tradeIn")}</Link></li>
+              <li><Link href="/sell-my-car" className="text-text-2 hover:text-text">{tn("sellCar")}</Link></li>
               <li><Link href="/about" className="text-text-2 hover:text-text">{tn("about")}</Link></li>
               <li><Link href="/contact" className="text-text-2 hover:text-text">{tn("contact")}</Link></li>
               <li><Link href="/favorites" className="text-text-2 hover:text-text">{tn("favorites")}</Link></li>

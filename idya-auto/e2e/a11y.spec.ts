@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const PAGES = ["/fr", "/en", "/fr/inventaire", "/en/inventory", "/fr/inventaire/2023-toyota-rav4-xle-ti-a2301", "/en/inventory/2023-toyota-rav4-xle-ti-a2301", "/fr/financement", "/en/financing", "/fr/echange", "/en/trade-in", "/fr/a-propos", "/fr/contact", "/en/contact", "/fr/confidentialite", "/en/terms", "/fr/favoris", "/fr/comparer"];
+const PAGES = ["/fr", "/en", "/fr/inventaire", "/en/inventory", "/fr/inventaire/2023-toyota-rav4-xle-ti-a2301", "/en/inventory/2023-toyota-rav4-xle-ti-a2301", "/fr/financement", "/en/financing", "/fr/echange", "/en/trade-in", "/fr/vendre-mon-auto", "/en/sell-my-car", "/fr/a-propos", "/fr/contact", "/en/contact", "/fr/confidentialite", "/en/terms", "/fr/favoris", "/fr/comparer"];
 
 /** axe on every public page in both locales — brief §23. */
 for (const path of PAGES) {

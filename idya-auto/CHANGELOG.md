@@ -13,6 +13,12 @@ follow the build phases of `IDYA_AUTO_BRIEF.md` §24 until launch.
   164 KB AV1, 179 KB portrait, 12 KB / 6 KB AVIF posters.
 - Admin on phones: bottom tab bar (Accueil, Véhicules, Leads, Essais, Plus) with a « Plus » sheet for
   Assistant, Paramètres, Journal and sign-out; sticky top bar with the demo flag and sign-out.
+- « Vendre mon auto » (`/fr/vendre-mon-auto`, `/en/sell-my-car`): a private owner offers their
+  vehicle to the dealership outright with their asking price, price flexibility, timeline, condition,
+  photos and a registered-owner statement. New lead type `sell_car` (« Vente directe ») with the
+  offered vehicle and asking price shown in the admin lead list and detail, AI triage, notification
+  email, Supabase enum migration, assistant routing, privacy-policy wording, links from the nav,
+  footer, home trade-in teaser and trade-in page. Unit, end-to-end and axe tests.
 
 ### Changed
 - Admin vehicle list and journal render as cards below `md` instead of horizontally scrolling tables;
@@ -20,6 +26,8 @@ follow the build phases of `IDYA_AUTO_BRIEF.md` §24 until launch.
   lead rows put date and badges on one line; booking week navigation uses arrow buttons on phones.
 - Admin form controls are 16 px on phones so iOS Safari no longer zooms into focused fields.
 - Demo admin login is a 5-digit passcode (`DEMO_ADMIN_PASSCODE`, default `00000`) instead of email/password.
+- Inline nav links now start at 1280 px (six links); below that they are in the menu sheet.
+- Demo state is written to `/tmp` on serverless hosts (Vercel's filesystem is read-only).
 
 ## [0.1.0] — Phases 1–6, demo mode — 2026-11-07
 

@@ -86,6 +86,42 @@ export const tradeInSchema = z
   })
   .refine((d) => Boolean(d.vin) || (d.year && d.make && d.model), { message: "required", path: ["make"] });
 
+/**
+ * « Vendre mon auto » — a private owner offers their vehicle to the dealership outright, with the
+ * price they are asking. Unlike a trade-in, no purchase is attached, so year/make/model are required
+ * and the asking price is the core of the request.
+ */
+export const sellCarSchema = z.object({
+  vin: vinSchema.optional().or(z.literal("")),
+  year: z.coerce.number().int("min").min(1980, "min").max(2030, "max"),
+  make: required(60),
+  model: required(60),
+  trim: z.string().trim().max(60).optional().default(""),
+  color: z.string().trim().max(40).optional().default(""),
+  km: z.coerce.number().int("km").min(0, "km").max(1_000_000, "km"),
+  condition: z.coerce.number().int().min(1).max(5),
+  accidents: z.enum(["yes", "no"]),
+  balance: z.enum(["yes", "no"]),
+  // Spaces, "$" and thousands separators are tolerated (« 24 500 $ »); anything else gets the friendly message.
+  askingPrice: z.preprocess(
+    (v) => (typeof v === "string" ? v.replace(/[\s\u00a0\u202f$,]/g, "") : v),
+    z.coerce.number({ message: "price" }).int("price").min(500, "price").max(500_000, "price"),
+  ),
+  flexibility: z.enum(["firm", "negotiable"]),
+  timeline: z.enum(["asap", "month", "exploring"]),
+  message: z.string().trim().max(2000).optional().default(""),
+  owner: z.literal(true, { message: "owner" }),
+  firstName: required(80),
+  lastName: required(80),
+  email,
+  phone,
+  photoCount: z.coerce.number().int().min(0).max(8).default(0),
+  consent,
+  locale: localeSchema,
+  website: honeypot,
+  turnstileToken: turnstile,
+});
+
 export const alertSchema = z.object({
   email,
   filters: z.string().max(4000).default("{}"),
@@ -127,6 +163,7 @@ export type QuestionInput = z.input<typeof questionSchema>;
 export type ContactInput = z.input<typeof contactSchema>;
 export type FinancingInput = z.input<typeof financingSchema>;
 export type TradeInInput = z.input<typeof tradeInSchema>;
+export type SellCarInput = z.input<typeof sellCarSchema>;
 export type AlertInput = z.input<typeof alertSchema>;
 export type HumanInput = z.input<typeof humanSchema>;
 export type BookingInput = z.input<typeof bookingSchema>;

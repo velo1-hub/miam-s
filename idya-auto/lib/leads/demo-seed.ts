@@ -12,7 +12,7 @@ const NAMES: [string, string][] = [
   ["Emily", "Carter"], ["Laurence", "Dubé"], ["Nicolas", "Lapointe"], ["Fatima", "Zahra"], ["Guillaume", "Caron"],
 ];
 const VEHICLES = ["v01", "v02", "v03", "v04", "v05", "v06", "v07", "v08", "v10", "v11", "v12"];
-const TYPES = ["test_drive", "question", "financing", "trade_in", "contact", "test_drive", "question", "test_drive"] as const;
+const TYPES = ["test_drive", "question", "financing", "trade_in", "contact", "test_drive", "sell_car", "test_drive"] as const;
 
 export function buildDemoLeads(now = new Date()): { leads: Lead[]; bookings: Booking[]; briefs: LeadAiBrief[] } {
   const leads: Lead[] = [];
@@ -22,7 +22,7 @@ export function buildDemoLeads(now = new Date()): { leads: Lead[]; bookings: Boo
   for (let i = 0; i < NAMES.length; i++) {
     const [firstName, lastName] = NAMES[i];
     const type = TYPES[i % TYPES.length];
-    const vehicleId = type === "contact" ? null : VEHICLES[i % VEHICLES.length];
+    const vehicleId = type === "contact" || type === "sell_car" ? null : VEHICLES[i % VEHICLES.length];
     const createdAt = new Date(now.getTime() - (i * 0.7 + (i % 3) * 0.2) * day).toISOString();
     const locale = i % 7 === 6 ? "en" : "fr";
     const slug = `${firstName}.${lastName}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z.]/g, "");
@@ -31,6 +31,7 @@ export function buildDemoLeads(now = new Date()): { leads: Lead[]; bookings: Boo
       question: locale === "fr" ? "Bonjour, est-ce que les pneus d'hiver sont inclus et le véhicule a-t-il eu des réparations de carrosserie ?" : "Hi, are winter tires included and has the vehicle had any body repairs?",
       financing: locale === "fr" ? "Je voudrais connaître mes options avec une mise de fonds de 3 000 $." : "I'd like to know my options with a $3,000 down payment.",
       trade_in: locale === "fr" ? "J'ai un Honda Civic 2018 avec 92 000 km à échanger." : "I have a 2018 Honda Civic with 92,000 km to trade in.",
+      sell_car: locale === "fr" ? "Entretien fait chez le concessionnaire, pneus d'hiver sur jantes inclus." : "Dealer-maintained, winter tires on rims included.",
       contact: locale === "fr" ? "Offrez-vous un service de livraison à domicile ?" : "Do you offer home delivery?",
       test_drive: locale === "fr" ? "Je suis disponible en fin de journée cette semaine." : "I'm available at the end of the day this week.",
     };
@@ -46,7 +47,14 @@ export function buildDemoLeads(now = new Date()): { leads: Lead[]; bookings: Boo
       locale,
       preferredContact: (["email", "phone", "sms"] as const)[i % 3],
       message: messages[type],
-      payload: type === "financing" ? { employment: "employed", income: "4000_6000", desiredPayment: "300_500" } : type === "trade_in" ? { year: 2018, make: "Honda", model: "Civic", km: 92_000, condition: 4, accidents: "no", balance: "yes" } : {},
+      payload:
+        type === "financing"
+          ? { employment: "employed", income: "4000_6000", desiredPayment: "300_500" }
+          : type === "trade_in"
+            ? { year: 2018, make: "Honda", model: "Civic", km: 92_000, condition: 4, accidents: "no", balance: "yes" }
+            : type === "sell_car"
+              ? { year: 2020, make: "Mazda", model: "CX-5", trim: "GS TI", km: 68_500, color: "Gris", condition: 4, accidents: "no", balance: "no", askingPrice: 24_500, flexibility: "negotiable", timeline: "asap", owner: true, photoCount: 6 }
+              : {},
       consentText: locale === "fr" ? "Je consens à ce qu'Idya Auto utilise mes coordonnées pour répondre à ma demande." : "I consent to Idya Auto using my contact details to answer my request.",
       consentAt: createdAt,
       assignedTo: null,
@@ -65,9 +73,9 @@ export function buildDemoLeads(now = new Date()): { leads: Lead[]; bookings: Boo
     const hot = type === "test_drive" || type === "financing";
     briefs.push({
       leadId: id,
-      summary: locale === "fr" ? `${firstName} ${lastName} — ${type === "test_drive" ? "souhaite un essai routier cette semaine" : type === "financing" ? "demande de financement avec mise de fonds" : type === "trade_in" ? "véhicule d'échange à évaluer" : "question sur un véhicule"}.` : `${firstName} ${lastName} — ${type === "test_drive" ? "wants a test drive this week" : type === "financing" ? "financing request with down payment" : type === "trade_in" ? "trade-in to appraise" : "question about a vehicle"}.`,
-      intent: hot ? "hot" : type === "trade_in" ? "warm" : "cold",
-      score: hot ? 78 + (i % 15) : type === "trade_in" ? 55 + (i % 10) : 30 + (i % 12),
+      summary: locale === "fr" ? `${firstName} ${lastName} — ${type === "test_drive" ? "souhaite un essai routier cette semaine" : type === "financing" ? "demande de financement avec mise de fonds" : type === "trade_in" ? "véhicule d'échange à évaluer" : type === "sell_car" ? "veut nous vendre sa Mazda CX-5 2020 (68 500 km) pour 24 500 $, prix négociable" : "question sur un véhicule"}.` : `${firstName} ${lastName} — ${type === "test_drive" ? "wants a test drive this week" : type === "financing" ? "financing request with down payment" : type === "trade_in" ? "trade-in to appraise" : type === "sell_car" ? "wants to sell us a 2020 Mazda CX-5 (68,500 km) for $24,500, negotiable" : "question about a vehicle"}.`,
+      intent: hot ? "hot" : type === "trade_in" || type === "sell_car" ? "warm" : "cold",
+      score: hot ? 78 + (i % 15) : type === "trade_in" || type === "sell_car" ? 55 + (i % 10) : 30 + (i % 12),
       reasons: hot ? ["Demande d'action concrète", "Véhicule précis identifié", "Disponibilité donnée"] : ["Question générale", "Pas de véhicule précis"],
       vehiclesOfInterest: vehicleId ? [vehicleId] : [],
       suggestedReplyFr: `Bonjour ${firstName}, merci pour votre message. ${type === "test_drive" ? "Votre essai est confirmé; apportez votre permis de conduire." : "Un conseiller vous rappelle aujourd'hui pour en discuter."}`,

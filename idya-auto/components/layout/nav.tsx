@@ -16,10 +16,12 @@ import { cn } from "@/lib/utils/cn";
 import { LanguageToggle } from "./language-toggle";
 
 type StaticPath = Exclude<AppPathname, "/inventory/[slug]">;
-const LINKS: { href: StaticPath; key: "inventory" | "financing" | "tradeIn" | "about" | "contact" }[] = [
+/** Six links fit inline from 1280 px (xl); below that they live in the menu sheet. */
+const LINKS: { href: StaticPath; key: "inventory" | "financing" | "tradeIn" | "sellCar" | "about" | "contact" }[] = [
   { href: "/inventory", key: "inventory" },
   { href: "/financing", key: "financing" },
   { href: "/trade-in", key: "tradeIn" },
+  { href: "/sell-my-car", key: "sellCar" },
   { href: "/about", key: "about" },
   { href: "/contact", key: "contact" },
 ];
@@ -87,7 +89,7 @@ export function Nav({ phone }: { phone: string }) {
             <Logo />
           </Link>
 
-          <ul className="hidden items-center gap-1 lg:flex">
+          <ul className="hidden items-center gap-1 xl:flex">
             {LINKS.map((l) => {
               const active = pathname === l.href || (l.href !== "/" && pathname.startsWith(l.href));
               return (
@@ -120,7 +122,7 @@ export function Nav({ phone }: { phone: string }) {
             <Button variant="light" size="md" className="hidden md:inline-flex" onClick={() => openBooking()}>
               {t("bookTestDrive")}
             </Button>
-            <IconButton label={menuOpen ? t("closeMenu") : t("openMenu")} variant="ghost" className="lg:hidden" aria-expanded={menuOpen} aria-controls="mobile-menu" onClick={() => setMenuOpen((v) => !v)}>
+            <IconButton label={menuOpen ? t("closeMenu") : t("openMenu")} variant="ghost" className="xl:hidden" aria-expanded={menuOpen} aria-controls="mobile-menu" onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X strokeWidth={1.5} /> : <Menu strokeWidth={1.5} />}
             </IconButton>
           </div>
@@ -134,7 +136,7 @@ export function Nav({ phone }: { phone: string }) {
             role="dialog"
             aria-modal="true"
             aria-label={t("openMenu")}
-            className="fixed inset-0 z-[45] flex flex-col bg-bg/95 pt-24 backdrop-blur-2xl lg:hidden"
+            className="fixed inset-0 z-[45] flex flex-col bg-bg/95 pt-24 backdrop-blur-2xl xl:hidden"
             initial={reduced ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

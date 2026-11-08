@@ -7,6 +7,7 @@ const STATIC: { fr: string; en: string; priority: number }[] = [
   { fr: "/fr/inventaire", en: "/en/inventory", priority: 0.9 },
   { fr: "/fr/financement", en: "/en/financing", priority: 0.7 },
   { fr: "/fr/echange", en: "/en/trade-in", priority: 0.7 },
+  { fr: "/fr/vendre-mon-auto", en: "/en/sell-my-car", priority: 0.7 },
   { fr: "/fr/a-propos", en: "/en/about", priority: 0.5 },
   { fr: "/fr/contact", en: "/en/contact", priority: 0.6 },
   { fr: "/fr/confidentialite", en: "/en/privacy", priority: 0.2 },
