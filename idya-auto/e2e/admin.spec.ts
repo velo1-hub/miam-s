@@ -4,8 +4,7 @@ test.describe("Admin (demo auth)", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
   test("create a vehicle, publish validation, mark as sold", async ({ page }) => {
     await page.goto("/admin/login");
-    await page.fill("input[name=email]", process.env.DEMO_ADMIN_EMAIL ?? "demo@idya-auto.example");
-    await page.fill("input[name=password]", process.env.DEMO_ADMIN_PASSWORD ?? "idya-demo-2026");
+    await page.fill("input[name=passcode]", process.env.DEMO_ADMIN_PASSCODE ?? "00000");
     await page.click("button[type=submit]");
     await expect(page).toHaveURL(/\/admin$/);
     await page.goto("/admin/vehicules");

@@ -24,5 +24,5 @@ Recorded so that `CLAUDE.md`, the brief and the code agree. Each entry names the
 | — | Logo sync (§3.2) | The client supplied the official logo as a storefront photo. `--red` moved from `#E10600` to `#E21F26` (sampled), tints re-derived (hover `#F0343B`, pressed `#B9161C`, text `#FF6064` at 6.8:1 on `--bg`, deep `#5C0B0E`). White on `--red` is 4.7:1. The mark is a vector tracing of the photo. | Drop the client SVG into `public/brand/logo.svg` and `components/ui/logo.tsx`. |
 | — | AI models | `claude-sonnet-5-5` for chat and descriptions, `claude-haiku-5-5` for parsing and lead briefs; `temperature` omitted (Sonnet 5.5 rejects it with adaptive effort); `effort: "low"` for the fast model. | `lib/ai/client.ts`. |
 | — | Red in headless screenshots | `backdrop-filter` does not render in SwiftShader screenshots; glass-3 got a dark base layer so dialogs stay legible everywhere. | — |
-| — | Demo admin auth | Signed cookie with `DEMO_ADMIN_EMAIL` / `DEMO_ADMIN_PASSWORD` in demo mode; Supabase Auth + TOTP otherwise. | — |
+| — | Demo admin auth | Signed cookie opened by a 5-digit passcode (`DEMO_ADMIN_PASSCODE`, default `00000`) in demo mode; Supabase Auth + TOTP otherwise. | — |
 | — | Robots in demo | `robots.txt` disallows everything and pages carry `noindex` while `DEMO_MODE=true`. | Set `DEMO_MODE=false`. |

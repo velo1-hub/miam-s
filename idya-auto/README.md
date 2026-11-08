@@ -20,8 +20,8 @@ pnpm setup:demo        # writes the demo admin credentials into .env.local
 pnpm dev               # http://localhost:3000/fr
 ```
 
-Demo admin: `http://localhost:3000/admin/login`, email `demo@idya-auto.example`, password printed by
-`pnpm setup:demo` (or the value of `DEMO_ADMIN_PASSWORD` in `.env.local`).
+Demo admin: `http://localhost:3000/admin/login`, passcode `00000` (override with `DEMO_ADMIN_PASSCODE`
+in `.env.local`; `pnpm setup:demo` writes the default).
 
 ## Commands
 
@@ -55,7 +55,7 @@ All variables are listed with comments in [`.env.example`](.env.example). What e
 | `NEXT_PUBLIC_GOOGLE_MAPS_KEY` | Embedded map in « Nous visiter » (static directions link otherwise) |
 | `PLAUSIBLE_DOMAIN` | Cookieless analytics script + custom events (brief §21) |
 | `PHOTOROOM_API_KEY` | Background removal in the spin pipeline (optional) |
-| `DEMO_ADMIN_EMAIL`, `DEMO_ADMIN_PASSWORD` | Demo admin account (demo mode only) |
+| `DEMO_ADMIN_PASSCODE`, `DEMO_ADMIN_EMAIL` | Demo admin passcode (5 digits, default `00000`) and display email (demo mode only) |
 
 Never commit `.env*` files. Demo-mode state (leads, settings overrides, vehicle drafts, outbox,
 chat logs, AI usage) lives in the git-ignored `.cache/` folder.

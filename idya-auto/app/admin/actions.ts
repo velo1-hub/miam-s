@@ -27,15 +27,15 @@ function revalidateVehicles(slug?: string) {
 }
 
 export async function loginAction(formData: FormData) {
-  const email = String(formData.get("email") ?? "");
-  const password = String(formData.get("password") ?? "");
   if (isSupabaseAuth()) {
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
     const { supabaseLogin } = await import("@/lib/admin/login-supabase");
     const r = await supabaseLogin(email, password, String(formData.get("totp") ?? ""));
     if (!r.ok) redirect(`/admin/login?error=${r.error}`);
     redirect("/admin");
   }
-  const session = await demoLogin(email, password);
+  const session = await demoLogin(String(formData.get("passcode") ?? ""));
   if (!session) redirect("/admin/login?error=credentials");
   redirect("/admin");
 }
