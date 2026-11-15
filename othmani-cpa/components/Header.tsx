@@ -3,6 +3,7 @@ import { dict } from "@/content/ui";
 import { href, routes, type RouteKey } from "@/lib/routes";
 import { hasPhone, portalHref, site, type Lang } from "@/lib/site";
 import { Logo } from "./Logo";
+import { concernsFor } from "@/content/concerns";
 import { Icon } from "./Icon";
 import { CloseOnNav } from "./CloseOnNav";
 import { HeaderScroll } from "./HeaderScroll";
@@ -14,6 +15,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
     ["individuals", t.nav.individuals],
     ["businesses", t.nav.businesses],
     ["calendar", t.nav.calendar],
+    ["tools", t.nav.tools],
     ["about", t.nav.about],
     ["contact", t.nav.contact],
   ];
@@ -52,19 +54,43 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
 
         <nav aria-label={t.nav.mainNav} className="hidden lg:block">
           <ul className="flex items-center gap-1">
-            {links.map(([k, label]) => (
-              <li key={k}>
-                <Link
-                  href={href(k, lang)}
-                  aria-current={isCurrent(k) ? "page" : undefined}
-                  className={`relative rounded-full px-3.5 py-2 text-[0.95rem] font-medium transition-colors ${
-                    overlay ? "text-white hover:bg-white/10" : "text-ink hover:bg-sky-50 hover:text-navy"
-                  } ${isCurrent(k) ? (overlay ? "bg-white/15" : "bg-sky-50 text-navy") : ""}`}
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
+            {links.map(([k, label]) => {
+              const sub = k === "individuals" || k === "businesses" ? concernsFor(k) : null;
+              return (
+                <li key={k} className="group relative">
+                  <Link
+                    href={href(k, lang)}
+                    aria-current={isCurrent(k) ? "page" : undefined}
+                    className={`relative inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-[0.95rem] font-medium transition-colors ${
+                      overlay ? "text-white hover:bg-white/10" : "text-ink hover:bg-sky-50 hover:text-navy"
+                    } ${isCurrent(k) ? (overlay ? "bg-white/15" : "bg-sky-50 text-navy") : ""}`}
+                  >
+                    {label}
+                    {sub && (
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 opacity-70 transition-transform group-hover:rotate-180 group-focus-within:rotate-180" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                    )}
+                  </Link>
+                  {sub && (
+                    /* Sous-menu : visible au survol et au focus clavier */
+                    <div className="on-light invisible absolute top-full left-1/2 z-50 w-[26rem] -translate-x-1/2 translate-y-2 pt-3 opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                      <ul className="rounded-3xl border border-line bg-white/[0.97] p-2.5 shadow-[0_30px_70px_-30px_rgba(23,23,58,.55)] backdrop-blur-2xl backdrop-saturate-150">
+                        {sub.map((c) => (
+                          <li key={c.key}>
+                            <Link href={href(c.key, lang)} className="flex gap-3 rounded-2xl p-3 transition-colors hover:bg-sky-50">
+                              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy text-white"><Icon name={c.icon} className="h-5 w-5" /></span>
+                              <span>
+                                <span className="block font-display font-semibold text-navy">{c[lang].label}</span>
+                                <span className="mt-0.5 block text-sm leading-snug text-muted">{c[lang].teaser}</span>
+                              </span>
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
 

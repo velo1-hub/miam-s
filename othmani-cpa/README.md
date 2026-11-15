@@ -65,7 +65,17 @@ components/           gabarits et composants (Clara, bannière Loi 25, formulair
 | `/etats-financiers/` | `/en/financial-statements/` |
 | `/plusieurs-entreprises/` | `/en/multiple-companies/` |
 | `/calendrier-fiscal/` | `/en/tax-calendar/` |
+| `/outils/` | `/en/tools/` |
 | `/a-propos/` · `/contact/` · `/confidentialite/` | `/en/about/` · `/en/contact/` · `/en/privacy/` |
+
+## Fonctionnalités
+
+- **Outils gratuits** (`/outils`, aussi intégrés aux pages concernées) : liste de documents personnalisée et imprimable, calculatrice TPS/TVQ (ajouter / retirer), vérification du seuil de 30 000 $. Tout reste dans le navigateur.
+- **Ajouter à mon agenda** : fichier .ics par date ou pour tout le calendrier, avec rappel 3 jours avant.
+- **Clara** répond directement en cherchant dans les 40 questions fréquentes du site, puis renvoie vers la page complète ou l'équipe.
+- **Pages de préoccupation** : sommaire collant avec section active, barre de progression de lecture, temps de lecture, date de révision par un CPA (`REVIEWED` dans `components/ConcernPage.tsx`), bouton Imprimer.
+- **Sous-menu** Particuliers / Entreprises sur ordinateur, au survol et au clavier.
+- **Verre dépoli** (glassmorphism) avec repli opaque pour les navigateurs qui ne le gèrent pas.
 
 ## Choix techniques
 

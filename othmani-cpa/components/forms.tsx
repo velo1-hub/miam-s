@@ -48,10 +48,12 @@ export function ContactForm({ lang }: { lang: Lang }) {
         <div>
           <label htmlFor={`${id}-n`} className="label">{t.name}{req}</label>
           <input id={`${id}-n`} name="nom" required autoComplete="name" className="field" />
+          <p className="field-error">{lang === "fr" ? "Indiquez votre nom." : "Please enter your name."}</p>
         </div>
         <div>
           <label htmlFor={`${id}-e`} className="label">{t.email}{req}</label>
           <input id={`${id}-e`} name="courriel" type="email" required autoComplete="email" className="field" />
+          <p className="field-error">{lang === "fr" ? "Entrez un courriel valide, ex. nom@exemple.ca" : "Enter a valid email, e.g. name@example.ca"}</p>
         </div>
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
@@ -73,6 +75,7 @@ export function ContactForm({ lang }: { lang: Lang }) {
       <div>
         <label htmlFor={`${id}-m`} className="label">{t.message}{req}</label>
         <textarea id={`${id}-m`} name="message" required rows={4} aria-describedby={`${id}-mh`} className="field resize-y" maxLength={2000} />
+        <p className="field-error">{lang === "fr" ? "Dites-nous en quelques mots ce qui vous préoccupe." : "Tell us in a few words what's on your mind."}</p>
         <p id={`${id}-mh`} className="mt-1.5 text-sm text-muted">{t.messageHelp}</p>
       </div>
       <label className="flex items-start gap-3 text-sm leading-relaxed text-ink">

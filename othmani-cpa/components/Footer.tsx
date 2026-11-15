@@ -2,7 +2,7 @@ import Link from "next/link";
 import { concernsFor } from "@/content/concerns";
 import { dict } from "@/content/ui";
 import { href, type RouteKey } from "@/lib/routes";
-import { portalHref, site, type Lang } from "@/lib/site";
+import { hasEmail, hasPhone, portalHref, site, type Lang } from "@/lib/site";
 import { Logo } from "./Logo";
 import { AddressLines, EmailLink, PhoneLink } from "./ContactInfo";
 import { CookieSettingsButton } from "./CookieBanner";
@@ -13,6 +13,7 @@ export function Footer({ lang }: { lang: Lang }) {
     ["individuals", t.nav.individuals],
     ["businesses", t.nav.businesses],
     ["calendar", t.nav.calendar],
+    ["tools", t.nav.tools],
     ["about", t.nav.about],
     ["contact", t.nav.contact],
   ];
@@ -38,8 +39,8 @@ export function Footer({ lang }: { lang: Lang }) {
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/80">{t.footer.tagline}</p>
           <address className="mt-6 space-y-2 text-sm leading-relaxed not-italic text-white/85">
             <p><AddressLines lang={lang} /></p>
-            <p><PhoneLink lang={lang} className={linkCls} /></p>
-            <p><EmailLink lang={lang} className={linkCls} /></p>
+            {hasPhone() && <p><PhoneLink lang={lang} className={linkCls} /></p>}
+            {hasEmail() && <p><EmailLink lang={lang} className={linkCls} /></p>}
           </address>
         </div>
         <nav aria-label={t.footer.nav} className="md:col-span-2">

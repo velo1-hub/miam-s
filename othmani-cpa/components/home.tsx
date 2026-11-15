@@ -144,6 +144,13 @@ export function Doors({ lang }: { lang: Lang }) {
           <Door lang={lang} title={t.doors.me} icon="user" items={concernsFor("individuals")} hub="individuals" delay="1" />
           <Door lang={lang} title={t.doors.business} icon="briefcase" items={concernsFor("businesses")} hub="businesses" delay="2" />
         </div>
+        <div className="reveal mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
+          <span className="text-sm font-medium text-muted">{lang === "fr" ? "Outils gratuits :" : "Free tools:"}</span>
+          <div className="flex flex-wrap gap-2">
+            <Link href={href("tools", lang) + "#documents"} className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-navy hover:bg-white"><Icon name="receipt" className="h-4 w-4" />{lang === "fr" ? "Ma liste de documents" : "My document checklist"}</Link>
+            <Link href={href("tools", lang) + "#calculatrice"} className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-navy hover:bg-white"><Icon name="percent" className="h-4 w-4" />{lang === "fr" ? "Calculatrice TPS/TVQ" : "GST/QST calculator"}</Link>
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -9,6 +9,7 @@ export const routes = {
   about: { fr: "/a-propos/", en: "/en/about/" },
   contact: { fr: "/contact/", en: "/en/contact/" },
   privacy: { fr: "/confidentialite/", en: "/en/privacy/" },
+  tools: { fr: "/outils/", en: "/en/tools/" },
   // Préoccupations
   personalTaxes: { fr: "/impots-particuliers/", en: "/en/personal-taxes/" },
   taxLetter: { fr: "/lettre-impot/", en: "/en/tax-letter/" },

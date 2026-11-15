@@ -49,7 +49,7 @@ export function CtaBand({ lang, title, text }: { lang: Lang; title?: string; tex
 
 export function Faq({ items, title, id = "faq" }: { items: { q: string; a: string }[]; title: string; id?: string }) {
   return (
-    <section aria-labelledby={`${id}-title`} className="mt-16">
+    <section id={id} aria-labelledby={`${id}-title`} className="mt-16">
       <h2 id={`${id}-title`} className="h2">{title}</h2>
       <div className="mt-8 divide-y divide-line overflow-hidden rounded-[1.5rem] border border-line">
         {items.map((f, i) => (

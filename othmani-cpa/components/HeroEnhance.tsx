@@ -60,7 +60,7 @@ export function HeroEnhance({ titleId, trackId, mediaId }: { titleId: string; tr
       const range = Math.max(1, track.offsetHeight - window.innerHeight);
       const p = Math.min(1, Math.max(0, -r.top / range));
       // Quelques lettres s'écrivent d'emblée, le reste suit le défilement et se termine à 65 %
-      const n = Math.round(chars.length * Math.min(1, 0.2 + p / 0.65));
+      const n = Math.round(chars.length * Math.min(1, 0.25 + p / 0.55));
       if (n === shown) return;
       chars.forEach((c, i) => {
         c.classList.toggle("on", i < n);

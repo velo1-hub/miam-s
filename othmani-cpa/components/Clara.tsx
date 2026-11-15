@@ -21,12 +21,33 @@ const keywords: Record<string, { fr: string[]; en: string[] }> = {
   statements: { fr: ["etats financiers", "bilan", "audit", "mission d'examen", "compilation", "banque", "obnl", "verification"], en: ["financial statements", "balance sheet", "audit", "review engagement", "compilation", "bank", "non-profit"] },
   multiCompanies: { fr: ["plusieurs", "holding", "societe de gestion", "associees", "groupe", "immeuble"], en: ["several", "multiple", "holding", "associated", "group", "property"] },
   calendar: { fr: ["date", "echeance", "quand", "limite", "calendrier", "30 avril", "15 juin"], en: ["date", "deadline", "when", "due", "calendar", "april 30", "june 15"] },
+  tools: { fr: ["calcul", "calculatrice", "outil", "liste", "documents", "papiers", "checklist"], en: ["calculator", "calculate", "tool", "checklist", "documents", "paperwork"] },
   contact: { fr: ["rendez-vous", "rencontre", "appeler", "telephone", "adresse", "heure", "prix", "tarif", "cout", "parler"], en: ["appointment", "meet", "call", "phone", "address", "hours", "price", "fee", "cost", "talk"] },
 };
 
-const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-type Msg = { from: "clara" | "me"; text: string; link?: { key?: RouteKey; href?: string; label: string } };
+const STOP = new Set("le la les de des du un une et ou au aux en dans pour par sur avec mon ma mes ce cette ces est sont je il on que qui quoi quel quelle quels quelles dois doit faire fait pas ne plus vous votre vos nous notre the an and or of to in on for my is are do does what how when can should with your you it be".split(" "));
+const tokens = (s: string) => norm(s).replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w));
+
+/** Cherche la question fréquente la plus proche parmi toutes les pages. */
+function searchFaq(q: string, lang: Lang) {
+  const qt = new Set(tokens(q));
+  if (qt.size === 0) return null;
+  let best: { key: RouteKey; q: string; a: string; score: number } | null = null;
+  for (const c of concerns) {
+    for (const f of c[lang].faq) {
+      const ft = tokens(f.q + " " + f.a);
+      let score = 0;
+      for (const w of qt) if (ft.some((x) => x === w || (w.length > 4 && x.startsWith(w.slice(0, 5))))) score++;
+      const ratio = score / qt.size;
+      if (score >= 2 && ratio >= 0.5 && (!best || ratio * score > best.score)) best = { key: c.key, q: f.q, a: f.a, score: ratio * score };
+    }
+  }
+  return best;
+}
+
+type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string } };
 
 export function Clara({ lang }: { lang: Lang }) {
   const t = dict(lang).clara;
@@ -59,10 +80,17 @@ export function Clara({ lang }: { lang: Lang }) {
     const c = concerns.find((x) => x.key === key);
     if (c) return c[lang].label;
     if (key === "calendar") return t.goCalendar;
+    if (key === "tools") return lang === "fr" ? "Outils gratuits" : "Free tools";
     return t.goContact;
   };
 
-  const answer = (q: string) => {
+  const answer = (q: string): Msg => {
+    if (/^\s*(bonjour|bonsoir|salut|allo|allô|hello|hi|hey|good (morning|afternoon))\b/i.test(q))
+      return { from: "clara", text: lang === "fr" ? "Bonjour ! Comment puis-je vous aider ? Vous pouvez poser une question ou choisir un sujet ci-dessous." : "Hello! How can I help? Ask a question or pick a topic below." };
+    if (/(merci|thank)/i.test(q))
+      return { from: "clara", text: lang === "fr" ? "Avec plaisir ! Autre chose ?" : "You're welcome! Anything else?" };
+    const hit = searchFaq(q, lang);
+    if (hit) return { from: "clara", text: hit.a, quote: hit.q, link: { key: hit.key, label: lang === "fr" ? "Lire toute la réponse" : "Read the full answer" } };
     const n = norm(q);
     let best: RouteKey | null = null;
     let score = 0;
@@ -70,8 +98,8 @@ export function Clara({ lang }: { lang: Lang }) {
       const s = kw[lang].concat(lang === "en" ? kw.fr : kw.en).reduce((acc, w) => (n.includes(norm(w)) ? acc + w.length : acc), 0);
       if (s > score) { score = s; best = key as RouteKey; }
     }
-    if (best) return { from: "clara" as const, text: t.found, link: { key: best, label: labelFor(best) } };
-    return { from: "clara" as const, text: t.fallback, link: { key: "contact" as RouteKey, label: t.goContact } };
+    if (best) return { from: "clara", text: t.found, link: { key: best, label: labelFor(best) } };
+    return { from: "clara", text: t.fallback, link: { key: "contact", label: t.goContact } };
   };
 
   const send = (text: string) => {
@@ -84,7 +112,7 @@ export function Clara({ lang }: { lang: Lang }) {
   const choose = (key: RouteKey) =>
     setMsgs((m) => [...m, { from: "me", text: labelFor(key) }, { from: "clara", text: t.found, link: { key, label: labelFor(key) } }]);
 
-  const chips: RouteKey[] = ["personalTaxes", "taxLetter", "selfEmployed", "salesTax", "startBusiness", "calendar"];
+  const chips: RouteKey[] = ["personalTaxes", "taxLetter", "selfEmployed", "salesTax", "startBusiness", "calendar", "tools"];
 
   return (
     <div className="clara-root">
@@ -112,6 +140,7 @@ export function Clara({ lang }: { lang: Lang }) {
             {msgs.map((m, i) => (
               <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
                 <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.93rem] leading-relaxed ${m.from === "me" ? "bg-navy text-white" : "border border-white bg-white/80 text-ink"}`}>
+                  {m.quote && <p className="mb-1.5 text-xs font-semibold tracking-wide text-navy/80 uppercase">{m.quote}</p>}
                   <p>{m.text}</p>
                   {m.link && (
                     <Link href={m.link.key ? href(m.link.key, lang) : m.link.href!} onClick={() => setOpen(false)} className="mt-2 inline-flex items-center gap-1.5 font-semibold text-navy underline underline-offset-4">

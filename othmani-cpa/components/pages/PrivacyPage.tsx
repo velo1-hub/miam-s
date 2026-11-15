@@ -60,7 +60,7 @@ const fr: Block[] = [
     h2: "Témoins (cookies)",
     p: [
       "Par défaut, seuls les témoins nécessaires sont utilisés. Ils mémorisent vos choix de confidentialité, dans votre navigateur.",
-      "Aucun témoin de mesure d'audience ou de publicité n'est activé sans votre consentement. La carte de notre bureau, fournie par OpenStreetMap, ne se charge que si vous cliquez ou si vous l'acceptez. Clara, l'assistante du site, fonctionne entièrement dans votre navigateur et n'enregistre pas vos messages.",
+      "Aucun témoin de mesure d'audience ou de publicité n'est activé sans votre consentement. La carte de notre bureau, fournie par OpenStreetMap, ne se charge que si vous cliquez ou si vous l'acceptez. Clara, l'assistante du site, fonctionne entièrement dans votre navigateur et n'enregistre pas vos messages. Les outils (liste de documents, calculatrices) gardent vos saisies dans votre navigateur seulement ; rien ne nous est transmis.",
       "Vous pouvez modifier vos choix en tout temps.",
     ],
   },
@@ -134,7 +134,7 @@ const en: Block[] = [
     h2: "Cookies",
     p: [
       "By default, only necessary cookies are used. They remember your privacy choices, in your browser.",
-      "No audience measurement or advertising cookies are turned on without your consent. The map of our office, provided by OpenStreetMap, only loads if you click or accept it. Clara, the site assistant, runs entirely in your browser and doesn't store your messages.",
+      "No audience measurement or advertising cookies are turned on without your consent. The map of our office, provided by OpenStreetMap, only loads if you click or accept it. Clara, the site assistant, runs entirely in your browser and doesn't store your messages. The tools (document checklist, calculators) keep your entries in your browser only; nothing is sent to us.",
       "You can change your choices at any time.",
     ],
   },

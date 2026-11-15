@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { Deadline } from "@/content/deadlines";
 import { formatDate, upcoming } from "@/lib/dates";
+import { AddAllToCalendar, AddToCalendar } from "./AddToCalendar";
 import { dict } from "@/content/ui";
 import type { Lang } from "@/lib/site";
 
@@ -21,6 +22,8 @@ export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "
 
   if (variant === "rows") {
     return (
+      <>
+      <div className="mb-5 flex justify-end"><AddAllToCalendar lang={lang} today={today} /></div>
       <ol className="glass divide-y divide-navy/10 overflow-hidden rounded-[1.5rem]">
         {items.map((d) => (
           <li key={d.date + d.fr.title} className="grid gap-2 p-5 sm:grid-cols-[11rem_1fr] sm:gap-6 sm:p-6">
@@ -28,11 +31,15 @@ export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "
             <div>
               <h3 className="font-display text-lg font-semibold">{d[lang].title}</h3>
               <p className="mt-1 leading-relaxed text-muted">{d[lang].detail}</p>
-              <p className="mt-2 text-xs font-semibold tracking-wide text-navy/80 uppercase">{aud(d.audience)}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <p className="text-xs font-semibold tracking-wide text-navy/80 uppercase">{aud(d.audience)}</p>
+                <AddToCalendar lang={lang} date={d.date} title={d[lang].title} small />
+              </div>
             </div>
           </li>
         ))}
       </ol>
+      </>
     );
   }
 
@@ -46,7 +53,10 @@ export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "
           </time>
           <h3 className="mt-4 font-display text-lg font-semibold leading-snug">{d[lang].title}</h3>
           <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-muted">{d[lang].detail}</p>
-          <p className="mt-4 inline-flex w-fit rounded-full border border-navy/10 bg-white/70 px-3 py-1 text-xs font-semibold text-navy">{aud(d.audience)}</p>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="inline-flex w-fit rounded-full border border-navy/10 bg-white/70 px-3 py-1 text-xs font-semibold text-navy">{aud(d.audience)}</p>
+            <AddToCalendar lang={lang} date={d.date} title={d[lang].title} small />
+          </div>
         </li>
       ))}
     </ol>

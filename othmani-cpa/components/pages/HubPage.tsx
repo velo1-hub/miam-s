@@ -47,7 +47,7 @@ export function HubPage({ lang, audience }: { lang: Lang; audience: "individuals
           </div>
           <ul className="reveal grid gap-3" data-delay="2">
             {p.do.map((d) => (
-              <li key={d} className="flex items-start gap-3 rounded-2xl border border-line p-4">
+              <li key={d} className="glass flex items-start gap-3 rounded-2xl p-4">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-navy text-white"><Icon name="check" className="h-4 w-4" strokeWidth={2.4} /></span>
                 <span className="leading-relaxed">{d}</span>
               </li>

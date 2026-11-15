@@ -83,7 +83,8 @@ details > summary::-webkit-details-marker { display: none; }
 
 /* Le héros n'est « long » que si le JavaScript et les animations sont actifs */
 .hero-track { height: 100svh; min-height: 34rem; }
-.js .hero-track { height: 175svh; }
+.js .hero-track { height: 125svh; }
+@media (min-width: 1024px) { .js .hero-track { height: 160svh; } }
 @media (prefers-reduced-motion: reduce) { .js .hero-track { height: 100svh; } }
 
 @media print { .reveal { opacity: 1 !important; transform: none !important; } .clara-root, [role="region"] { display: none !important; } }
@@ -129,3 +130,16 @@ details > summary::-webkit-details-marker { display: none; }
 /* Léger flottement de la carte vitrée du héros */
 @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .floaty { animation: floaty 7s ease-in-out infinite; }
+
+/* Impression : seulement le contenu utile */
+@media print {
+  header, footer, .clara-root, nav[aria-label], .no-print { display: none !important; }
+  .glass, .glass-dark { background: #fff !important; box-shadow: none !important; backdrop-filter: none !important; border-color: #ccc !important; }
+  body { color: #000; }
+}
+
+/* Validation des formulaires : seulement après interaction */
+.field:user-invalid { border-color: #a3261f; box-shadow: 0 0 0 3px rgba(163, 38, 31, .12); }
+.field-error { display: none; margin-top: .375rem; font-size: .85rem; color: #a3261f; }
+.field:user-invalid + .field-error { display: block; }
+.field:focus { outline: none; border-color: var(--color-navy); box-shadow: 0 0 0 4px rgba(111, 193, 216, .35); }
