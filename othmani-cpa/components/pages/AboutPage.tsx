@@ -7,6 +7,7 @@ import { Icon } from "../Icon";
 import { JsonLd } from "../JsonLd";
 import { Shell } from "../Shell";
 import { Portrait } from "../home";
+import { Team } from "../Team";
 
 export function AboutPage({ lang }: { lang: Lang }) {
   const p = pagesText.about[lang];
@@ -50,6 +51,7 @@ export function AboutPage({ lang }: { lang: Lang }) {
           </ul>
         </div>
       </section>
+      <Team lang={lang} />
       <CtaBand lang={lang} />
     </Shell>
   );

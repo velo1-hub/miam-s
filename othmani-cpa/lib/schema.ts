@@ -1,6 +1,7 @@
 import { routes, type RouteKey } from "./routes";
 import { abs, hasEmail, hasPhone, site, type Lang } from "./site";
 import type { QA } from "@/content/concerns";
+import { team } from "@/content/team";
 
 const BUSINESS_ID = abs("/#cabinet");
 
@@ -20,6 +21,7 @@ export function businessSchema(lang: Lang) {
         ? "Cabinet de CPA à Saint-Léonard (Montréal) pour particuliers et entreprises : impôts, TPS/TVQ, états financiers, audit."
         : "CPA firm in Saint-Léonard (Montreal) for individuals and businesses: taxes, GST/QST, financial statements, audit.",
     founder: { "@type": "Person", name: site.owner, jobTitle: site.ownerTitle[lang] },
+    employee: team.map((m) => ({ "@type": "Person", name: m.name, jobTitle: m[lang].role, image: abs(m.photo) })),
     address: {
       "@type": "PostalAddress",
       streetAddress: lang === "fr" ? a.street : a.streetEn,

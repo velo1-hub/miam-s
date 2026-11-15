@@ -413,7 +413,13 @@ export function Zouhaier({ lang }: { lang: Lang }) {
               </li>
             ))}
           </ul>
-          <Link href={href("about", lang)} className="btn-primary mt-9">{z.more} <Icon name="arrow" className="h-5 w-5" /></Link>
+          <div className="glass mt-8 flex max-w-md items-center gap-4 rounded-2xl p-3 pr-5">
+            <img src="/images/racha-ghazoini-thumb.webp" alt="Racha Ghazoini" width={240} height={240} loading="lazy" decoding="async" className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+            <p className="text-sm leading-snug text-ink/90">
+              {lang === "fr" ? "Avec " : "With "}<strong className="font-semibold text-navy">Racha Ghazoini</strong>{lang === "fr" ? ", technicienne comptable, qui suit vos documents au quotidien." : ", accounting technician, who follows up on your documents day to day."}
+            </p>
+          </div>
+          <Link href={href("about", lang)} className="btn-primary mt-8">{z.more} <Icon name="arrow" className="h-5 w-5" /></Link>
         </div>
       </div>
     </section>
