@@ -93,9 +93,9 @@ export function Clara({ lang }: { lang: Lang }) {
           id={panelId}
           role="dialog"
           aria-label={`${t.name}, ${t.role}`}
-          className="fixed inset-x-3 bottom-24 z-[55] flex max-h-[min(36rem,calc(100dvh-8rem))] flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-[0_24px_70px_-30px_rgba(42,42,92,.55)] sm:inset-x-auto sm:right-5 sm:w-[24rem]"
+          className="fixed inset-x-3 bottom-24 z-[55] flex max-h-[min(36rem,calc(100dvh-8rem))] flex-col overflow-hidden rounded-3xl border border-white/80 bg-white/85 shadow-[0_30px_80px_-30px_rgba(23,23,58,.6)] backdrop-blur-2xl backdrop-saturate-150 sm:inset-x-auto sm:right-5 sm:w-[24rem]"
         >
-          <div className="flex items-center justify-between gap-3 bg-navy px-5 py-4 text-white on-dark">
+          <div className="mesh-dark flex items-center justify-between gap-3 px-5 py-4 text-white on-dark">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky font-display text-lg font-semibold text-navy" aria-hidden="true">C</span>
               <div>
@@ -111,7 +111,7 @@ export function Clara({ lang }: { lang: Lang }) {
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
             {msgs.map((m, i) => (
               <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.93rem] leading-relaxed ${m.from === "me" ? "bg-navy text-white" : "bg-sky-50 text-ink"}`}>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.93rem] leading-relaxed ${m.from === "me" ? "bg-navy text-white" : "border border-white bg-white/80 text-ink"}`}>
                   <p>{m.text}</p>
                   {m.link && (
                     <Link href={m.link.key ? href(m.link.key, lang) : m.link.href!} onClick={() => setOpen(false)} className="mt-2 inline-flex items-center gap-1.5 font-semibold text-navy underline underline-offset-4">
@@ -152,12 +152,12 @@ export function Clara({ lang }: { lang: Lang }) {
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         aria-label={open ? t.close : t.open}
-        className="clara-fab fixed right-4 bottom-4 z-[55] flex h-16 items-center gap-2.5 rounded-full bg-navy pr-5 pl-2 text-white shadow-[0_14px_40px_-14px_rgba(42,42,92,.7)] transition-transform hover:-translate-y-0.5 on-dark sm:right-5 sm:bottom-5"
+        className="clara-fab glass-dark fixed right-4 bottom-4 z-[55] flex h-14 items-center gap-2.5 rounded-full !bg-navy/80 pr-2 pl-2 text-white transition-transform hover:-translate-y-0.5 on-dark sm:right-5 sm:bottom-5 sm:pr-5"
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-sky font-display text-lg font-semibold text-navy" aria-hidden="true">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky font-display text-lg font-semibold text-navy" aria-hidden="true">
           {open ? <Icon name="close" className="h-5 w-5" /> : "C"}
         </span>
-        <span className="font-display font-semibold">{t.name}</span>
+        <span className="hidden font-display font-semibold sm:inline">{t.name}</span>
       </button>
     </div>
   );

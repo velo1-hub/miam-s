@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { dict } from "@/content/ui";
 import { href, routes, type RouteKey } from "@/lib/routes";
-import { portalHref, type Lang } from "@/lib/site";
+import { hasPhone, portalHref, site, type Lang } from "@/lib/site";
 import { Logo } from "./Logo";
 import { Icon } from "./Icon";
 import { CloseOnNav } from "./CloseOnNav";
+import { HeaderScroll } from "./HeaderScroll";
 
 export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeKey: RouteKey; overlay?: boolean }) {
   const t = dict(lang);
@@ -19,7 +20,31 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
   const isCurrent = (k: RouteKey) => k === routeKey;
 
   return (
-    <header className={overlay ? "absolute inset-x-0 top-0 z-40" : "sticky top-0 z-40 border-b border-line bg-white/90 backdrop-blur-md"}>
+    <header data-overlay={overlay ? "" : undefined} className={`site-header ${overlay ? "fixed inset-x-0 top-0 z-40" : "sticky top-0 z-40 border-b border-white/70 bg-white/65 backdrop-blur-xl backdrop-saturate-150"}`}>
+      {/* Barre d'information (grand écran) */}
+      <div className={`topbar hidden border-b text-[0.8rem] lg:block ${overlay ? "on-dark border-white/10 text-white/80" : "border-line/70 text-muted"}`}>
+        <div className="container-site flex h-10 items-center justify-between">
+          <p className="flex items-center gap-2">
+            <Icon name="pin" className="h-3.5 w-3.5" />
+            {lang === "fr" ? site.address.street : site.address.streetEn}, {site.address.city}
+            <span aria-hidden="true" className="mx-2 opacity-40">|</span>
+            {t.pro.topbar}
+          </p>
+          <div className="flex items-center gap-5">
+            {hasPhone() && (
+              <a href={`tel:${site.phone.tel}`} className="inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+                <Icon name="phone" className="h-3.5 w-3.5" /> {site.phone.display}
+              </a>
+            )}
+            <a href={portalHref(lang)} className="inline-flex items-center gap-1.5 font-medium hover:underline underline-offset-4">
+              <Icon name="shield" className="h-3.5 w-3.5" /> {t.cta.portal}
+            </a>
+            <a href={routes[routeKey][other]} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} lang={other} aria-label={t.nav.langSwitchLabel} className="font-semibold hover:underline underline-offset-4">
+              {t.nav.langSwitch}
+            </a>
+          </div>
+        </div>
+      </div>
       <div className={`container-site flex h-20 items-center justify-between gap-4 ${overlay ? "on-dark" : ""}`}>
         <Link href={href("home", lang)} aria-label={lang === "fr" ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="shrink-0 rounded-lg">
           <Logo light={overlay} />
@@ -32,7 +57,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
                 <Link
                   href={href(k, lang)}
                   aria-current={isCurrent(k) ? "page" : undefined}
-                  className={`rounded-full px-3.5 py-2 text-[0.95rem] font-medium transition-colors ${
+                  className={`relative rounded-full px-3.5 py-2 text-[0.95rem] font-medium transition-colors ${
                     overlay ? "text-white hover:bg-white/10" : "text-ink hover:bg-sky-50 hover:text-navy"
                   } ${isCurrent(k) ? (overlay ? "bg-white/15" : "bg-sky-50 text-navy") : ""}`}
                 >
@@ -49,7 +74,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
             hrefLang={other === "fr" ? "fr-CA" : "en-CA"}
             lang={other}
             aria-label={t.nav.langSwitchLabel}
-            className={`hidden rounded-full px-3 py-2 text-sm font-semibold sm:inline-flex ${overlay ? "text-white hover:bg-white/10" : "text-navy hover:bg-sky-50"}`}
+            className={`hidden rounded-full px-3 py-2 text-sm font-semibold sm:inline-flex lg:hidden ${overlay ? "text-white hover:bg-white/10" : "text-navy hover:bg-sky-50"}`}
           >
             {other === "fr" ? "FR" : "EN"}
           </a>
@@ -68,7 +93,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
               <span className="group-open:hidden"><Icon name="menu" /></span>
               <span className="hidden group-open:inline"><Icon name="close" /></span>
             </summary>
-            <div className="fixed inset-x-3 top-[5.25rem] z-50 rounded-3xl border border-line bg-white p-4 shadow-[0_18px_50px_-20px_rgba(42,42,92,.35)]">
+            <div className="on-light fixed inset-x-3 top-[5.25rem] z-50 rounded-3xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_60px_-28px_rgba(23,23,58,.6)] backdrop-blur-2xl backdrop-saturate-150">
               <nav aria-label={t.nav.mainNav}>
                 <ul className="flex flex-col">
                   {links.map(([k, label]) => (
@@ -93,6 +118,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
             </div>
           </details>
           <CloseOnNav targetId="mobile-menu" />
+          {overlay && <HeaderScroll />}
         </div>
       </div>
     </header>

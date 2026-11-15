@@ -9,7 +9,7 @@ import { Icon } from "./Icon";
 
 export function PageHeader({ lang, crumbs, eyebrow, title, intro, children }: { lang: Lang; crumbs: Crumb[]; eyebrow?: string; title: string; intro?: ReactNode; children?: ReactNode }) {
   return (
-    <div className="relative overflow-hidden border-b border-line bg-gradient-to-b from-sky-50 to-white">
+    <div className="mesh relative overflow-hidden border-b border-line">
       <svg className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 text-sky/30" viewBox="0 0 200 200" fill="none" aria-hidden="true">
         <circle cx="100" cy="100" r="99" stroke="currentColor" />
         <circle cx="100" cy="100" r="70" stroke="currentColor" />
@@ -30,7 +30,8 @@ export function CtaBand({ lang, title, text }: { lang: Lang; title?: string; tex
   const t = dict(lang);
   return (
     <section className="container-site py-16 sm:py-20" aria-labelledby="cta-band-title">
-      <div className="reveal on-dark relative overflow-hidden rounded-[1.75rem] bg-navy px-6 py-12 text-white sm:px-12 sm:py-14">
+      <div className="reveal on-dark mesh-dark relative overflow-hidden rounded-[2rem] px-6 py-12 text-white sm:px-12 sm:py-14">
+        <div className="absolute -top-20 left-1/3 h-64 w-64 rounded-full bg-sky/30 blur-3xl" aria-hidden="true" />
         <svg className="pointer-events-none absolute -right-16 -bottom-24 h-80 w-80 text-sky/25" viewBox="0 0 200 200" fill="none" aria-hidden="true">
           <circle cx="100" cy="100" r="99" stroke="currentColor" /><circle cx="100" cy="100" r="66" stroke="currentColor" />
         </svg>
@@ -50,7 +51,7 @@ export function Faq({ items, title, id = "faq" }: { items: { q: string; a: strin
   return (
     <section aria-labelledby={`${id}-title`} className="mt-16">
       <h2 id={`${id}-title`} className="h2">{title}</h2>
-      <div className="mt-8 divide-y divide-line overflow-hidden rounded-[var(--radius-card)] border border-line">
+      <div className="mt-8 divide-y divide-line overflow-hidden rounded-[1.5rem] border border-line">
         {items.map((f, i) => (
           <details key={f.q} className="group bg-white open:bg-paper" open={i === 0}>
             <summary className="flex cursor-pointer items-center justify-between gap-6 px-5 py-5 sm:px-7">
@@ -64,5 +65,19 @@ export function Faq({ items, title, id = "faq" }: { items: { q: string; a: strin
         ))}
       </div>
     </section>
+  );
+}
+
+/** En-tête de section uniforme : surtitre, titre, introduction et action facultative. */
+export function SectionHead({ id, eyebrow, title, intro, action, dark = false, center = false }: { id: string; eyebrow: string; title: string; intro?: string; action?: ReactNode; dark?: boolean; center?: boolean }) {
+  return (
+    <div className={`reveal flex flex-col gap-6 md:flex-row md:items-end ${center ? "md:justify-center text-center" : "md:justify-between"}`}>
+      <div className={`max-w-2xl ${center ? "mx-auto" : ""}`}>
+        <p className={`eyebrow ${dark ? "text-sky" : ""} ${center ? "justify-center" : ""}`}>{eyebrow}</p>
+        <h2 id={id} className={`h2 ${dark ? "text-white" : ""}`}>{title}</h2>
+        {intro && <p className={`mt-4 text-lg leading-relaxed ${dark ? "text-white/80" : "text-muted"}`}>{intro}</p>}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </div>
   );
 }

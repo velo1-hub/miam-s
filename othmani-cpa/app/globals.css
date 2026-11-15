@@ -28,7 +28,8 @@
   /* Focus visible bien contrasté, partout */
   :focus-visible { outline: 3px solid var(--color-navy); outline-offset: 3px; border-radius: 6px; }
   .on-dark :focus-visible, .on-dark:focus-visible { outline-color: #fff; }
-  [id] { scroll-margin-top: 6rem; }
+  .on-dark .on-light :focus-visible { outline-color: var(--color-navy); }
+  [id] { scroll-margin-top: 8rem; }
 }
 
 @utility btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.95rem] font-semibold transition-colors duration-200; }
@@ -86,3 +87,45 @@ details > summary::-webkit-details-marker { display: none; }
 @media (prefers-reduced-motion: reduce) { .js .hero-track { height: 100svh; } }
 
 @media print { .reveal { opacity: 1 !important; transform: none !important; } .clara-root, [role="region"] { display: none !important; } }
+
+/* ───────────── Verre dépoli (glassmorphism) ───────────── */
+@utility glass {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 20px 50px -30px rgba(42, 42, 92, 0.35);
+}
+@utility glass-dark {
+  background: rgba(23, 23, 58, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 60px -30px rgba(0, 0, 0, 0.6);
+}
+/* Fond en dégradé « mesh » très doux, pour que le verre se lise */
+@utility mesh {
+  background:
+    radial-gradient(40rem 28rem at 8% 10%, rgba(111, 193, 216, 0.22), transparent 60%),
+    radial-gradient(36rem 26rem at 92% 30%, rgba(42, 42, 92, 0.10), transparent 60%),
+    radial-gradient(34rem 24rem at 50% 100%, rgba(111, 193, 216, 0.16), transparent 60%),
+    #f7fbfd;
+}
+@utility mesh-dark {
+  background:
+    radial-gradient(42rem 30rem at 85% 0%, rgba(111, 193, 216, 0.28), transparent 60%),
+    radial-gradient(36rem 26rem at 0% 100%, rgba(98, 98, 190, 0.35), transparent 60%),
+    #1d1d48;
+}
+/* Repli si le navigateur ne gère pas backdrop-filter : fonds plus opaques */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(255, 255, 255, 0.94); }
+  .glass-dark { background: rgba(23, 23, 58, 0.92); }
+}
+/* En-tête : transparent sur le héros, vitré dès qu'on défile */
+.site-header[data-overlay] { transition: background-color .3s ease, border-color .3s ease, backdrop-filter .3s ease; }
+.site-header[data-overlay][data-scrolled] { background: rgba(23, 23, 58, 0.82); -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); border-bottom: 1px solid rgba(255,255,255,.1); }
+.site-header[data-overlay][data-scrolled] .topbar { display: none; }
+/* Léger flottement de la carte vitrée du héros */
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.floaty { animation: floaty 7s ease-in-out infinite; }

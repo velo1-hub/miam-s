@@ -28,7 +28,7 @@ export function ConcernPage({ lang, routeKey }: { lang: Lang; routeKey: RouteKey
           title={x.h1}
         >
           {/* La réponse simple, tout en haut */}
-          <div className="mt-8 max-w-3xl rounded-[var(--radius-card)] border border-sky/60 bg-white p-6 sm:p-7">
+          <div className="glass mt-8 max-w-3xl rounded-[1.75rem] p-6 sm:p-8">
             <p className="flex items-center gap-2 text-sm font-semibold tracking-wide text-navy uppercase">
               <Icon name="check" className="h-5 w-5" strokeWidth={2.2} /> {t.concern.short}
             </p>
@@ -62,7 +62,7 @@ export function ConcernPage({ lang, routeKey }: { lang: Lang; routeKey: RouteKey
                 const r = concernByKey(k);
                 return (
                   <li key={k}>
-                    <Link href={href(k, lang)} className="group block rounded-2xl border border-line p-4 transition-colors hover:border-navy/40 hover:bg-sky-50">
+                    <Link href={href(k, lang)} className="group block rounded-2xl border border-line bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-navy/30 hover:shadow-[0_16px_40px_-28px_rgba(42,42,92,.6)]">
                       <span className="flex items-center gap-3 font-medium text-ink">
                         <Icon name={r.icon} className="h-5 w-5 shrink-0 text-navy" /> {r[lang].label}
                       </span>

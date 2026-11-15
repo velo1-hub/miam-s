@@ -56,10 +56,10 @@ export function CookieBanner({ lang }: { lang: Lang }) {
     <section
       role="region"
       aria-labelledby={titleId}
-      className="fixed inset-x-3 bottom-3 z-[60] rounded-3xl border border-line bg-white p-5 shadow-[0_20px_60px_-25px_rgba(42,42,92,.45)] sm:inset-x-auto sm:left-5 sm:bottom-5 sm:max-w-md sm:p-6"
+      className="fixed inset-x-3 bottom-3 z-[60] rounded-3xl border border-white/80 bg-white/85 p-4 shadow-[0_24px_70px_-30px_rgba(23,23,58,.55)] backdrop-blur-2xl backdrop-saturate-150 sm:inset-x-auto sm:left-5 sm:bottom-5 sm:max-w-md sm:p-6"
     >
       <h2 id={titleId} className="font-display text-lg font-semibold">{t.title}</h2>
-      <p className="mt-2 text-sm leading-relaxed text-muted">
+      <p className="mt-1.5 text-[0.82rem] leading-relaxed text-muted sm:text-sm">
         {t.text}{" "}
         <Link href={href("privacy", lang) + "#temoins"} className="font-medium text-navy underline underline-offset-4">{t.learn}</Link>
       </p>
