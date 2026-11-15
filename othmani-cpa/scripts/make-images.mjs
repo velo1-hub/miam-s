@@ -1,7 +1,5 @@
 /**
- * Génère les images provisoires (WebP) : visuel du héros, portrait temporaire, image Open Graph.
- * ⚠️ Le portrait est un espace réservé : remplacez public/images/zouhaier-othmani.webp
- *    par la vraie photo de Zouhaier (800 × 1000 px, WebP, < 120 Ko).
+ * Génère les images (WebP) : visuel du héros, image Open Graph, icône.
  * Usage : npm run images
  */
 import sharp from "sharp";
@@ -40,18 +38,7 @@ ${waves}
 await sharp(Buffer.from(hero)).webp({ quality: 80 }).toFile(out + "hero-1600.webp");
 await sharp(Buffer.from(hero)).resize(800, 1000, { fit: "cover", position: "right" }).webp({ quality: 76 }).toFile(out + "hero-800.webp");
 
-// Portrait provisoire (à remplacer par la vraie photo)
-const portrait = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
-<defs>
-  <linearGradient id="p" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d1d48"/><stop offset="1" stop-color="#2f3170"/></linearGradient>
-  <radialGradient id="g" cx=".7" cy=".2" r=".6"><stop offset="0" stop-color="#6fc1d8" stop-opacity=".5"/><stop offset="1" stop-color="#6fc1d8" stop-opacity="0"/></radialGradient>
-</defs>
-<rect width="800" height="1000" fill="url(#p)"/><rect width="800" height="1000" fill="url(#g)"/>
-<g fill="none" stroke="#6fc1d8" stroke-opacity=".25"><circle cx="400" cy="420" r="170"/><circle cx="400" cy="420" r="250"/></g>
-<text x="400" y="460" font-family="Arial, sans-serif" font-size="120" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="6">ZO</text>
-<text x="400" y="560" font-family="Arial, sans-serif" font-size="26" fill="#6fc1d8" text-anchor="middle" letter-spacing="8">PHOTO À VENIR</text>
-</svg>`;
-await sharp(Buffer.from(portrait)).webp({ quality: 80 }).toFile(out + "zouhaier-othmani.webp");
+// Le portrait de Zouhaier (public/images/zouhaier-othmani.webp) est une vraie photo : ce script ne le touche plus.
 
 // Image Open Graph 1200 × 630
 const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">

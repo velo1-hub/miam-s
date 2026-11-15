@@ -32,7 +32,6 @@ Tout se règle dans **`lib/site.ts`** (un champ vide est masqué du site et du S
 
 Autres fichiers :
 
-- **Photo de Zouhaier** : remplacer `public/images/zouhaier-othmani.webp` (portrait 800 × 1000, WebP). L'image actuelle est un espace réservé « Photo à venir ».
 - **Avis Google** : `content/reviews.ts`. Copier **mot pour mot** de vrais avis publiés sur Google. Liste vide = la section affiche seulement les boutons vers Google. Aucun avis, chiffre ou témoignage inventé (règles de publicité de l'Ordre des CPA).
 - **Dates fiscales** : `content/deadlines.ts`, à prolonger chaque année. Le HTML contient les dates du jour de génération ; le navigateur recalcule les « 3 prochaines ».
 - **Rappels par courriel** : le formulaire recueille l'adresse avec consentement explicite ; l'envoi des rappels se fait dans l'outil d'infolettre choisi.
