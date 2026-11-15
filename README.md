@@ -24,6 +24,8 @@ Everything needed to launch and run Miam's Resto Café: strategy, identity, menu
 | 13 | Launch & 90 days | [docs/13-launch-roadmap.md](docs/13-launch-roadmap.md) | Timeline, RACI, budget tiers, scorecard, risks |
 | ⚠️ | All owner-only actions | [docs/owner-actions.md](docs/owner-actions.md) | One checklist of everything only the owner can do |
 
+> **Autre projet dans ce dépôt :** [`othmani-cpa/`](othmani-cpa/) — site web d'Othmani CPA Inc. (Next.js + Tailwind, statique). Voir son README.
+
 ## Commands
 
 ```bash

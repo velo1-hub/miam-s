@@ -1,0 +1,76 @@
+# Othmani CPA — site web
+
+Site bilingue (FR à la racine, EN sous `/en`) d'Othmani CPA Inc., Saint-Léonard.
+Next.js 16 (App Router) + Tailwind CSS 4, **généré en statique** (`out/`) : chaque page est du HTML complet, lisible sans JavaScript.
+
+## Commandes
+
+```bash
+npm install
+npm run dev        # http://localhost:3000
+npm run build      # génère le site statique dans out/
+npm run check      # contrôle SEO du site généré (title < 60, description < 155, 1 H1, canonical, hreflang, alt, JSON-LD)
+npm run images     # régénère les images provisoires (héros, portrait temporaire, Open Graph)
+```
+
+Le dossier `out/` se dépose tel quel sur n'importe quel hébergeur statique (Netlify, Cloudflare Pages, Vercel, o2switch…).
+
+## ⚠️ À compléter avant la mise en ligne
+
+Tout se règle dans **`lib/site.ts`** (un champ vide est masqué du site et du Schema.org, jamais inventé) :
+
+| Champ | Quoi |
+|---|---|
+| `phone`, `email` | Téléphone et courriel du cabinet (affichés « [à venir] » pour l'instant) |
+| `hours`, `hoursLabel` | Heures d'ouverture — **valeurs provisoires** (lun-ven 9 h-17 h) à confirmer |
+| `url` | Domaine définitif (sert aux canonical, hreflang, sitemap) |
+| `geo` | Coordonnées GPS approximatives du 8065, boul. Viau — à vérifier |
+| `clientPortalUrl` | Lien de l'espace client Pilote Fiscal (sinon, renvoie à la section du site) |
+| `googleReviewsUrl`, `googleWriteReviewUrl` | Fiche Google et lien « Laisser un avis » |
+| `formEndpoint` | Réception des formulaires (Formspree, Basin, Netlify Forms…) — sans lui, les formulaires affichent un message de repli |
+| `heroVideo` | Vidéo du héros (`/public/media/…`, WebM + MP4, < 3 Mo, sans son) |
+
+Autres fichiers :
+
+- **Photo de Zouhaier** : remplacer `public/images/zouhaier-othmani.webp` (portrait 800 × 1000, WebP). L'image actuelle est un espace réservé « Photo à venir ».
+- **Avis Google** : `content/reviews.ts`. Copier **mot pour mot** de vrais avis publiés sur Google. Liste vide = la section affiche seulement les boutons vers Google. Aucun avis, chiffre ou témoignage inventé (règles de publicité de l'Ordre des CPA).
+- **Dates fiscales** : `content/deadlines.ts`, à prolonger chaque année. Le HTML contient les dates du jour de génération ; le navigateur recalcule les « 3 prochaines ».
+- **Rappels par courriel** : le formulaire recueille l'adresse avec consentement explicite ; l'envoi des rappels se fait dans l'outil d'infolettre choisi.
+
+## Structure
+
+```
+app/(fr)/…            pages françaises (layout lang="fr-CA")
+app/(en)/en/…         pages anglaises (layout lang="en-CA")
+app/sitemap.ts        sitemap.xml avec alternatives hreflang
+app/robots.ts         robots.txt
+content/concerns.ts   les 8 préoccupations (FR + EN) : question H1, réponse courte, explication, 5 FAQ
+content/pages.ts      textes et métadonnées des autres pages
+content/ui.ts         libellés de l'interface FR + EN
+lib/routes.ts         table des URL FR ↔ EN (hreflang, sélecteur de langue)
+lib/schema.ts         AccountingService + LocalBusiness, FAQPage, BreadcrumbList, Person
+components/           gabarits et composants (Clara, bannière Loi 25, formulaires…)
+```
+
+| FR | EN |
+|---|---|
+| `/` | `/en/` |
+| `/particuliers/` · `/entreprises/` | `/en/individuals/` · `/en/businesses/` |
+| `/impots-particuliers/` | `/en/personal-taxes/` |
+| `/lettre-impot/` | `/en/tax-letter/` |
+| `/travailleur-autonome/` | `/en/self-employed/` |
+| `/grands-changements/` | `/en/life-changes/` |
+| `/demarrer-entreprise/` | `/en/start-a-business/` |
+| `/taxes-tps-tvq/` | `/en/gst-qst/` |
+| `/etats-financiers/` | `/en/financial-statements/` |
+| `/plusieurs-entreprises/` | `/en/multiple-companies/` |
+| `/calendrier-fiscal/` | `/en/tax-calendar/` |
+| `/a-propos/` · `/contact/` · `/confidentialite/` | `/en/about/` · `/en/contact/` · `/en/privacy/` |
+
+## Choix techniques
+
+- **Loi 25** : aucun témoin optionnel sans consentement ; « Tout refuser » aussi visible que « Tout accepter » ; choix modifiables en tout temps (pied de page) ; carte OpenStreetMap chargée seulement sur clic ; polices hébergées localement (aucun appel à Google Fonts).
+- **Clara** : assistante d'orientation 100 % locale (mots-clés → bonne page ou équipe). Aucun serveur, aucun message enregistré, ne donne pas de conseils fiscaux. Pour la brancher plus tard à une IA, remplacer la fonction `answer()` de `components/Clara.tsx`.
+- **Performance mobile** : images WebP, `lazy` sous la ligne de flottaison, vidéo jamais chargée sur téléphone, en mode « économie de données » ou si l'utilisateur réduit les animations.
+- **Accessibilité** : contraste AA, lien d'évitement, focus visible, menu mobile et FAQ en `<details>` (clavier, sans JS), `prefers-reduced-motion` respecté. Audit axe-core : 0 violation.
+- **Contenu fiscal** : informations générales, prudentes, avec mention « ne remplace pas un avis adapté ». À relire par Zouhaier avant publication.
