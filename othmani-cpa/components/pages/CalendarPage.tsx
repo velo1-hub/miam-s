@@ -33,7 +33,7 @@ export function CalendarPage({ lang }: { lang: Lang }) {
             </dl>
           </section>
         </div>
-        <aside className="lg:sticky lg:top-20 lg:self-start" aria-labelledby="cal-remind">
+        <aside className="lg:sticky lg:top-28 lg:self-start" aria-labelledby="cal-remind">
           <div className="on-dark mesh-dark relative overflow-hidden rounded-[1.75rem] p-7 text-white">
             <h2 id="cal-remind" className="flex items-center gap-3 text-2xl font-semibold text-white"><Icon name="bell" /> {t.dates.remind}</h2>
             <p className="mt-2 mb-6 text-white/85">{t.dates.remindHelp}</p>

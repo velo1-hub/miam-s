@@ -15,7 +15,7 @@ export function PageHeader({ lang, crumbs, eyebrow, title, intro, children }: { 
         <circle cx="100" cy="100" r="70" stroke="currentColor" />
         <circle cx="100" cy="100" r="41" stroke="currentColor" />
       </svg>
-      <div className="container-site relative py-12 sm:py-16">
+      <div className="container-site relative pt-32 pb-12 sm:pt-36 sm:pb-16">
         <Breadcrumbs lang={lang} items={crumbs} />
         {eyebrow && <p className="eyebrow mt-8">{eyebrow}</p>}
         <h1 className={`${eyebrow ? "" : "mt-8"} max-w-3xl text-[2.1rem] leading-[1.1] font-semibold sm:text-5xl`}>{title}</h1>

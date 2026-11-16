@@ -20,11 +20,11 @@ export function Hero({ lang }: { lang: Lang }) {
   const fr = lang === "fr";
   return (
     <section id="hero-track" className="hero-track relative bg-white" aria-labelledby="hero-title">
-      <div className="sticky top-[3.25rem] flex h-[calc(100svh-3.25rem)] min-h-[36rem] flex-col overflow-hidden">
+      <div className="sticky top-0 flex h-[100svh] min-h-[38rem] flex-col overflow-hidden">
         {/* Halo très doux derrière le titre */}
         <div className="pointer-events-none absolute -top-40 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-sky/20 blur-3xl" aria-hidden="true" />
 
-        <div className="container-site relative pt-7 text-center sm:pt-14 lg:pt-16">
+        <div className="container-site relative pt-28 text-center sm:pt-32">
           <p className="mx-auto flex items-center justify-center gap-2 text-[0.8rem] font-medium tracking-wide text-balance text-muted">
             <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full bg-sky sm:inline-block" aria-hidden="true" />
             {fr ? "Comptables professionnels agréés · Saint-Léonard, Montréal" : "Chartered professional accountants · Saint-Léonard, Montreal"}
