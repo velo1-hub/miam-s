@@ -14,7 +14,7 @@ export function businessSchema(lang: Lang) {
     "@id": BUSINESS_ID,
     name: site.name,
     url: abs(routes.home[lang]),
-    image: abs("/images/og.png"),
+    image: abs("/images/othmani-cpa-partage.png"),
     logo: abs("/icon.svg"),
     description:
       lang === "fr"

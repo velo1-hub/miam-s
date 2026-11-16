@@ -76,3 +76,11 @@ export const portalOn = () => site.portalEnabled && Boolean(site.clientPortalUrl
 export const portalHref = (lang: Lang) =>
   site.clientPortalUrl || (lang === "fr" ? "/#pilote-fiscal" : "/en/#pilote-fiscal");
 export const abs = (path: string) => site.url + path;
+
+/**
+ * Adresse réellement en ligne, pour les images de partage (aperçu du lien dans Messages, WhatsApp…).
+ * Sur Vercel : le domaine de production du projet (le domaine personnalisé dès qu'il est branché).
+ */
+export const liveUrl = (path: string) =>
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : site.url) + path;
+export const SHARE_IMAGE = "/images/othmani-cpa-partage.png";
