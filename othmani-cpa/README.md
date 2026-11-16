@@ -76,7 +76,7 @@ components/           gabarits et composants (Clara, bannière Loi 25, formulair
 - **Sous-menu** Particuliers / Entreprises sur ordinateur, au survol et au clavier.
 - **Verre dépoli** (glassmorphism) avec repli opaque pour les navigateurs qui ne le gèrent pas.
 
-- **Image d'accueil** : `public/images/accueil-bureau-*.webp`, générée avec Higgsfield (illustration, pas une photo du bureau réel).
+- **Image d'accueil** : `public/images/saint-leonard-*.webp`, générée avec Higgsfield (illustration d'un boulevard de l'est de Montréal, pas une photo de l'immeuble réel).
 
 ## Choix techniques
 

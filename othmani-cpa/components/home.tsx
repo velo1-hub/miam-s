@@ -47,10 +47,10 @@ export function Hero({ lang }: { lang: Lang }) {
         <div className="container-site relative mt-8 min-h-0 flex-1 pb-6 sm:mt-10 sm:pb-8">
           <div id="hero-media" className="relative h-full min-h-[13rem] overflow-hidden rounded-[1.75rem] bg-sky-50 sm:rounded-[2.25rem]">
             <picture>
-              <source media="(max-width: 767px)" srcSet="/images/accueil-bureau-800.webp" type="image/webp" />
-              <source media="(max-width: 1199px)" srcSet="/images/accueil-bureau-1000.webp" type="image/webp" />
+              <source media="(max-width: 767px)" srcSet="/images/saint-leonard-800.webp" type="image/webp" />
+              <source media="(max-width: 1199px)" srcSet="/images/saint-leonard-1000.webp" type="image/webp" />
               <img
-                src="/images/accueil-bureau-1600.webp"
+                src="/images/saint-leonard-1600.webp"
                 alt={t.hero.imgAlt}
                 width={1600}
                 height={895}
@@ -135,7 +135,7 @@ export function Doors({ lang }: { lang: Lang }) {
 export function Steps({ lang }: { lang: Lang }) {
   const t = dict(lang);
   return (
-    <section className="section" aria-labelledby="steps-title">
+    <section className="section border-t border-line" aria-labelledby="steps-title">
       <div className="container-site">
         <SectionHead id="steps-title" eyebrow={t.pro.eyebrows.steps} title={t.steps.h2} intro={t.steps.intro} />
         <ol className="relative mt-14 grid gap-10 md:grid-cols-3 md:gap-8">

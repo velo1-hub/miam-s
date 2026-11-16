@@ -7,6 +7,8 @@ import { LogoMark } from "./Logo";
 import { Icon } from "./Icon";
 import { CloseOnNav } from "./CloseOnNav";
 import { HeaderScroll } from "./HeaderScroll";
+import { NavBar, type NavItem } from "./NavBar";
+import { toolsText } from "@/content/tools";
 
 /**
  * En-tête inspiré des sites Apple : une seule barre fine (52 px), vitrée,
@@ -24,6 +26,61 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
     ["contact", t.nav.contact],
   ];
   const isCurrent = (k: RouteKey) => k === routeKey;
+  const fr = lang === "fr";
+  const tt = toolsText[lang];
+  const concernItems = (aud: "individuals" | "businesses") =>
+    concernsFor(aud).map((c) => ({ href: href(c.key, lang), label: c[lang].label, text: c[lang].teaser, icon: c.icon }));
+  const fly: Partial<Record<RouteKey, NavItem["fly"]>> = {
+    individuals: {
+      kicker: t.doors.me,
+      title: t.nav.individuals,
+      text: fr ? "Impôts, lettres de l'impôt, travail autonome, grands changements de vie : des réponses claires, puis un CPA pour s'en occuper." : "Taxes, letters from the tax authorities, self-employment, big life changes: clear answers, then a CPA to handle it.",
+      groups: [
+        { title: fr ? "Vos préoccupations" : "Your concerns", items: concernItems("individuals") },
+        { title: fr ? "Outils gratuits" : "Free tools", items: [
+          { href: href("tools", lang) + "#documents", label: tt.checklist.h2, icon: "receipt" },
+          { href: href("calendar", lang), label: t.nav.calendar, icon: "calendar" },
+        ] },
+      ],
+      cta: { href: href("individuals", lang), label: fr ? "Tout pour les particuliers" : "Everything for individuals" },
+    },
+    businesses: {
+      kicker: t.doors.business,
+      title: t.nav.businesses,
+      text: fr ? "Démarrage, taxes, états financiers, plusieurs sociétés : un CPA auditeur qui voit l'ensemble de votre situation." : "Start-up, sales tax, financial statements, multiple companies: a CPA auditor who sees your whole picture.",
+      groups: [
+        { title: fr ? "Vos préoccupations" : "Your concerns", items: concernItems("businesses") },
+        { title: fr ? "Outils gratuits" : "Free tools", items: [
+          { href: href("tools", lang) + "#calculatrice", label: tt.calc.h2, icon: "percent" },
+          { href: href("tools", lang) + "#seuil", label: tt.threshold.h2, icon: "chart" },
+        ] },
+      ],
+      cta: { href: href("businesses", lang), label: fr ? "Tout pour les entreprises" : "Everything for businesses" },
+    },
+    tools: {
+      kicker: fr ? "Gratuit · Sans inscription" : "Free · No sign-up",
+      title: t.nav.tools,
+      text: tt.intro,
+      groups: [{ title: fr ? "Nos outils" : "Our tools", items: [
+        { href: href("tools", lang) + "#documents", label: tt.checklist.h2, text: tt.checklist.intro, icon: "receipt" },
+        { href: href("tools", lang) + "#calculatrice", label: tt.calc.h2, text: tt.calc.intro, icon: "percent" },
+        { href: href("tools", lang) + "#seuil", label: tt.threshold.h2, text: tt.threshold.intro, icon: "chart" },
+        { href: href("calendar", lang), label: t.nav.calendar, text: fr ? "Les échéances des 12 prochains mois, à ajouter à votre agenda." : "Deadlines for the next 12 months, to add to your calendar.", icon: "calendar" },
+      ] }],
+    },
+    about: {
+      kicker: "Othmani CPA",
+      title: t.nav.about,
+      text: fr ? "Un cabinet de quartier à Saint-Léonard, dirigé par un CPA auditeur, membre de l'Ordre des CPA du Québec." : "A neighbourhood firm in Saint-Léonard, led by a CPA auditor, member of the Ordre des CPA du Québec.",
+      groups: [{ title: fr ? "Le cabinet" : "The firm", items: [
+        { href: href("about", lang), label: "Zouhaier Othmani", text: fr ? "CPA auditeur, fondateur" : "CPA auditor, founder", icon: "badge" },
+        { href: href("about", lang) + "#equipe", label: fr ? "L'équipe" : "The team", text: fr ? "Les personnes derrière votre dossier" : "The people behind your file", icon: "user" },
+        { href: href("contact", lang), label: t.nav.contact, text: fr ? "8065, boul. Viau, suite 204, Saint-Léonard" : "8065 Viau Blvd., Suite 204, Saint-Léonard", icon: "pin" },
+        { href: href("privacy", lang), label: t.footer.privacy, text: fr ? "Vos renseignements et la Loi 25" : "Your information and Law 25", icon: "shield" },
+      ] }],
+    },
+  };
+  const navItems: NavItem[] = links.map(([k, label]) => ({ key: k, href: href(k, lang), label, current: isCurrent(k), fly: fly[k] }));
 
   return (
     <header className="site-header sticky top-0 z-40">
@@ -36,54 +93,9 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
             <span className="font-display text-[0.95rem] font-semibold tracking-tight text-navy">Othmani CPA</span>
           </Link>
 
-          <nav aria-label={t.nav.mainNav} className="hidden lg:block">
-            <ul className="flex items-center gap-1">
-              {links.map(([k, label]) => {
-                const sub = k === "individuals" || k === "businesses" ? concernsFor(k) : null;
-                return (
-                  <li key={k} className="group">
-                    <Link
-                      href={href(k, lang)}
-                      aria-current={isCurrent(k) ? "page" : undefined}
-                      className={`flex h-[3.25rem] items-center px-3 text-[0.8rem] tracking-[0.01em] transition-colors ${
-                        isCurrent(k) ? "font-semibold text-navy" : "text-ink/75 hover:text-ink"
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                    {sub && (
-                      /* Panneau pleine largeur, comme sur apple.com : visible au survol et au focus clavier */
-                      <div className="invisible absolute inset-x-0 top-full opacity-0 transition-[opacity,visibility] delay-100 duration-300 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                        <div className="border-b border-black/[0.06] bg-[#fbfcfe] shadow-[0_30px_60px_-40px_rgba(23,23,58,.35)]">
-                          <div className="container-site grid gap-10 py-10 md:grid-cols-[14rem_1fr]">
-                            <div>
-                              <p className="text-xs font-medium text-muted">{k === "individuals" ? t.doors.me : t.doors.business}</p>
-                              <Link href={href(k, lang)} className="mt-2 block font-display text-2xl font-semibold text-navy hover:underline underline-offset-4">
-                                {label}
-                              </Link>
-                            </div>
-                            <ul className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
-                              {sub.map((c) => (
-                                <li key={c.key}>
-                                  <Link href={href(c.key, lang)} className="group/item block">
-                                    <span className="flex items-center gap-2 font-display text-lg font-semibold text-ink group-hover/item:text-navy">
-                                      {c[lang].label}
-                                      <Icon name="arrow" className="h-4 w-4 -translate-x-1 opacity-0 transition-all group-hover/item:translate-x-0 group-hover/item:opacity-100" />
-                                    </span>
-                                    <span className="mt-1 block max-w-sm text-sm leading-snug text-muted">{c[lang].teaser}</span>
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+          <div className="hidden lg:block">
+            <NavBar items={navItems} label={t.nav.mainNav} />
+          </div>
 
           <div className="flex items-center gap-1.5">
             <a

@@ -30,7 +30,7 @@ const fr = {
     h1: "Votre CPA à Saint-Léonard, sans le stress.",
     sub: "Particuliers et entreprises. On s'occupe de vos chiffres, vous avancez.",
     scroll: "Défiler",
-    imgAlt: "Bureau lumineux et calme, avec vue sur une rue résidentielle de Montréal bordée d'arbres et d'escaliers extérieurs",
+    imgAlt: "Boulevard commerçant de l'est de Montréal en fin de journée : immeubles de brique, bureaux à l'étage, café et grands arbres",
   },
   doors: {
     h2: "Qu'est-ce qui vous préoccupe ?",
@@ -220,7 +220,7 @@ const en: Dict = {
     h1: "Your CPA in Saint-Léonard, without the stress.",
     sub: "Individuals and businesses. We take care of your numbers, you move forward.",
     scroll: "Scroll",
-    imgAlt: "Bright, calm office looking out on a tree-lined Montreal residential street with outdoor staircases",
+    imgAlt: "East-end Montreal commercial boulevard in late afternoon: brick buildings, upstairs offices, a café and tall trees",
   },
   doors: {
     h2: "What's on your mind?",

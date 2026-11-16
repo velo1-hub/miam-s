@@ -148,3 +148,8 @@ details > summary::-webkit-details-marker { display: none; }
 .site-header[data-scrolled] .header-glass { background: rgba(255,255,255,.85); }
 html:has(#mobile-menu[open]) .clara-fab { display: none; }
 html:has(#mobile-menu[open]) { overflow: hidden; }
+
+/* Panneaux de navigation : éléments en cascade */
+@keyframes navIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.nav-in { animation: navIn .45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms + 60ms); }
+@media (prefers-reduced-motion: reduce) { .nav-in { animation: none; } }

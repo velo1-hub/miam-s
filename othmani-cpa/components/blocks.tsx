@@ -47,11 +47,12 @@ export function CtaBand({ lang, title, text }: { lang: Lang; title?: string; tex
   );
 }
 
-export function Faq({ items, title, id = "faq" }: { items: { q: string; a: string }[]; title: string; id?: string }) {
+export function Faq({ items, title, id = "faq", hideTitle = false }: { items: { q: string; a: string }[]; title: string; id?: string; hideTitle?: boolean }) {
+  const Tag = hideTitle ? "div" : "section";
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="mt-16">
-      <h2 id={`${id}-title`} className="h2">{title}</h2>
-      <div className="mt-8 divide-y divide-line overflow-hidden rounded-[1.5rem] border border-line">
+    <Tag id={id} {...(hideTitle ? {} : { "aria-labelledby": `${id}-title` })} className={hideTitle ? "" : "mt-16"}>
+      {!hideTitle && <h2 id={`${id}-title`} className="h2">{title}</h2>}
+      <div className={hideTitle ? "" : "mt-8"}><div className="divide-y divide-line overflow-hidden rounded-[1.5rem] border border-line">
         {items.map((f, i) => (
           <details key={f.q} className="group bg-white open:bg-paper" open={i === 0}>
             <summary className="flex cursor-pointer items-center justify-between gap-6 px-5 py-5 sm:px-7">
@@ -64,7 +65,8 @@ export function Faq({ items, title, id = "faq" }: { items: { q: string; a: strin
           </details>
         ))}
       </div>
-    </section>
+      </div>
+    </Tag>
   );
 }
 

@@ -1,9 +1,16 @@
+/** Monogramme : un « C » ouvert (CPA) et un crochet bleu ciel (« c'est réglé »). */
 export function LogoMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <svg viewBox="0 0 40 40" className={className} aria-hidden="true" focusable="false">
-      <rect width="40" height="40" rx="11" fill="#2a2a5c" />
-      <circle cx="20" cy="20" r="9.5" fill="none" stroke="#fff" strokeWidth="3" />
-      <path d="M14 27.5L27.5 14" stroke="#6fc1d8" strokeWidth="3" strokeLinecap="round" />
+      <defs>
+        <linearGradient id="lm-g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#34347a" />
+          <stop offset="1" stopColor="#1d1d48" />
+        </linearGradient>
+      </defs>
+      <rect width="40" height="40" rx="11" fill="url(#lm-g)" />
+      <path d="M27.8 13.2A10 10 0 1 0 27.8 26.8" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" />
+      <path d="M16 20.4l3.2 3.2 7.6-8" fill="none" stroke="#6fc1d8" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

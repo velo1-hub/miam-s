@@ -6,7 +6,7 @@ import { SectionHead } from "./blocks";
 export function Team({ lang }: { lang: Lang }) {
   const fr = lang === "fr";
   return (
-    <section className="section" aria-labelledby="team-title">
+    <section id="equipe" className="section" aria-labelledby="team-title">
       <div className="container-site">
         <SectionHead id="team-title" eyebrow={fr ? "L'équipe" : "The team"} title={fr ? "Les personnes derrière votre dossier" : "The people behind your file"} intro={fr ? "Une petite équipe, qui connaît votre dossier et vous répond directement." : "A small team that knows your file and answers you directly."} />
         <ul className="mt-12 grid gap-8 sm:grid-cols-2 lg:max-w-4xl">
