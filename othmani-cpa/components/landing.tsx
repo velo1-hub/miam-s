@@ -21,7 +21,6 @@ import { NextDeadline } from "./NextDeadline";
 
 const HERO = [
   { src: "saint-leonard", w: [800, 1000, 1600], pos: "object-[60%_center]" },
-  { src: "bureau", w: [900, 1600], pos: "object-[65%_center]" },
   { src: "boulevard", w: [900, 1600], pos: "object-center" },
 ];
 const srcset = (h: (typeof HERO)[number]) => h.w.map((w) => `/images/${h.src}-${w}.webp ${w === 800 ? 720 : w}w`).join(", ");
@@ -43,7 +42,7 @@ export function LandingHero({ lang }: { lang: Lang }) {
               src={`/images/${h.src}-1600.webp`}
               srcSet={srcset(h)}
               sizes="100vw"
-              alt={i === 0 ? t.hero.imgAlt : i === 1 ? (fr ? "Bureau lumineux avec vue sur une rue de Montréal" : "Bright office overlooking a Montreal street") : (fr ? "Boulevard commerçant de Montréal bordé d'érables" : "Montreal commercial boulevard lined with maples")}
+              alt={i === 0 ? t.hero.imgAlt : (fr ? "Boulevard commerçant de Montréal bordé d'érables" : "Montreal commercial boulevard lined with maples")}
               width={1600}
               height={895}
               fetchPriority={i === 0 ? "high" : "low"}
