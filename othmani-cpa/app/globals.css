@@ -214,7 +214,7 @@ html:has(#mobile-menu[open]) { overflow: hidden; }
 
 /* Liens de l'en-tête : soulignement qui s'étire depuis le centre */
 .hdr-link::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: .2rem; height: 2px; border-radius: 2px; background: var(--color-sky); transition: left .3s cubic-bezier(.2,.8,.2,1), right .3s cubic-bezier(.2,.8,.2,1); }
-.hdr-link:hover::after, .hdr-link[aria-current="page"]::after { left: .9rem; right: .9rem; }
+.hdr-link:hover::after, .hdr-link[aria-current="page"]::after { left: .75rem; right: .75rem; }
 
 /* Bandeau défilant */
 .ticker { animation: ticker 40s linear infinite; }
@@ -249,3 +249,12 @@ html:not(:has(#mobile-menu[open])) .site-header[data-dark-top]:not([data-scrolle
 .media-card:hover img { transform: scale(1.05); }
 /* Image fixe derrière le bandeau de chiffres (grand écran) */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) { .bg-fixed-lg { background-attachment: fixed; } }
+
+/* En-tête : ce qui s'affiche selon la largeur (évite tout retour à la ligne) */
+.hdr-num { display: none; padding: 0 1rem 0 .65rem; }
+.hdr-tag { display: none; }
+@media (min-width: 768px) { .hdr-num { display: inline; } .hdr-tag { display: block; } }
+@media (min-width: 1280px) { .hdr-num, .hdr-tag { display: none; } }
+@media (min-width: 1400px) { .hdr-num { display: inline; } }
+@media (min-width: 1700px) { .hdr-tag { display: block; } }
+@media (min-width: 1700px) { .hdr-shell { max-width: 90rem; } .site-header[data-scrolled] .hdr-shell { max-width: 88rem; } }

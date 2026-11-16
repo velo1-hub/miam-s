@@ -36,8 +36,8 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
           <Link href={href("home", lang)} aria-label={fr ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="flex shrink-0 items-center gap-2.5 rounded-xl">
             <LogoMark className="hdr-ink h-9 w-auto transition-colors sm:h-10" />
             <span className="flex flex-col leading-none">
-              <span className="hdr-ink font-display text-[1.05rem] font-bold tracking-tight text-navy transition-colors sm:text-[1.2rem]">Othmani CPA <span className="text-[0.65rem] font-medium">Inc.</span></span>
-              <span className="hdr-ink-soft mt-1 hidden text-[0.62rem] font-medium tracking-wide text-ink/70 transition-colors sm:block">Société de comptable professionnel agréé</span>
+              <span className="hdr-ink font-display text-[1.05rem] font-bold tracking-tight whitespace-nowrap text-navy transition-colors sm:text-[1.2rem]">Othmani CPA <span className="text-[0.65rem] font-medium">Inc.</span></span>
+              <span className="hdr-ink-soft mt-1 text-[0.62rem] font-medium tracking-wide whitespace-nowrap text-ink/70 transition-colors hdr-tag">Société de comptable professionnel agréé</span>
             </span>
           </Link>
 
@@ -49,7 +49,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
                   <Link
                     href={href(k, lang)}
                     aria-current={k === routeKey ? "page" : undefined}
-                    className="hdr-link hdr-ink relative rounded-full px-3.5 py-2 text-[0.92rem] font-medium text-ink/80 transition-colors hover:text-navy aria-[current=page]:text-navy"
+                    className="hdr-link hdr-ink relative rounded-full px-3 py-2 text-[0.92rem] font-medium whitespace-nowrap text-ink/80 transition-colors hover:text-navy aria-[current=page]:text-navy"
                   >
                     {label}
                   </Link>
@@ -72,15 +72,15 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
 
             {/* Pastille d'appel (ou de contact tant que le numéro n'est pas configuré) */}
             {phone ? (
-              <a href={`tel:${site.phone.tel}`} className="gbtn phone-pill h-11 gap-2.5 pr-1 pl-1 sm:h-12 sm:pr-5" aria-label={`${t.cta.call} ${site.phone.display}`}>
+              <a href={`tel:${site.phone.tel}`} className="gbtn phone-pill h-11 px-1 sm:h-12" aria-label={`${t.cta.call} ${site.phone.display}`}>
                 <span className="ring-ico"><Icon name="phone" className="h-[1.1rem] w-[1.1rem]" /></span>
-                <span className="hidden text-[0.95rem] font-semibold tracking-wide sm:inline xl:hidden 2xl:inline">{site.phone.display}</span>
+                <span className="hdr-num text-[0.95rem] font-semibold tracking-wide whitespace-nowrap">{site.phone.display}</span>
               </a>
             ) : (
-              <Link href={href("contact", lang)} className="gbtn phone-pill h-11 gap-2.5 pr-1 pl-1 sm:h-12 sm:pr-5">
+              <Link href={href("contact", lang)} aria-label={t.cta.talk} className="gbtn phone-pill h-11 px-1 sm:h-12">
                 <span className="ring-ico"><Icon name="chat" className="h-[1.05rem] w-[1.05rem]" /></span>
-                <span className="hidden text-[0.95rem] font-semibold sm:inline xl:hidden 2xl:inline">{t.cta.talk}</span>
-                <span className="sr-only sm:hidden xl:inline 2xl:hidden">{t.cta.talk}</span>
+                <span className="hdr-num text-[0.95rem] font-semibold whitespace-nowrap">{t.cta.talk}</span>
+                
               </Link>
             )}
 
