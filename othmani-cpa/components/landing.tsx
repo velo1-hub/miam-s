@@ -132,12 +132,14 @@ export function Ticker({ lang }: { lang: Lang }) {
 }
 
 /* ───────────── Les deux portes, en grandes cartes photo ───────────── */
-function MediaDoor({ lang, title, lead, img, alt, items, hub, delay }: { lang: Lang; title: string; lead: string; img: string; alt: string; items: Concern[]; hub: string; delay: string }) {
+function MediaDoor({ lang, title, lead, img, alt, items, hub, delay, pos = "object-center" }: { lang: Lang; title: string; lead: string; img: string; alt: string; items: Concern[]; hub: string; delay: string; pos?: string }) {
   return (
-    <article className="media-card on-dark reveal relative flex min-h-[46rem] flex-col justify-end overflow-hidden rounded-[2rem] bg-navy-950 p-5 sm:min-h-[50rem] sm:p-7" data-delay={delay}>
-      <img src={img} alt={alt} width={900} height={1124} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/60 to-transparent" aria-hidden="true" />
-      <div className="relative">
+    <article className="media-card on-dark reveal relative flex flex-col overflow-hidden rounded-[2rem] bg-navy-950" data-delay={delay}>
+      <div className="relative h-64 overflow-hidden sm:h-[22rem]">
+        <img src={img} alt={alt} width={900} height={1124} loading="lazy" decoding="async" className={`absolute inset-0 h-full w-full object-cover ${pos}`} />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy-950 to-transparent" aria-hidden="true" />
+      </div>
+      <div className="relative flex-1 p-5 pt-2 sm:p-7 sm:pt-3">
         <h3 className="text-4xl font-semibold text-white sm:text-5xl">
           <Link href={hub} className="underline-offset-8 hover:underline">{title}</Link>
         </h3>
@@ -172,8 +174,8 @@ export function MediaDoors({ lang }: { lang: Lang }) {
           <MediaDoor
             lang={lang} title={b.me} delay="1" hub={href("individuals", lang)} items={concernsFor("individuals")}
             lead={fr ? "Vos impôts, vos lettres, vos grands projets de vie." : "Your taxes, your letters, your big life plans."}
-            img="/images/porte-particuliers.webp"
-            alt={fr ? "Fauteuil marine près d'une fenêtre donnant sur une rue résidentielle de Montréal" : "Navy armchair by a window overlooking a Montreal residential street"}
+            img="/images/consultation-1070.webp" pos="object-[40%_52%]"
+            alt={fr ? "Un CPA explique un dossier à un client, assis à une table" : "A CPA explains a file to a client, seated at a table"}
           />
           <MediaDoor
             lang={lang} title={b.biz} delay="2" hub={href("businesses", lang)} items={concernsFor("businesses")}
