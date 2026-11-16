@@ -40,7 +40,7 @@ export function HeroEnhance({ titleId, trackId, mediaId }: { titleId: string; tr
     text.split(/(\s+)/).forEach((part) => {
       if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(" ")); return; }
       const w = document.createElement("span");
-      w.className = /stress/i.test(part) ? "strike" : "inline-block whitespace-nowrap";
+      w.className = "inline-block whitespace-nowrap";
       w.setAttribute("aria-hidden", "true");
       for (const c of part) {
         const s = document.createElement("span");

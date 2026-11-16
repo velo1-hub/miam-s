@@ -14,7 +14,7 @@ import { HeaderScroll } from "./HeaderScroll";
  * - au défilement : capsule vitrée détachée des bords (voir .hdr-shell dans globals.css) ;
  * - le menu ☰ ouvre un grand panneau vitré (fonctionne sans JavaScript grâce à <details>).
  */
-export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; overlay?: boolean }) {
+export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeKey: RouteKey; overlay?: boolean }) {
   const t = dict(lang);
   const fr = lang === "fr";
   const other: Lang = fr ? "en" : "fr";
@@ -29,15 +29,15 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
   const phone = hasPhone();
 
   return (
-    <header className="site-header fixed inset-x-0 top-0 z-40">
+    <header data-dark-top={overlay ? "" : undefined} className="site-header fixed inset-x-0 top-0 z-40">
       <div className="hdr-shell">
         <div className="relative flex items-center justify-between gap-3">
           {/* Logo */}
           <Link href={href("home", lang)} aria-label={fr ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="flex shrink-0 items-center gap-2.5 rounded-xl">
-            <LogoMark className="h-9 w-auto sm:h-10" />
+            <LogoMark className="hdr-ink h-9 w-auto transition-colors sm:h-10" />
             <span className="flex flex-col leading-none">
-              <span className="font-display text-[1.05rem] font-bold tracking-tight text-navy sm:text-[1.2rem]">Othmani CPA <span className="text-[0.65rem] font-medium">Inc.</span></span>
-              <span className="mt-1 hidden text-[0.62rem] font-medium tracking-wide text-ink/70 sm:block">Société de comptable professionnel agréé</span>
+              <span className="hdr-ink font-display text-[1.05rem] font-bold tracking-tight text-navy transition-colors sm:text-[1.2rem]">Othmani CPA <span className="text-[0.65rem] font-medium">Inc.</span></span>
+              <span className="hdr-ink-soft mt-1 hidden text-[0.62rem] font-medium tracking-wide text-ink/70 transition-colors sm:block">Société de comptable professionnel agréé</span>
             </span>
           </Link>
 
@@ -49,7 +49,7 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
                   <Link
                     href={href(k, lang)}
                     aria-current={k === routeKey ? "page" : undefined}
-                    className="hdr-link relative rounded-full px-3.5 py-2 text-[0.92rem] font-medium text-ink/80 transition-colors hover:text-navy aria-[current=page]:text-navy"
+                    className="hdr-link hdr-ink relative rounded-full px-3.5 py-2 text-[0.92rem] font-medium text-ink/80 transition-colors hover:text-navy aria-[current=page]:text-navy"
                   >
                     {label}
                   </Link>

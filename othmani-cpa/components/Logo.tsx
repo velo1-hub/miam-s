@@ -2,7 +2,6 @@
  * Logo « OC » d'Othmani CPA Inc., redessiné en vectoriel d'après la carte professionnelle :
  * deux anneaux marine ouverts, chacun prolongé par un parallélogramme bleu ciel.
  */
-const NAVY = "#2a2a5c";
 const SKY = "#56bfdc";
 
 function Letter({ cx, color, c = false }: { cx: number; color: string; c?: boolean }) {
@@ -25,9 +24,9 @@ function Letter({ cx, color, c = false }: { cx: number; color: string; c?: boole
 }
 
 export function LogoMark({ className = "h-9 w-auto", light = false }: { className?: string; light?: boolean }) {
-  const color = light ? "#ffffff" : NAVY;
+  const color = light ? "#ffffff" : "currentColor";
   return (
-    <svg viewBox="0 0 128 63" className={className} aria-hidden="true" focusable="false">
+    <svg viewBox="0 0 128 63" className={`${light ? "" : "text-navy"} ${className}`} aria-hidden="true" focusable="false">
       <defs>
         {/* Le « C » : on retire le quart inférieur droit de l'anneau */}
         <clipPath id="oc-clip-c">
