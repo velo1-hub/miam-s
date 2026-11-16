@@ -199,15 +199,15 @@ export function Manifesto({ lang }: { lang: Lang }) {
           <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-sky/40 to-navy/10 blur-2xl" aria-hidden="true" />
           <div className="media-card relative overflow-hidden rounded-[2rem]">
             <img
-              src="/images/bureau-table-1600.webp"
-              srcSet="/images/bureau-table-900.webp 900w, /images/bureau-table-1600.webp 1600w"
+              src="/images/consultation-1070.webp"
+              srcSet="/images/consultation-700.webp 700w, /images/consultation-1070.webp 1070w"
               sizes="(max-width: 1023px) 92vw, 44vw"
-              alt={fr ? "Bureau calme et lumineux : table en chêne, dossiers, ordinateur et fauteuil marine" : "Calm, bright office: oak table, folders, laptop and a navy armchair"}
-              width={1600} height={895} loading="lazy" decoding="async"
-              className="aspect-[4/5] w-full object-cover object-[55%_center] sm:aspect-[4/3] lg:aspect-[4/5]"
+              alt={fr ? "Un CPA explique un dossier à un client, assis à une table dans un bureau lumineux" : "A CPA explains a file to a client, seated at a table in a bright office"}
+              width={1070} height={1470} loading="lazy" decoding="async"
+              className="aspect-[4/5] w-full object-cover object-[35%_center]"
             />
           </div>
-          <ol className="glass absolute inset-x-4 bottom-4 grid gap-2 rounded-2xl p-4 sm:inset-x-6 sm:bottom-6 sm:grid-cols-3 sm:gap-4 sm:p-5">
+          <ol className="absolute inset-x-4 bottom-4 grid gap-2 rounded-2xl border border-white/80 bg-white/90 p-4 backdrop-blur-xl sm:inset-x-6 sm:bottom-6 sm:grid-cols-3 sm:gap-4 sm:p-5">
             {m.points.map((p, i) => (
               <li key={p.t}>
                 <span className="font-display text-xs font-semibold text-navy/70">0{i + 1}</span>
