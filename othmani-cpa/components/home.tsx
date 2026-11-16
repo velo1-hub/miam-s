@@ -424,7 +424,8 @@ export function ContactDetails({ lang, sub = "h3" }: { lang: Lang; sub?: "h2" | 
       </div>
       <div className={row}>
         <span className={ico}><Icon name="phone" className="h-5 w-5" /></span>
-        <div><H className="font-display font-semibold">{t.phoneLabel}</H><p className="mt-1 text-muted"><PhoneLink lang={lang} className="font-medium text-navy underline-offset-4 hover:underline" /></p></div>
+        <div><H className="font-display font-semibold">{t.phoneLabel}</H><p className="mt-1 text-muted"><PhoneLink lang={lang} className="font-medium text-navy underline-offset-4 hover:underline" /></p>
+          <p className="mt-0.5 text-sm text-muted">{lang === "fr" ? "Cellulaire : " : "Mobile: "}<a href={`tel:${site.mobile.tel}`} className="font-medium text-navy underline-offset-4 hover:underline">{site.mobile.display}</a></p></div>
       </div>
       <div className={row}>
         <span className={ico}><Icon name="mail" className="h-5 w-5" /></span>

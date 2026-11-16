@@ -143,7 +143,7 @@ const fr = {
     back: { individuals: "Toutes les préoccupations des particuliers", businesses: "Toutes les préoccupations des entreprises" },
   },
   footer: {
-    tagline: "Cabinet de comptables professionnels agréés à Montréal. Particuliers et entreprises, partout au Canada.",
+    tagline: "Société de comptable professionnel agréé à Montréal. Particuliers et entreprises, partout au Canada.",
     served: "Nous servons l'ensemble du Grand Montréal — dont Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies, Laval et Longueuil — et des clients partout au Canada, à distance.",
     public: "Mandats réalisés auprès d'organismes publics.",
     nav: "Le cabinet",

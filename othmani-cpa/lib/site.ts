@@ -8,7 +8,7 @@ export const site = {
   owner: "Zouhaier Othmani",
   ownerTitle: { fr: "CPA auditeur", en: "CPA auditor" },
   /** Domaine définitif, sans barre oblique finale. À COMPLÉTER si différent. */
-  url: "https://www.othmanicpa.ca",
+  url: "https://www.othmanicpa.com",
   address: {
     street: "8065, boul. Viau, suite 204",
     streetEn: "8065 Viau Blvd., Suite 204",
@@ -19,9 +19,11 @@ export const site = {
   },
   geo: { lat: 45.5856, lng: -73.6038 },
   /** À COMPLÉTER : ex. { display: "514 555-1234", tel: "+15145551234" } */
-  phone: { display: "", tel: "" },
+  phone: { display: "514 448-0924", tel: "+15144480924" },
+  /** Cellulaire de Zouhaier (carte professionnelle) */
+  mobile: { display: "514 299-2592", tel: "+15142992592" },
   /** À COMPLÉTER : ex. "info@othmanicpa.ca" */
-  email: "",
+  email: "zouhaier@othmanicpa.com",
   /** Heures d'ouverture — À CONFIRMER par le cabinet. */
   hours: [
     { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "17:00" },

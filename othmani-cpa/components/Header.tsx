@@ -34,10 +34,10 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
         <div className="relative flex items-center justify-between gap-3">
           {/* Logo */}
           <Link href={href("home", lang)} aria-label={fr ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="flex shrink-0 items-center gap-2.5 rounded-xl">
-            <LogoMark className="h-10 w-10 sm:h-11 sm:w-11" />
+            <LogoMark className="h-9 w-auto sm:h-10" />
             <span className="flex flex-col leading-none">
-              <span className="font-display text-[1.05rem] font-bold tracking-[0.02em] text-navy uppercase sm:text-[1.15rem]">Othmani</span>
-              <span className="mt-0.5 text-[0.72rem] font-medium tracking-[0.16em] text-ink/70 uppercase sm:text-[0.78rem]">CPA<span className="hidden sm:inline"> · Saint-Léonard</span></span>
+              <span className="font-display text-[1.05rem] font-bold tracking-tight text-navy sm:text-[1.2rem]">Othmani CPA <span className="text-[0.65rem] font-medium">Inc.</span></span>
+              <span className="mt-1 hidden text-[0.62rem] font-medium tracking-wide text-ink/70 sm:block">Société de comptable professionnel agréé</span>
             </span>
           </Link>
 

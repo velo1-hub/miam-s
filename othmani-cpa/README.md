@@ -21,7 +21,7 @@ Tout se règle dans **`lib/site.ts`** (un champ vide est masqué du site et du S
 
 | Champ | Quoi |
 |---|---|
-| `phone`, `email` | Téléphone et courriel du cabinet (affichés « [à venir] » pour l'instant) |
+| `phone`, `mobile`, `email` | Coordonnées tirées de la carte professionnelle (514 448-0924, 514 299-2592, zouhaier@othmanicpa.com) |
 | `hours`, `hoursLabel` | Heures d'ouverture — **valeurs provisoires** (lun-ven 9 h-17 h) à confirmer |
 | `url` | Domaine définitif (sert aux canonical, hreflang, sitemap) |
 | `geo` | Coordonnées GPS approximatives du 8065, boul. Viau — à vérifier |
