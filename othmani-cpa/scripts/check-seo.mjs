@@ -1,18 +1,18 @@
 /**
- * Vérifie le site généré (out/) : title < 60, description < 155, un seul H1, canonical,
+ * Vérifie les pages générées (.next/server/app) : title < 60, description < 155, un seul H1, canonical,
  * hreflang fr-CA/en-CA, lang, alt sur chaque image, JSON-LD valide, titles et descriptions uniques.
  * Usage : npm run build && npm run check
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const root = new URL("../out/", import.meta.url).pathname;
+const root = new URL("../.next/server/app/", import.meta.url).pathname;
 const files = [];
 (function walk(d) {
   for (const f of readdirSync(d)) {
     const p = join(d, f);
-    if (statSync(p).isDirectory()) { if (!["_next", "_not-found", "404"].includes(f)) walk(p); }
-    else if (f === "index.html") files.push(p);
+    if (statSync(p).isDirectory()) { if (!["api"].includes(f)) walk(p); }
+    else if (f.endsWith(".html") && !/^_|^404/.test(f)) files.push(p);
   }
 })(root);
 
@@ -22,8 +22,9 @@ let errors = 0;
 const err = (f, m) => { errors++; console.log(`✗ ${f}: ${m}`); };
 
 for (const file of files.sort()) {
-  const rel = "/" + file.slice(root.length).replace(/index\.html$/, "");
+  const rel = ("/" + file.slice(root.length).replace(/\.html$/, "/")).replace(/^\/index\/$/, "/").replace(/^\/en\/$/, "/en/");
   const html = readFileSync(file, "utf8");
+  if (/<meta name="robots" content="noindex/.test(html)) { console.log(`– ${rel.padEnd(30)} (noindex, ignorée)`); continue; }
   const title = decode(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
   const desc = decode(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "");
   const h1s = (html.match(/<h1[\s>]/g) || []).length;

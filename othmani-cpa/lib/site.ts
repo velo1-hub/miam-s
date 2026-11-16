@@ -45,12 +45,12 @@ export const site = {
    */
   heroVideo: { webm: "", mp4: "" },
   /**
-   * Espace client Pilote Fiscal. L'application n'est pas encore prête : tant que `portalEnabled`
-   * vaut false, le site n'en parle nulle part (boutons, section, textes). Passez à true et
-   * indiquez `clientPortalUrl` le jour du lancement.
+   * Espace client Pilote Fiscal. Il est construit (/espace-client/ et /en/client-portal/) mais
+   * tant que `portalEnabled` vaut false, le site n'en parle nulle part (boutons, section, textes).
+   * Passez à true le jour du lancement, une fois la base de données branchée (voir README).
    */
   portalEnabled: false,
-  /** Lien vers l'espace client Pilote Fiscal. */
+  /** Laisser vide pour l'espace client intégré au site ; sinon, lien vers un portail externe. */
   clientPortalUrl: "",
   /** Fiche Google Business : lien public et lien « Laisser un avis ». À COMPLÉTER. */
   googleReviewsUrl: "",
@@ -72,9 +72,9 @@ export type Lang = "fr" | "en";
 
 export const hasPhone = () => Boolean(site.phone.tel);
 export const hasEmail = () => Boolean(site.email);
-export const portalOn = () => site.portalEnabled && Boolean(site.clientPortalUrl);
+export const portalOn = () => site.portalEnabled;
 export const portalHref = (lang: Lang) =>
-  site.clientPortalUrl || (lang === "fr" ? "/#pilote-fiscal" : "/en/#pilote-fiscal");
+  site.clientPortalUrl || (lang === "fr" ? "/espace-client/" : "/en/client-portal/");
 export const abs = (path: string) => site.url + path;
 
 /**

@@ -79,7 +79,7 @@ components/           gabarits et composants (Clara, bannière Loi 25, formulair
 
 - **Image d'accueil** : `public/images/saint-leonard-*.webp`, générée avec Higgsfield (illustration d'un boulevard de l'est de Montréal, pas une photo de l'immeuble réel).
 
-- **Actualités économiques** (accueil) : titres lus automatiquement dans les fils officiels (Banque du Canada, Statistique Canada, ARC, Finances Canada), plus le taux directeur et le dollar américain. Sur Vercel, l'accueil se régénère au plus une fois par heure, sans intervention. Sources et réglages : `lib/news.ts`. `npm run build:static` produit toujours un export 100 % statique (la section affiche alors les liens vers les sources).
+- **Actualités économiques** (accueil) : titres lus automatiquement dans les fils officiels (Banque du Canada, Statistique Canada, ARC, Finances Canada), plus le taux directeur et le dollar américain. Sur Vercel, l'accueil se régénère au plus une fois par heure, sans intervention. Sources et réglages : `lib/news.ts`.
 - **Avis Google** : la section est retirée de l'accueil pour l'instant (composant `Reviews` conservé dans `components/home.tsx`).
 
 ## Choix techniques
@@ -89,3 +89,36 @@ components/           gabarits et composants (Clara, bannière Loi 25, formulair
 - **Performance mobile** : images WebP, `lazy` sous la ligne de flottaison, vidéo jamais chargée sur téléphone, en mode « économie de données » ou si l'utilisateur réduit les animations.
 - **Accessibilité** : contraste AA, lien d'évitement, focus visible, menu mobile et FAQ en `<details>` (clavier, sans JS), `prefers-reduced-motion` respecté. Audit axe-core : 0 violation.
 - **Contenu fiscal** : informations générales, prudentes, avec mention « ne remplace pas un avis adapté ». À relire par Zouhaier avant publication.
+
+## Système de gestion et Clara « agent » (construits, éteints par défaut)
+
+Tout est dans le code, mais rien ne s'active tant que les variables ci-dessous ne sont pas définies dans Vercel. Sans elles, le site se comporte exactement comme avant.
+
+| Élément | Adresse | Rôle |
+|---|---|---|
+| Tableau de bord du cabinet | `/gestion/` | Demandes (formulaire + Clara), dossiers, documents demandés, fichiers, messages, notes internes, inscrits aux rappels (export CSV). Réservé aux courriels de la table `staff`. |
+| Espace client Pilote Fiscal | `/espace-client/` · `/en/client-portal/` | Le client suit son dossier (7 étapes), voit les documents à fournir, dépose ses fichiers et écrit au cabinet. Il ne voit que les dossiers liés à son courriel. |
+| Formulaires | `/api/lead/` · `/api/reminder/` | Le formulaire de contact et l'inscription aux rappels arrivent dans le tableau de bord. |
+| Clara agent | `/api/clara/` | Répond aux questions de comptabilité et de fiscalité, prend les demandes avec l'accord de la personne. **Ne propose ni ne confirme jamais de date ou d'heure** : l'équipe rappelle. Consignes : `lib/claraPrompt.ts`. |
+
+Connexion sans mot de passe (lien envoyé par courriel). Ces pages ne sont ni indexées ni liées depuis le site tant que `portalEnabled` vaut `false` dans `lib/site.ts`.
+
+### Mise en service
+
+1. **Base de données** : créer un projet Supabase en région **Canada (Central)**, puis exécuter `supabase/migrations/0001_gestion.sql` (éditeur SQL). Le script crée les tables, les règles d'accès (RLS) et le stockage privé `documents`.
+2. **Équipe** : `insert into public.staff (email, name) values ('zouhaier@othmanicpa.com', 'Zouhaier Othmani');` (une ligne par membre).
+3. **Supabase → Authentication → URL Configuration** : mettre l'adresse du site dans *Site URL* et *Redirect URLs*.
+4. **Vercel → Settings → Environment Variables**, puis redéployer :
+
+| Variable | Valeur | Active |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase | formulaires, tableau de bord, espace client |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clé publique (anon / publishable) | idem |
+| `ANTHROPIC_API_KEY` | clé API Anthropic | Clara agent |
+| `NEXT_PUBLIC_CLARA_AGENT` | `on` | Clara agent (toute autre valeur : Clara locale) |
+| `CLARA_MODEL` | facultatif | modèle utilisé par Clara |
+| `RESEND_API_KEY`, `LEADS_NOTIFY_EMAIL`, `LEADS_FROM_EMAIL` | facultatif | courriel d'avis au cabinet à chaque nouvelle demande |
+
+5. **Lancement de l'espace client** : passer `portalEnabled` à `true` dans `lib/site.ts`. Le bouton et la section « Pilote Fiscal » apparaissent alors sur le site.
+
+Avant d'activer : mettre à jour la politique de confidentialité (hébergeur de la base, assistant automatisé, durée de conservation) et la faire valider par le cabinet. Aucune clé secrète de base de données n'est utilisée par le site : la sécurité repose sur les règles RLS, testées dans le script.

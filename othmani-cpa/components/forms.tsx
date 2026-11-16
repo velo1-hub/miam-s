@@ -7,13 +7,17 @@ import { site, type Lang } from "@/lib/site";
 
 type Status = "idle" | "sending" | "ok" | "error" | "off";
 
-async function submit(e: FormEvent<HTMLFormElement>, setStatus: (s: Status) => void) {
+/** Base de données branchée (variables Vercel) : les formulaires arrivent dans le tableau de bord du cabinet. */
+const backend = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+async function submit(e: FormEvent<HTMLFormElement>, setStatus: (s: Status) => void, api: string) {
   e.preventDefault();
   const form = e.currentTarget;
-  if (!site.formEndpoint) { setStatus("off"); return; }
+  const endpoint = backend ? api : site.formEndpoint;
+  if (!endpoint) { setStatus("off"); return; }
   setStatus("sending");
   try {
-    const res = await fetch(site.formEndpoint, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } });
+    const res = await fetch(endpoint, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } });
     if (!res.ok) throw new Error(String(res.status));
     form.reset();
     setStatus("ok");
@@ -39,7 +43,7 @@ export function ContactForm({ lang }: { lang: Lang }) {
   const [status, setStatus] = useState<Status>("idle");
   const req = <span className="text-[#a3261f]" aria-hidden="true"> *</span>;
   return (
-    <form action={site.formEndpoint || undefined} method="post" onSubmit={(e) => submit(e, setStatus)} className="space-y-5" noValidate={false}>
+    <form action={site.formEndpoint || undefined} method="post" onSubmit={(e) => submit(e, setStatus, "/api/lead/")} className="space-y-5" noValidate={false}>
       <input type="hidden" name="_subject" value={lang === "fr" ? "Nouveau message du site" : "New website message"} />
       <input type="hidden" name="langue" value={lang} />
       {/* Piège à robots : laissé vide par les humains */}
@@ -98,7 +102,7 @@ export function ReminderForm({ lang, dark = false }: { lang: Lang; dark?: boolea
   const id = useId();
   const [status, setStatus] = useState<Status>("idle");
   return (
-    <form action={site.formEndpoint || undefined} method="post" onSubmit={(e) => submit(e, setStatus)}>
+    <form action={site.formEndpoint || undefined} method="post" onSubmit={(e) => submit(e, setStatus, "/api/reminder/")}>
       <input type="hidden" name="_subject" value={lang === "fr" ? "Inscription aux rappels fiscaux" : "Tax reminder sign-up"} />
       <input type="hidden" name="type" value="rappel" />
       <input type="hidden" name="langue" value={lang} />

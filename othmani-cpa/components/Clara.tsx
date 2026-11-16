@@ -47,12 +47,35 @@ function searchFaq(q: string, lang: Lang) {
   return best;
 }
 
-type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string } };
+/** Clara « agent » : éteinte tant que NEXT_PUBLIC_CLARA_AGENT n'est pas « on » dans Vercel. */
+const AGENT = process.env.NEXT_PUBLIC_CLARA_AGENT === "on";
+const agentText = {
+  fr: {
+    role: "Assistante virtuelle du cabinet",
+    hello: "Bonjour ! Je suis Clara, l'assistante virtuelle du cabinet. Posez-moi votre question de comptabilité ou d'impôt. Si vous le souhaitez, je transmets aussi votre demande à l'équipe.",
+    notice: "Clara est un outil automatique (intelligence artificielle) : information générale, pas un avis personnalisé. N'écrivez ni NAS ni renseignement bancaire. Vos coordonnées ne sont transmises au cabinet qu'avec votre accord.",
+    typing: "Clara écrit…",
+    sent: "Demande transmise à l'équipe",
+  },
+  en: {
+    role: "The firm's virtual assistant",
+    hello: "Hello! I'm Clara, the firm's virtual assistant. Ask me your accounting or tax question. If you like, I can also pass your request on to the team.",
+    notice: "Clara is an automated tool (artificial intelligence): general information, not personalized advice. Do not enter your SIN or banking details. Your contact details are only sent to the firm with your consent.",
+    typing: "Clara is typing…",
+    sent: "Request sent to the team",
+  },
+};
+
+type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string }; badge?: string };
 
 export function Clara({ lang }: { lang: Lang }) {
-  const t = dict(lang).clara;
+  const base = dict(lang).clara;
+  const t = AGENT ? { ...base, ...agentText[lang] } : { ...base, typing: "", sent: "" };
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([{ from: "clara", text: t.hello }]);
+  const [busy, setBusy] = useState(false);
+  const leadSaved = useRef(false);
+  const agentDown = useRef(false);
   const [input, setInput] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -102,11 +125,35 @@ export function Clara({ lang }: { lang: Lang }) {
     return { from: "clara", text: t.fallback, link: { key: "contact", label: t.goContact } };
   };
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     const q = text.trim();
-    if (!q) return;
-    setMsgs((m) => [...m, { from: "me", text: q }, answer(q)]);
+    if (!q || busy) return;
     setInput("");
+    if (!AGENT || agentDown.current) {
+      setMsgs((m) => [...m, { from: "me", text: q }, answer(q)]);
+      return;
+    }
+    const history = [...msgs.slice(1), { from: "me" as const, text: q }];
+    setMsgs((m) => [...m, { from: "me", text: q }]);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/clara/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lang, leadSaved: leadSaved.current, messages: history.map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text })) }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as { reply?: string; lead?: boolean };
+      if (!data.reply) throw new Error("empty");
+      if (data.lead) leadSaved.current = true;
+      setMsgs((m) => [...m, { from: "clara", text: data.reply!, badge: data.lead ? t.sent : undefined }]);
+    } catch {
+      // L'agent ne répond pas : Clara continue avec la recherche locale dans les pages.
+      agentDown.current = true;
+      setMsgs((m) => [...m, answer(q)]);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const choose = (key: RouteKey) =>
@@ -141,7 +188,8 @@ export function Clara({ lang }: { lang: Lang }) {
               <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
                 <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.93rem] leading-relaxed ${m.from === "me" ? "bg-navy text-white" : "border border-white bg-white/80 text-ink"}`}>
                   {m.quote && <p className="mb-1.5 text-xs font-semibold tracking-wide text-navy/80 uppercase">{m.quote}</p>}
-                  <p>{m.text}</p>
+                  <p className="whitespace-pre-line">{m.text}</p>
+                  {m.badge && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-navy"><Icon name="check" className="h-3.5 w-3.5" /> {m.badge}</p>}
                   {m.link && (
                     <Link href={m.link.key ? href(m.link.key, lang) : m.link.href!} onClick={() => setOpen(false)} className="mt-2 inline-flex items-center gap-1.5 font-semibold text-navy underline underline-offset-4">
                       {m.link.label} <Icon name="arrow" className="h-4 w-4" />
@@ -150,6 +198,7 @@ export function Clara({ lang }: { lang: Lang }) {
                 </div>
               </div>
             ))}
+            {busy && <p className="px-1 text-sm text-muted">{t.typing}</p>}
             <div>
               <p className="sr-only">{t.chips}</p>
               <div className="flex flex-wrap gap-2 pt-1">
@@ -166,8 +215,8 @@ export function Clara({ lang }: { lang: Lang }) {
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="border-t border-line p-3">
             <div className="flex gap-2">
               <label htmlFor={`${panelId}-q`} className="sr-only">{t.placeholder}</label>
-              <input id={`${panelId}-q`} ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder={t.placeholder} autoComplete="off" className="field min-h-11 flex-1 py-2" maxLength={300} />
-              <button type="submit" className="btn-primary min-h-11 px-4" aria-label={t.send}><Icon name="arrow" className="h-5 w-5" /></button>
+              <input id={`${panelId}-q`} ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder={t.placeholder} autoComplete="off" className="field min-h-11 flex-1 py-2" maxLength={AGENT ? 1200 : 300} />
+              <button type="submit" disabled={busy} className="btn-primary min-h-11 px-4" aria-label={t.send}><Icon name="arrow" className="h-5 w-5" /></button>
             </div>
             <p className="mt-2 px-1 text-xs leading-snug text-muted">{t.notice}</p>
           </form>
