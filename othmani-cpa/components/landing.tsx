@@ -204,10 +204,10 @@ export function Manifesto({ lang }: { lang: Lang }) {
               sizes="(max-width: 1023px) 92vw, 44vw"
               alt={fr ? "Un CPA explique un dossier à un client, assis à une table dans un bureau lumineux" : "A CPA explains a file to a client, seated at a table in a bright office"}
               width={1070} height={1470} loading="lazy" decoding="async"
-              className="aspect-[4/5] w-full object-cover object-[35%_center]"
+              className="aspect-[4/5] w-full object-cover object-[35%_60%]"
             />
           </div>
-          <ol className="absolute inset-x-4 bottom-4 grid gap-2 rounded-2xl border border-white/80 bg-white/90 p-4 backdrop-blur-xl sm:inset-x-6 sm:bottom-6 sm:grid-cols-3 sm:gap-4 sm:p-5">
+          <ol className="relative mt-3 grid grid-cols-3 gap-3 rounded-2xl border border-line bg-white p-4 sm:absolute sm:inset-x-6 sm:bottom-6 sm:mt-0 sm:gap-4 sm:border-white/80 sm:bg-white/90 sm:p-5 sm:backdrop-blur-xl">
             {m.points.map((p, i) => (
               <li key={p.t}>
                 <span className="font-display text-xs font-semibold text-navy/70">0{i + 1}</span>
