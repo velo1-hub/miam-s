@@ -25,3 +25,15 @@ export function NextDeadline({ lang, buildDate, light = false }: { lang: Lang; b
     </div>
   );
 }
+
+/** Version texte seul : « 15 déc. 2026 », pour les lignes de grand livre. */
+export function NextDeadlineInline({ lang, buildDate }: { lang: Lang; buildDate: string }) {
+  const [today, setToday] = useState(buildDate);
+  useEffect(() => {
+    const d = new Date();
+    setToday(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+  }, []);
+  const d = upcoming(today)[0];
+  if (!d) return null;
+  return <time dateTime={d.date}>{formatDate(d.date, lang, { day: "numeric", month: "short" })}</time>;
+}

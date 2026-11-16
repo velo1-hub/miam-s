@@ -35,6 +35,9 @@ export const landing = {
     manifesto: {
       eyebrow: "Notre philosophie",
       big: "Vous ne cherchez pas un comptable. Vous voulez vous débarrasser d'un stress.",
+      pre: "Vous ne cherchez pas un ",
+      struck: "comptable",
+      post: ". Vous voulez vous débarrasser d'un stress.",
       text: [
         "Une lettre de l'impôt qu'on n'ose pas ouvrir. Des reçus dans une boîte à chaussures. Une entreprise qui grandit plus vite que la paperasse. On connaît.",
         "Notre travail, c'est de prendre ce poids sur nos épaules. On vous explique les choses en mots simples, on s'occupe des chiffres et des échéances, et vous retrouvez l'esprit tranquille.",
@@ -94,6 +97,9 @@ export const landing = {
     manifesto: {
       eyebrow: "Our philosophy",
       big: "You're not looking for an accountant. You want to get rid of a worry.",
+      pre: "You're not looking for an ",
+      struck: "accountant",
+      post: ". You want to get rid of a worry.",
       text: [
         "A letter from the tax authorities you don't dare open. Receipts in a shoebox. A business growing faster than the paperwork. We get it.",
         "Our job is to take that weight off your shoulders. We explain things in plain language, handle the numbers and the deadlines, and you get your peace of mind back.",

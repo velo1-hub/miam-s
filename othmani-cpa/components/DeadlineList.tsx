@@ -10,7 +10,7 @@ import type { Lang } from "@/lib/site";
  * Liste des prochaines échéances. Le HTML statique contient les dates calculées au moment
  * de la génération ; le navigateur les recalcule ensuite selon la date du jour.
  */
-export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "cards" }: { lang: Lang; buildDate: string; limit?: number; audience?: Deadline["audience"]; variant?: "cards" | "rows" }) {
+export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "cards" }: { lang: Lang; buildDate: string; limit?: number; audience?: Deadline["audience"]; variant?: "cards" | "rows" | "ledger" }) {
   const t = dict(lang).dates;
   const [today, setToday] = useState(buildDate);
   useEffect(() => {
@@ -19,6 +19,29 @@ export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "
   }, []);
   const items = upcoming(today, audience).slice(0, limit);
   const aud = (a: Deadline["audience"]) => (a === "both" ? t.both : a === "individuals" ? t.individuals : t.businesses);
+
+  if (variant === "ledger") {
+    return (
+      <ol className="border-t-2 border-navy">
+        {items.map((d) => (
+          <li key={d.date + d.fr.title} className="reveal grid gap-x-8 gap-y-2 border-b border-navy/15 py-6 md:grid-cols-[11rem_1fr_auto] md:items-baseline">
+            <time dateTime={d.date} className="flex items-baseline gap-2 font-display text-navy">
+              <span className="text-5xl leading-none font-semibold tabular-nums">{formatDate(d.date, lang, { day: "2-digit" })}</span>
+              <span className="text-sm font-semibold tracking-[0.12em] uppercase">{formatDate(d.date, lang, { month: "short", year: "numeric" })}</span>
+            </time>
+            <div>
+              <h3 className="font-display text-xl font-semibold">{d[lang].title}</h3>
+              <p className="mt-1 max-w-2xl leading-relaxed text-muted">{d[lang].detail}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 md:flex-col md:items-end">
+              <p className="text-xs font-semibold tracking-[0.12em] text-navy/80 uppercase">{aud(d.audience)}</p>
+              <AddToCalendar lang={lang} date={d.date} title={d[lang].title} small />
+            </div>
+          </li>
+        ))}
+      </ol>
+    );
+  }
 
   if (variant === "rows") {
     return (

@@ -31,7 +31,7 @@ export function HeroEnhance({ titleId, trackId, mediaId }: { titleId: string; tr
     // Titre lettre par lettre
     const h1 = document.getElementById(titleId);
     const track = document.getElementById(trackId);
-    if (!h1 || !track || reduce) return;
+    if (!h1 || !track) return;
     const text = h1.textContent ?? "";
     h1.setAttribute("aria-label", text);
     const frag = document.createDocumentFragment();
@@ -40,7 +40,7 @@ export function HeroEnhance({ titleId, trackId, mediaId }: { titleId: string; tr
     text.split(/(\s+)/).forEach((part) => {
       if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(" ")); return; }
       const w = document.createElement("span");
-      w.className = "inline-block whitespace-nowrap";
+      w.className = /stress/i.test(part) ? "strike" : "inline-block whitespace-nowrap";
       w.setAttribute("aria-hidden", "true");
       for (const c of part) {
         const s = document.createElement("span");
@@ -51,6 +51,19 @@ export function HeroEnhance({ titleId, trackId, mediaId }: { titleId: string; tr
     h1.textContent = "";
     h1.appendChild(frag);
     h1.classList.add("typing");
+    if (reduce) { chars.forEach((c) => c.classList.add("on")); h1.classList.add("typed"); return; }
+
+    // Petit écran : le héros n'est pas « collant », le titre s'écrit donc tout seul à l'arrivée
+    if (!window.matchMedia("(min-width: 1024px)").matches) {
+      let i = 0;
+      const id = setInterval(() => {
+        if (i > 0) chars[i - 1].classList.remove("cur");
+        if (i >= chars.length) { clearInterval(id); h1.classList.add("typed"); return; }
+        chars[i].classList.add("on", "cur");
+        i++;
+      }, 38);
+      return () => clearInterval(id);
+    }
 
     let shown = -1;
     let raf = 0;
@@ -66,6 +79,7 @@ export function HeroEnhance({ titleId, trackId, mediaId }: { titleId: string; tr
         c.classList.toggle("on", i < n);
         c.classList.toggle("cur", i === n - 1 && n < chars.length);
       });
+      h1.classList.toggle("typed", n >= chars.length);
       shown = n;
     };
     const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
