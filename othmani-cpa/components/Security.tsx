@@ -13,15 +13,30 @@ export function Security({ lang }: { lang: Lang }) {
       <div className="container-site">
         <SectionHead id="security-title" eyebrow={s.eyebrow} title={s.h2} intro={s.intro} />
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-[1fr_2fr]">
+        <div className="mt-12 grid gap-5 lg:grid-cols-[1.05fr_2fr]">
           {/* Le pilier : le secret professionnel */}
-          <div className="reveal on-dark mesh-dark relative flex flex-col justify-between overflow-hidden rounded-[2rem] p-8 text-white sm:p-10">
-            <div className="absolute -right-10 -bottom-10 text-white/[0.06]" aria-hidden="true"><Icon name="shield" className="h-64 w-64" strokeWidth={1} /></div>
-            <span className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-sky text-navy"><Icon name="shield" className="h-8 w-8" /></span>
-            <div className="relative mt-10">
-              <h3 className="text-3xl leading-tight font-semibold text-white">{s.pillar.t}</h3>
-              <p className="mt-4 text-lg leading-relaxed text-white/85">{s.pillar.d}</p>
+          <div className="reveal on-dark mesh-dark relative flex flex-col overflow-hidden rounded-[2rem] p-8 text-white sm:p-10">
+            <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-sky/25 blur-3xl" aria-hidden="true" />
+            <div className="absolute -right-12 -bottom-12 text-white/[0.05]" aria-hidden="true"><Icon name="shield" className="h-72 w-72" strokeWidth={1} /></div>
+            <div className="relative flex items-center gap-4">
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-sky text-navy"><Icon name="shield" className="h-7 w-7" /></span>
+              <h3 className="text-2xl leading-tight font-semibold text-white sm:text-3xl">{s.pillar.t}</h3>
             </div>
+            <p className="relative mt-6 text-lg leading-relaxed text-white/85">{s.pillar.d}</p>
+            <div className="relative mt-8 flex-1 border-t border-white/15 pt-7">
+              <p className="text-xs font-semibold tracking-[0.14em] text-sky uppercase">{s.pillar.coversTitle}</p>
+              <ul className="mt-4 space-y-3.5">
+                {s.pillar.covers.map((c) => (
+                  <li key={c} className="flex items-start gap-3 leading-snug text-white/90">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-sky"><Icon name="check" className="h-3 w-3" strokeWidth={3} /></span>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <p className="glass-dark relative mt-8 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-white/85">
+              <Icon name="badge" className="h-5 w-5 shrink-0 text-sky" /> {s.pillar.foot}
+            </p>
           </div>
 
           <ul className="grid gap-5 sm:grid-cols-2">
