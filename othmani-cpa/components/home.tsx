@@ -17,85 +17,60 @@ import { SectionHead } from "./blocks";
 /* 1. Héros ─────────────────────────────────────────────── */
 export function Hero({ lang }: { lang: Lang }) {
   const t = dict(lang);
+  const fr = lang === "fr";
   return (
-    <section id="hero-track" className="hero-track relative bg-navy-950" aria-labelledby="hero-title">
-      <div className="on-dark sticky top-0 flex h-[100svh] min-h-[38rem] flex-col overflow-hidden">
-        <div id="hero-media" className="absolute inset-0">
-          <picture>
-            <source media="(max-width: 767px)" srcSet="/images/hero-800.webp" type="image/webp" />
-            <img
-              src="/images/hero-1600.webp"
-              alt={t.hero.imgAlt}
-              width={1600}
-              height={1000}
-              fetchPriority="high"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </picture>
-        </div>
-        {/* Voile pour garantir le contraste du texte (AA) sur l'image ou la vidéo */}
-        <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/75 to-navy-950/45 sm:bg-gradient-to-r sm:from-navy-950/95 sm:via-navy-950/70 sm:to-navy-950/25" aria-hidden="true" />
+    <section id="hero-track" className="hero-track relative bg-white" aria-labelledby="hero-title">
+      <div className="sticky top-[3.25rem] flex h-[calc(100svh-3.25rem)] min-h-[36rem] flex-col overflow-hidden">
+        {/* Halo très doux derrière le titre */}
+        <div className="pointer-events-none absolute -top-40 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-sky/20 blur-3xl" aria-hidden="true" />
 
-        <div className="container-site relative grid flex-1 items-end gap-12 pt-32 pb-10 sm:items-center sm:pb-0 lg:grid-cols-[minmax(0,1fr)_21rem] lg:pt-40">
-          <div>
-            <p className="glass-dark mb-6 inline-flex w-fit items-center gap-3 rounded-full px-4 py-1.5 text-[0.8rem] font-medium tracking-wide text-white/90">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky" aria-hidden="true" />
-              Othmani CPA · Saint-Léonard, Montréal
-            </p>
-            <h1 id="hero-title" className="max-w-4xl text-[2.55rem] leading-[1.04] font-semibold tracking-[-0.03em] text-white sm:text-6xl lg:text-[4.6rem]">
-              {t.hero.h1}
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 sm:text-xl">{t.hero.sub}</p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href={href("contact", lang)} className="btn-light">
-                {t.cta.talk} <Icon name="arrow" className="h-5 w-5" />
-              </Link>
-              <a href={portalHref(lang)} className="btn glass-dark text-white hover:bg-white/15">
-                <Icon name="shield" className="h-5 w-5" /> {t.cta.portal}
-              </a>
-            </div>
-          </div>
-
-          {/* Carte vitrée flottante (grand écran) */}
-          <div className="floaty hidden lg:block">
-            <div className="glass-dark rounded-[1.75rem] p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-[0.7rem] font-semibold tracking-[0.18em] text-sky uppercase">Pilote Fiscal</p>
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white"><Icon name="bell" className="h-4 w-4" /></span>
-              </div>
-              <p className="mt-2 font-display text-lg font-semibold text-white">{t.portal.mockStatus}</p>
-              <ol className="mt-5 space-y-3" aria-label={t.portal.mockLabel}>
-                {t.portal.mockSteps.map((st, i) => (
-                  <li key={st} className="flex items-center gap-3 text-sm">
-                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${i < 2 ? "bg-sky text-navy" : i === 2 ? "border-2 border-sky" : "border border-white/25"}`} aria-hidden="true">
-                      {i < 2 && <Icon name="check" className="h-3.5 w-3.5" strokeWidth={2.6} />}
-                    </span>
-                    <span className={i <= 2 ? "text-white" : "text-white/60"}>{st}</span>
-                  </li>
-                ))}
-              </ol>
-              <div className="mt-6 border-t border-white/10 pt-5">
-                <NextDeadline lang={lang} buildDate={buildDate()} />
-              </div>
-            </div>
+        <div className="container-site relative pt-7 text-center sm:pt-14 lg:pt-16">
+          <p className="mx-auto flex items-center justify-center gap-2 text-[0.8rem] font-medium tracking-wide text-balance text-muted">
+            <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full bg-sky sm:inline-block" aria-hidden="true" />
+            {fr ? "Comptables professionnels agréés · Saint-Léonard, Montréal" : "Chartered professional accountants · Saint-Léonard, Montreal"}
+          </p>
+          <h1 id="hero-title" className="mx-auto mt-4 max-w-4xl text-[2.4rem] leading-[1.05] font-semibold tracking-[-0.035em] text-navy sm:text-6xl lg:text-[4.5rem]">
+            {t.hero.h1}
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">{t.hero.sub}</p>
+          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link href={href("contact", lang)} className="btn-primary">
+              {t.cta.talk} <Icon name="arrow" className="h-5 w-5" />
+            </Link>
+            <a href="#preoccupations" className="inline-flex min-h-12 items-center gap-1.5 px-4 font-semibold text-navy hover:underline underline-offset-4">
+              {fr ? "Voir comment on peut vous aider" : "See how we can help"} <Icon name="arrow" className="h-4 w-4 rotate-90" />
+            </a>
           </div>
         </div>
 
-        {/* Titres professionnels, discrets */}
-        <div className="glass-dark relative !rounded-none !border-x-0 !border-b-0">
-          <ul className="container-site flex flex-wrap items-center gap-x-8 gap-y-2 py-5 text-sm text-white/85">
-            {t.pro.creds.map((c) => (
-              <li key={c} className="flex items-center gap-2.5">
-                <Icon name="check" className="h-4 w-4 text-sky" strokeWidth={2.2} /> {c}
-              </li>
-            ))}
-            <li className="ml-auto hidden lg:block">
-              <a href="#preoccupations" className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] text-white/75 uppercase hover:text-white">
-                {t.hero.scroll} <span className="block h-px w-10 bg-sky" aria-hidden="true" />
-              </a>
-            </li>
-          </ul>
+        {/* Grande image dans un cadre arrondi, avec cartes vitrées */}
+        <div className="container-site relative mt-8 min-h-0 flex-1 pb-6 sm:mt-10 sm:pb-8">
+          <div id="hero-media" className="relative h-full min-h-[13rem] overflow-hidden rounded-[1.75rem] bg-sky-50 sm:rounded-[2.25rem]">
+            <picture>
+              <source media="(max-width: 767px)" srcSet="/images/accueil-bureau-800.webp" type="image/webp" />
+              <source media="(max-width: 1199px)" srcSet="/images/accueil-bureau-1000.webp" type="image/webp" />
+              <img
+                src="/images/accueil-bureau-1600.webp"
+                alt={t.hero.imgAlt}
+                width={1600}
+                height={895}
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover object-[70%_center]"
+              />
+            </picture>
+
+            <div className="glass absolute bottom-4 left-4 max-w-[19rem] rounded-2xl p-4 sm:bottom-6 sm:left-6 sm:p-5">
+              <NextDeadline lang={lang} buildDate={buildDate()} light />
+            </div>
+            <ul className="glass absolute top-6 left-6 hidden rounded-2xl px-5 py-4 text-sm text-ink lg:block">
+              {t.pro.creds.map((c) => (
+                <li key={c} className="flex items-center gap-2.5 py-0.5">
+                  <Icon name="check" className="h-4 w-4 text-navy" strokeWidth={2.2} /> {c}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
       <HeroEnhance titleId="hero-title" trackId="hero-track" mediaId="hero-media" />

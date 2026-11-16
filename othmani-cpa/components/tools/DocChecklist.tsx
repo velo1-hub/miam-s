@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { baseDocs, situations, toolsText } from "@/content/tools";
-import { portalHref, type Lang } from "@/lib/site";
+import { portalHref, portalOn, type Lang } from "@/lib/site";
+import { href } from "@/lib/routes";
 import { Icon } from "../Icon";
 
 const KEY = "ocpa-checklist";
@@ -109,7 +110,7 @@ export function DocChecklist({ lang, preset = [] }: { lang: Lang; preset?: strin
           <p className="text-sm text-muted">{t.saved}</p>
           <div className="flex gap-3">
             <button type="button" onClick={() => setDone([])} className="text-sm font-semibold text-navy underline underline-offset-4">{t.reset}</button>
-            <a href={portalHref(lang)} className="text-sm font-semibold text-navy underline underline-offset-4">{t.next}</a>
+            <a href={portalOn() ? portalHref(lang) : href("contact", lang)} className="text-sm font-semibold text-navy underline underline-offset-4">{portalOn() ? t.next : t.nextContact}</a>
           </div>
         </div>
       </div>

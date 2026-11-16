@@ -27,7 +27,7 @@ const fr: Block[] = [
     list: [
       "Par le formulaire de contact : votre nom, votre courriel, votre téléphone (facultatif) et votre message",
       "Par l'inscription aux rappels : votre courriel",
-      "Dans le cadre d'un mandat : les documents et renseignements nécessaires à vos déclarations ou à votre mission (feuillets, numéro d'assurance sociale, renseignements financiers), déposés dans votre espace client sécurisé",
+      "Dans le cadre d'un mandat : les documents et renseignements nécessaires à vos déclarations ou à votre mission (feuillets, numéro d'assurance sociale, renseignements financiers), transmis de façon sécuritaire",
       "Lors de votre visite du site : seulement les données techniques nécessaires à son fonctionnement et, avec votre consentement, des statistiques anonymes",
     ],
   },
@@ -45,7 +45,7 @@ const fr: Block[] = [
     h2: "Qui peut y avoir accès",
     p: [
       "Seuls les membres de l'équipe qui en ont besoin pour vous servir. Nous sommes tenus au secret professionnel.",
-      "Nous pouvons faire appel à des fournisseurs (hébergement du site, réception des formulaires, espace client, logiciels fiscaux). Ils sont liés par contrat et ne peuvent utiliser vos renseignements que pour nous rendre service. Certains peuvent conserver des données à l'extérieur du Québec ; nous évaluons alors les risques avant de leur communiquer des renseignements, comme l'exige la loi.",
+      "Nous pouvons faire appel à des fournisseurs (hébergement du site, réception des formulaires, transfert sécurisé de documents, logiciels fiscaux). Ils sont liés par contrat et ne peuvent utiliser vos renseignements que pour nous rendre service. Certains peuvent conserver des données à l'extérieur du Québec ; nous évaluons alors les risques avant de leur communiquer des renseignements, comme l'exige la loi.",
       "Avec votre autorisation, nous transmettons des renseignements à Revenu Québec et à l'Agence du revenu du Canada.",
     ],
   },
@@ -79,7 +79,7 @@ const fr: Block[] = [
   {
     h2: "Sécurité et incidents",
     p: [
-      "Nous protégeons vos renseignements par des mesures adaptées : espace client chiffré, accès limité, mots de passe robustes. En cas d'incident de confidentialité présentant un risque de préjudice sérieux, nous vous aviserons, ainsi que la Commission d'accès à l'information, et nous tenons un registre des incidents.",
+      "Nous protégeons vos renseignements par des mesures adaptées : transferts chiffrés, accès limité, mots de passe robustes. En cas d'incident de confidentialité présentant un risque de préjudice sérieux, nous vous aviserons, ainsi que la Commission d'accès à l'information, et nous tenons un registre des incidents.",
     ],
   },
 ];
@@ -101,7 +101,7 @@ const en: Block[] = [
     list: [
       "Through the contact form: your name, email, phone (optional) and message",
       "Through the reminder sign-up: your email",
-      "During an engagement: the documents and information needed for your returns or engagement (slips, social insurance number, financial information), uploaded to your secure client portal",
+      "During an engagement: the documents and information needed for your returns or engagement (slips, social insurance number, financial information), sent to us securely",
       "When you visit the site: only the technical data needed for it to work and, with your consent, anonymous statistics",
     ],
   },
@@ -119,7 +119,7 @@ const en: Block[] = [
     h2: "Who can access it",
     p: [
       "Only team members who need it to serve you. We are bound by professional secrecy.",
-      "We may use service providers (website hosting, form handling, client portal, tax software). They are bound by contract and may only use your information to provide services to us. Some may store data outside Quebec; we assess the risks before sharing information with them, as the law requires.",
+      "We may use service providers (website hosting, form handling, secure document transfer, tax software). They are bound by contract and may only use your information to provide services to us. Some may store data outside Quebec; we assess the risks before sharing information with them, as the law requires.",
       "With your authorization, we send information to Revenu Québec and the Canada Revenue Agency.",
     ],
   },
@@ -153,7 +153,7 @@ const en: Block[] = [
   {
     h2: "Security and incidents",
     p: [
-      "We protect your information with appropriate measures: encrypted client portal, limited access, strong passwords. If a confidentiality incident presents a risk of serious injury, we will notify you and the Commission d'accès à l'information, and we keep a register of incidents.",
+      "We protect your information with appropriate measures: encrypted transfers, limited access, strong passwords. If a confidentiality incident presents a risk of serious injury, we will notify you and the Commission d'accès à l'information, and we keep a register of incidents.",
     ],
   },
 ];

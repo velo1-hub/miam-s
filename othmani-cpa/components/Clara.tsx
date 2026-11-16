@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { concerns } from "@/content/concerns";
 import { dict } from "@/content/ui";
 import { href, type RouteKey } from "@/lib/routes";
-import { portalHref, type Lang } from "@/lib/site";
+import { portalHref, portalOn, type Lang } from "@/lib/site";
 import { Icon } from "./Icon";
 
 /**
@@ -158,7 +158,7 @@ export function Clara({ lang }: { lang: Lang }) {
                     {labelFor(k)}
                   </button>
                 ))}
-                <a href={portalHref(lang)} className="rounded-full border border-line px-3 py-1.5 text-sm text-navy hover:border-navy hover:bg-sky-50">{t.goPortal}</a>
+                {portalOn() && <a href={portalHref(lang)} className="rounded-full border border-line px-3 py-1.5 text-sm text-navy hover:border-navy hover:bg-sky-50">{t.goPortal}</a>}
               </div>
             </div>
           </div>

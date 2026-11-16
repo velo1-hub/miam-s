@@ -132,6 +132,7 @@ export const toolsText = {
       reset: "Recommencer",
       saved: "Vos coches sont gardées sur cet appareil seulement.",
       next: "Tout est prêt ? Déposez vos documents dans votre espace client.",
+      nextContact: "Tout est prêt ? Écrivez-nous pour transmettre vos documents.",
     },
     calc: {
       h2: "Calculatrice TPS/TVQ",
@@ -176,6 +177,7 @@ export const toolsText = {
       reset: "Start over",
       saved: "Your checkmarks are kept on this device only.",
       next: "All set? Upload your documents to your client portal.",
+      nextContact: "All set? Write to us to send your documents.",
     },
     calc: {
       h2: "GST/QST calculator",

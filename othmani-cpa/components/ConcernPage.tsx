@@ -96,7 +96,7 @@ export function ConcernPage({ lang, routeKey }: { lang: Lang; routeKey: RouteKey
           </div>
 
           {/* Liens internes entre préoccupations */}
-          <aside aria-labelledby="related-title" className="lg:sticky lg:top-36 lg:self-start">
+          <aside aria-labelledby="related-title" className="lg:sticky lg:top-20 lg:self-start">
             <nav aria-labelledby="toc-title" className="glass mb-8 hidden rounded-[1.5rem] p-5 lg:block">
               <h2 id="toc-title" className="text-xs font-semibold tracking-[0.14em] text-navy uppercase">{fr ? "Sur cette page" : "On this page"}</h2>
               <ol className="mt-3 space-y-1 border-l border-navy/10">

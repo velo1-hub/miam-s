@@ -42,7 +42,13 @@ export const site = {
    * l'utilisateur préfère réduire les animations : l'image fixe est affichée à la place.
    */
   heroVideo: { webm: "", mp4: "" },
-  /** Lien vers l'espace client Pilote Fiscal. À COMPLÉTER (vide = renvoie à la section du site). */
+  /**
+   * Espace client Pilote Fiscal. L'application n'est pas encore prête : tant que `portalEnabled`
+   * vaut false, le site n'en parle nulle part (boutons, section, textes). Passez à true et
+   * indiquez `clientPortalUrl` le jour du lancement.
+   */
+  portalEnabled: false,
+  /** Lien vers l'espace client Pilote Fiscal. */
   clientPortalUrl: "",
   /** Fiche Google Business : lien public et lien « Laisser un avis ». À COMPLÉTER. */
   googleReviewsUrl: "",
@@ -59,6 +65,7 @@ export type Lang = "fr" | "en";
 
 export const hasPhone = () => Boolean(site.phone.tel);
 export const hasEmail = () => Boolean(site.email);
+export const portalOn = () => site.portalEnabled && Boolean(site.clientPortalUrl);
 export const portalHref = (lang: Lang) =>
   site.clientPortalUrl || (lang === "fr" ? "/#pilote-fiscal" : "/en/#pilote-fiscal");
 export const abs = (path: string) => site.url + path;

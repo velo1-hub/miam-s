@@ -30,7 +30,7 @@ const fr = {
     h1: "Votre CPA à Saint-Léonard, sans le stress.",
     sub: "Particuliers et entreprises. On s'occupe de vos chiffres, vous avancez.",
     scroll: "Défiler",
-    imgAlt: "Lignes douces bleu marine et bleu ciel évoquant des colonnes de chiffres bien en ordre",
+    imgAlt: "Bureau lumineux et calme, avec vue sur une rue résidentielle de Montréal bordée d'arbres et d'escaliers extérieurs",
   },
   doors: {
     h2: "Qu'est-ce qui vous préoccupe ?",
@@ -43,7 +43,7 @@ const fr = {
     intro: "Trois étapes. Aucune paperasse inutile.",
     items: [
       { t: "Dites-nous ce qui vous préoccupe", d: "Par téléphone, par courriel ou avec le formulaire. Une question suffit pour commencer." },
-      { t: "Déposez vos documents", d: "Dans votre espace client sécurisé, depuis votre téléphone ou votre ordinateur." },
+      { t: "Transmettez vos documents", d: "À distance ou directement au bureau de Saint-Léonard. On vous dit exactement quoi fournir." },
       { t: "Notre équipe s'en occupe", d: "Et vous tient au courant à chaque étape. Vous savez toujours où en est votre dossier." },
     ],
   },
@@ -220,7 +220,7 @@ const en: Dict = {
     h1: "Your CPA in Saint-Léonard, without the stress.",
     sub: "Individuals and businesses. We take care of your numbers, you move forward.",
     scroll: "Scroll",
-    imgAlt: "Soft navy and sky-blue lines suggesting neatly ordered columns of numbers",
+    imgAlt: "Bright, calm office looking out on a tree-lined Montreal residential street with outdoor staircases",
   },
   doors: {
     h2: "What's on your mind?",
@@ -233,7 +233,7 @@ const en: Dict = {
     intro: "Three steps. No unnecessary paperwork.",
     items: [
       { t: "Tell us what's on your mind", d: "By phone, by email or with the form. One question is enough to get started." },
-      { t: "Upload your documents", d: "To your secure client portal, from your phone or computer." },
+      { t: "Send us your documents", d: "Remotely or in person at our Saint-Léonard office. We tell you exactly what to provide." },
       { t: "Our team takes care of it", d: "And keeps you posted at every step. You always know where your file stands." },
     ],
   },

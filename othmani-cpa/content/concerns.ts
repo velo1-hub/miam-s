@@ -90,7 +90,7 @@ export const concerns: Concern[] = [
         },
         {
           q: "Puis-je vous envoyer mes documents sans me déplacer ?",
-          a: "Oui. Vous déposez vos documents dans votre espace client sécurisé, Pilote Fiscal, depuis votre téléphone ou votre ordinateur. Vous pouvez aussi venir au bureau de Saint-Léonard.",
+          a: "Oui. Vous pouvez nous transmettre vos documents à distance, de façon sécuritaire, ou venir au bureau de Saint-Léonard. Nous vous indiquons la marche à suivre dès votre premier contact.",
         },
         {
           q: "Je n'ai pas fait mes impôts depuis plusieurs années. Que faire ?",
@@ -156,7 +156,7 @@ export const concerns: Concern[] = [
         },
         {
           q: "Can I send my documents without coming in?",
-          a: "Yes. You upload your documents to your secure client portal, Pilote Fiscal, from your phone or computer. You can also visit our Saint-Léonard office.",
+          a: "Yes. You can send us your documents remotely and securely, or visit our Saint-Léonard office. We explain how as soon as you first contact us.",
         },
         {
           q: "I haven't filed in several years. What should I do?",
@@ -374,7 +374,7 @@ export const concerns: Concern[] = [
         },
         {
           q: "Quels documents dois-je garder, et combien de temps ?",
-          a: "Toutes vos factures de ventes, vos reçus de dépenses et vos relevés bancaires. Conservez-les au moins six ans. Le plus simple : prenez-les en photo et déposez-les dans votre espace client au fil de l'année.",
+          a: "Toutes vos factures de ventes, vos reçus de dépenses et vos relevés bancaires. Conservez-les au moins six ans. Le plus simple : prenez-les en photo au fil de l'année et classez-les dans un même dossier.",
         },
         {
           q: "Que sont les acomptes provisionnels ?",
@@ -438,7 +438,7 @@ export const concerns: Concern[] = [
         },
         {
           q: "Which documents should I keep, and for how long?",
-          a: "All of your sales invoices, expense receipts and bank statements. Keep them for at least six years. The easiest way: take a photo and upload them to your client portal throughout the year.",
+          a: "All of your sales invoices, expense receipts and bank statements. Keep them for at least six years. The easiest way: take a photo throughout the year and keep them in a single folder.",
         },
         {
           q: "What are tax instalments?",

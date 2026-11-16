@@ -29,7 +29,7 @@
   :focus-visible { outline: 3px solid var(--color-navy); outline-offset: 3px; border-radius: 6px; }
   .on-dark :focus-visible, .on-dark:focus-visible { outline-color: #fff; }
   .on-dark .on-light :focus-visible { outline-color: var(--color-navy); }
-  [id] { scroll-margin-top: 8rem; }
+  [id] { scroll-margin-top: 5rem; }
 }
 
 @utility btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.95rem] font-semibold transition-colors duration-200; }
@@ -82,10 +82,10 @@ details > summary::-webkit-details-marker { display: none; }
 @media (max-width: 639px) { [data-cookie-open] .clara-fab { display: none; } }
 
 /* Le héros n'est « long » que si le JavaScript et les animations sont actifs */
-.hero-track { height: 100svh; min-height: 34rem; }
-.js .hero-track { height: 125svh; }
-@media (min-width: 1024px) { .js .hero-track { height: 160svh; } }
-@media (prefers-reduced-motion: reduce) { .js .hero-track { height: 100svh; } }
+.hero-track { height: calc(100svh - 3.25rem); min-height: 36rem; }
+.js .hero-track { height: 120svh; }
+@media (min-width: 1024px) { .js .hero-track { height: 135svh; } }
+@media (prefers-reduced-motion: reduce) { .js .hero-track { height: calc(100svh - 3.25rem); } }
 
 @media print { .reveal { opacity: 1 !important; transform: none !important; } .clara-root, [role="region"] { display: none !important; } }
 
@@ -143,3 +143,8 @@ details > summary::-webkit-details-marker { display: none; }
 .field-error { display: none; margin-top: .375rem; font-size: .85rem; color: #a3261f; }
 .field:user-invalid + .field-error { display: block; }
 .field:focus { outline: none; border-color: var(--color-navy); box-shadow: 0 0 0 4px rgba(111, 193, 216, .35); }
+
+/* En-tête : légèrement plus opaque après défilement */
+.site-header[data-scrolled] .header-glass { background: rgba(255,255,255,.85); }
+html:has(#mobile-menu[open]) .clara-fab { display: none; }
+html:has(#mobile-menu[open]) { overflow: hidden; }

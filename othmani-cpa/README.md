@@ -25,7 +25,7 @@ Tout se règle dans **`lib/site.ts`** (un champ vide est masqué du site et du S
 | `hours`, `hoursLabel` | Heures d'ouverture — **valeurs provisoires** (lun-ven 9 h-17 h) à confirmer |
 | `url` | Domaine définitif (sert aux canonical, hreflang, sitemap) |
 | `geo` | Coordonnées GPS approximatives du 8065, boul. Viau — à vérifier |
-| `clientPortalUrl` | Lien de l'espace client Pilote Fiscal (sinon, renvoie à la section du site) |
+| `portalEnabled`, `clientPortalUrl` | Espace client Pilote Fiscal : **désactivé** tant que l'application n'est pas prête. Le jour du lancement, passer `portalEnabled` à `true` et indiquer le lien : boutons, section d'accueil et mentions réapparaissent. |
 | `googleReviewsUrl`, `googleWriteReviewUrl` | Fiche Google et lien « Laisser un avis » |
 | `formEndpoint` | Réception des formulaires (Formspree, Basin, Netlify Forms…) — sans lui, les formulaires affichent un message de repli |
 | `heroVideo` | Vidéo du héros (`/public/media/…`, WebM + MP4, < 3 Mo, sans son) |
@@ -75,6 +75,8 @@ components/           gabarits et composants (Clara, bannière Loi 25, formulair
 - **Pages de préoccupation** : sommaire collant avec section active, barre de progression de lecture, temps de lecture, date de révision par un CPA (`REVIEWED` dans `components/ConcernPage.tsx`), bouton Imprimer.
 - **Sous-menu** Particuliers / Entreprises sur ordinateur, au survol et au clavier.
 - **Verre dépoli** (glassmorphism) avec repli opaque pour les navigateurs qui ne le gèrent pas.
+
+- **Image d'accueil** : `public/images/accueil-bureau-*.webp`, générée avec Higgsfield (illustration, pas une photo du bureau réel).
 
 ## Choix techniques
 

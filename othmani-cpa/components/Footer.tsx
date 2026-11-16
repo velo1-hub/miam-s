@@ -2,7 +2,7 @@ import Link from "next/link";
 import { concernsFor } from "@/content/concerns";
 import { dict } from "@/content/ui";
 import { href, type RouteKey } from "@/lib/routes";
-import { hasEmail, hasPhone, portalHref, site, type Lang } from "@/lib/site";
+import { hasEmail, hasPhone, portalHref, portalOn, site, type Lang } from "@/lib/site";
 import { Logo } from "./Logo";
 import { AddressLines, EmailLink, PhoneLink } from "./ContactInfo";
 import { CookieSettingsButton } from "./CookieBanner";
@@ -29,7 +29,7 @@ export function Footer({ lang }: { lang: Lang }) {
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link href={href("contact", lang)} className="btn-light">{t.cta.talk}</Link>
-            <a href={portalHref(lang)} className="btn-ghost-light">{t.cta.portal}</a>
+            {portalOn() && <a href={portalHref(lang)} className="btn-ghost-light">{t.cta.portal}</a>}
           </div>
         </div>
       </div>

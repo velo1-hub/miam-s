@@ -1,14 +1,18 @@
 import Link from "next/link";
+import { concernsFor } from "@/content/concerns";
 import { dict } from "@/content/ui";
 import { href, routes, type RouteKey } from "@/lib/routes";
-import { hasPhone, portalHref, site, type Lang } from "@/lib/site";
-import { Logo } from "./Logo";
-import { concernsFor } from "@/content/concerns";
+import { portalHref, portalOn, type Lang } from "@/lib/site";
+import { LogoMark } from "./Logo";
 import { Icon } from "./Icon";
 import { CloseOnNav } from "./CloseOnNav";
 import { HeaderScroll } from "./HeaderScroll";
 
-export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeKey: RouteKey; overlay?: boolean }) {
+/**
+ * En-tête inspiré des sites Apple : une seule barre fine (52 px), vitrée,
+ * petits liens centrés, sous-menus en panneau pleine largeur.
+ */
+export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; overlay?: boolean }) {
   const t = dict(lang);
   const other: Lang = lang === "fr" ? "en" : "fr";
   const links: [RouteKey, string][] = [
@@ -22,129 +26,111 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
   const isCurrent = (k: RouteKey) => k === routeKey;
 
   return (
-    <header data-overlay={overlay ? "" : undefined} className={`site-header ${overlay ? "fixed inset-x-0 top-0 z-40" : "sticky top-0 z-40 border-b border-white/70 bg-white/65 backdrop-blur-xl backdrop-saturate-150"}`}>
-      {/* Barre d'information (grand écran) */}
-      <div className={`topbar hidden border-b text-[0.8rem] lg:block ${overlay ? "on-dark border-white/10 text-white/80" : "border-line/70 text-muted"}`}>
-        <div className="container-site flex h-10 items-center justify-between">
-          <p className="flex items-center gap-2">
-            <Icon name="pin" className="h-3.5 w-3.5" />
-            {lang === "fr" ? site.address.street : site.address.streetEn}, {site.address.city}
-            <span aria-hidden="true" className="mx-2 opacity-40">|</span>
-            {t.pro.topbar}
-          </p>
-          <div className="flex items-center gap-5">
-            {hasPhone() && (
-              <a href={`tel:${site.phone.tel}`} className="inline-flex items-center gap-1.5 hover:underline underline-offset-4">
-                <Icon name="phone" className="h-3.5 w-3.5" /> {site.phone.display}
-              </a>
-            )}
-            <a href={portalHref(lang)} className="inline-flex items-center gap-1.5 font-medium hover:underline underline-offset-4">
-              <Icon name="shield" className="h-3.5 w-3.5" /> {t.cta.portal}
-            </a>
-            <a href={routes[routeKey][other]} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} lang={other} aria-label={t.nav.langSwitchLabel} className="font-semibold hover:underline underline-offset-4">
-              {t.nav.langSwitch}
-            </a>
-          </div>
-        </div>
-      </div>
-      <div className={`container-site flex h-20 items-center justify-between gap-4 ${overlay ? "on-dark" : ""}`}>
-        <Link href={href("home", lang)} aria-label={lang === "fr" ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="shrink-0 rounded-lg">
-          <Logo light={overlay} />
-        </Link>
-
-        <nav aria-label={t.nav.mainNav} className="hidden lg:block">
-          <ul className="flex items-center gap-1">
-            {links.map(([k, label]) => {
-              const sub = k === "individuals" || k === "businesses" ? concernsFor(k) : null;
-              return (
-                <li key={k} className="group relative">
-                  <Link
-                    href={href(k, lang)}
-                    aria-current={isCurrent(k) ? "page" : undefined}
-                    className={`relative inline-flex items-center gap-1 rounded-full px-3.5 py-2 text-[0.95rem] font-medium transition-colors ${
-                      overlay ? "text-white hover:bg-white/10" : "text-ink hover:bg-sky-50 hover:text-navy"
-                    } ${isCurrent(k) ? (overlay ? "bg-white/15" : "bg-sky-50 text-navy") : ""}`}
-                  >
-                    {label}
-                    {sub && (
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 opacity-70 transition-transform group-hover:rotate-180 group-focus-within:rotate-180" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                    )}
-                  </Link>
-                  {sub && (
-                    /* Sous-menu : visible au survol et au focus clavier */
-                    <div className="on-light invisible absolute top-full left-1/2 z-50 w-[26rem] -translate-x-1/2 translate-y-2 pt-3 opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-                      <ul className="rounded-3xl border border-line bg-white/[0.97] p-2.5 shadow-[0_30px_70px_-30px_rgba(23,23,58,.55)] backdrop-blur-2xl backdrop-saturate-150">
-                        {sub.map((c) => (
-                          <li key={c.key}>
-                            <Link href={href(c.key, lang)} className="flex gap-3 rounded-2xl p-3 transition-colors hover:bg-sky-50">
-                              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy text-white"><Icon name={c.icon} className="h-5 w-5" /></span>
-                              <span>
-                                <span className="block font-display font-semibold text-navy">{c[lang].label}</span>
-                                <span className="mt-0.5 block text-sm leading-snug text-muted">{c[lang].teaser}</span>
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <a
-            href={routes[routeKey][other]}
-            hrefLang={other === "fr" ? "fr-CA" : "en-CA"}
-            lang={other}
-            aria-label={t.nav.langSwitchLabel}
-            className={`hidden rounded-full px-3 py-2 text-sm font-semibold sm:inline-flex lg:hidden ${overlay ? "text-white hover:bg-white/10" : "text-navy hover:bg-sky-50"}`}
-          >
-            {other === "fr" ? "FR" : "EN"}
-          </a>
-          <Link href={href("contact", lang)} className={`${overlay ? "btn-light" : "btn-primary"} hidden min-h-11 px-5 sm:inline-flex`}>
-            {t.cta.talk}
+    <header className="site-header sticky top-0 z-40">
+      <div className="relative">
+        {/* Calque vitré séparé : un backdrop-filter sur le parent casserait le menu mobile en position fixe */}
+        <div className="header-glass absolute inset-0 -z-10 border-b border-black/[0.06] bg-white/75 backdrop-blur-2xl backdrop-saturate-[1.8]" aria-hidden="true" />
+        <div className="container-site flex h-[3.25rem] items-center justify-between gap-6">
+          <Link href={href("home", lang)} aria-label={lang === "fr" ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="flex shrink-0 items-center gap-2 rounded-lg">
+            <LogoMark className="h-7 w-7" />
+            <span className="font-display text-[0.95rem] font-semibold tracking-tight text-navy">Othmani CPA</span>
           </Link>
 
-          {/* Menu mobile : fonctionne sans JavaScript (<details>) et au clavier */}
-          <details id="mobile-menu" className="group relative lg:hidden">
-            <summary
-              className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border ${
-                overlay ? "border-white/50 text-white" : "border-line text-navy"
-              }`}
-              aria-label={t.nav.menu}
+          <nav aria-label={t.nav.mainNav} className="hidden lg:block">
+            <ul className="flex items-center gap-1">
+              {links.map(([k, label]) => {
+                const sub = k === "individuals" || k === "businesses" ? concernsFor(k) : null;
+                return (
+                  <li key={k} className="group">
+                    <Link
+                      href={href(k, lang)}
+                      aria-current={isCurrent(k) ? "page" : undefined}
+                      className={`flex h-[3.25rem] items-center px-3 text-[0.8rem] tracking-[0.01em] transition-colors ${
+                        isCurrent(k) ? "font-semibold text-navy" : "text-ink/75 hover:text-ink"
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                    {sub && (
+                      /* Panneau pleine largeur, comme sur apple.com : visible au survol et au focus clavier */
+                      <div className="invisible absolute inset-x-0 top-full opacity-0 transition-[opacity,visibility] delay-100 duration-300 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                        <div className="border-b border-black/[0.06] bg-[#fbfcfe] shadow-[0_30px_60px_-40px_rgba(23,23,58,.35)]">
+                          <div className="container-site grid gap-10 py-10 md:grid-cols-[14rem_1fr]">
+                            <div>
+                              <p className="text-xs font-medium text-muted">{k === "individuals" ? t.doors.me : t.doors.business}</p>
+                              <Link href={href(k, lang)} className="mt-2 block font-display text-2xl font-semibold text-navy hover:underline underline-offset-4">
+                                {label}
+                              </Link>
+                            </div>
+                            <ul className="grid gap-x-10 gap-y-5 sm:grid-cols-2">
+                              {sub.map((c) => (
+                                <li key={c.key}>
+                                  <Link href={href(c.key, lang)} className="group/item block">
+                                    <span className="flex items-center gap-2 font-display text-lg font-semibold text-ink group-hover/item:text-navy">
+                                      {c[lang].label}
+                                      <Icon name="arrow" className="h-4 w-4 -translate-x-1 opacity-0 transition-all group-hover/item:translate-x-0 group-hover/item:opacity-100" />
+                                    </span>
+                                    <span className="mt-1 block max-w-sm text-sm leading-snug text-muted">{c[lang].teaser}</span>
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className="flex items-center gap-1.5">
+            <a
+              href={routes[routeKey][other]}
+              hrefLang={other === "fr" ? "fr-CA" : "en-CA"}
+              lang={other}
+              aria-label={t.nav.langSwitchLabel}
+              className="hidden h-8 items-center rounded-full px-2.5 text-[0.8rem] text-ink/75 hover:text-ink sm:inline-flex"
             >
-              <span className="group-open:hidden"><Icon name="menu" /></span>
-              <span className="hidden group-open:inline"><Icon name="close" /></span>
-            </summary>
-            <div className="on-light fixed inset-x-3 top-[5.25rem] z-50 rounded-3xl border border-white/70 bg-white/90 p-4 shadow-[0_24px_60px_-28px_rgba(23,23,58,.6)] backdrop-blur-2xl backdrop-saturate-150">
-              <nav aria-label={t.nav.mainNav}>
-                <ul className="flex flex-col">
-                  {links.map(([k, label]) => (
-                    <li key={k}>
-                      <Link href={href(k, lang)} aria-current={isCurrent(k) ? "page" : undefined} className="flex items-center justify-between rounded-2xl px-4 py-3.5 text-lg font-medium text-ink hover:bg-sky-50">
-                        {label}
-                        <Icon name="arrow" className="h-5 w-5 text-navy/50" />
-                      </Link>
-                    </li>
-                  ))}
-                  <li>
-                    <a href={routes[routeKey][other]} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} lang={other} className="flex rounded-2xl px-4 py-3.5 text-lg font-medium text-navy hover:bg-sky-50">
+              {other === "fr" ? "FR" : "EN"}
+            </a>
+            <Link href={href("contact", lang)} className="hidden h-8 items-center rounded-full bg-navy px-4 text-[0.8rem] font-medium text-white transition-colors hover:bg-navy-700 sm:inline-flex">
+              {t.cta.talk}
+            </Link>
+
+            {/* Menu mobile plein écran : fonctionne sans JavaScript (<details>) et au clavier */}
+            <details id="mobile-menu" className="group lg:hidden">
+              <summary className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink" aria-label={t.nav.menu}>
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                  <path className="origin-center transition-transform group-open:translate-y-[3px] group-open:rotate-45" d="M5 9h14" />
+                  <path className="origin-center transition-transform group-open:-translate-y-[3px] group-open:-rotate-45" d="M5 15h14" />
+                </svg>
+              </summary>
+              <div className="fixed inset-x-0 top-[3.25rem] bottom-0 z-50 overflow-y-auto bg-white/95 backdrop-blur-2xl">
+                <nav aria-label={t.nav.mainNav} className="container-site py-6">
+                  <ul>
+                    {links.map(([k, label]) => (
+                      <li key={k}>
+                        <Link href={href(k, lang)} aria-current={isCurrent(k) ? "page" : undefined} className="block py-2.5 font-display text-[1.75rem] font-semibold tracking-tight text-ink hover:text-navy">
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-8 grid gap-3 border-t border-line pt-6">
+                    <Link href={href("contact", lang)} className="btn-primary w-full">{t.cta.talk}</Link>
+                    {portalOn() && <a href={portalHref(lang)} className="btn-secondary w-full">{t.cta.portal}</a>}
+                    <a href={routes[routeKey][other]} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} lang={other} className="py-2 text-center text-sm font-medium text-navy">
                       {t.nav.langSwitch}
                     </a>
-                  </li>
-                </ul>
-              </nav>
-              <div className="mt-3 grid gap-2 border-t border-line pt-4">
-                <Link href={href("contact", lang)} className="btn-primary w-full">{t.cta.talk}</Link>
-                <a href={portalHref(lang)} className="btn-secondary w-full">{t.cta.portal}</a>
+                  </div>
+                </nav>
               </div>
-            </div>
-          </details>
-          <CloseOnNav targetId="mobile-menu" />
-          {overlay && <HeaderScroll />}
+            </details>
+            <CloseOnNav targetId="mobile-menu" />
+            <HeaderScroll />
+          </div>
         </div>
       </div>
     </header>
