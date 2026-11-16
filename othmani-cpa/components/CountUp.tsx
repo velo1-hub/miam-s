@@ -26,7 +26,8 @@ export function CountUp({ to, lang, suffix = "" }: { to: number; lang: "fr" | "e
     return () => { io.disconnect(); cancelAnimationFrame(raf); };
   }, [to]);
   return (
-    <span ref={ref} aria-label={`${fmt(to)}${suffix}`}>
+    <span ref={ref}>
+      <span className="sr-only">{fmt(to)}{suffix}</span>
       <span aria-hidden="true">{fmt(v)}{suffix}</span>
     </span>
   );
