@@ -7,6 +7,7 @@
     "dev": "next dev",
     "images": "node scripts/make-images.mjs",
     "build": "next build",
+    "build:static": "NEXT_EXPORT=1 next build",
     "check": "node scripts/check-seo.mjs",
     "serve": "npx serve out"
   },

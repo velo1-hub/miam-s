@@ -4,7 +4,8 @@ import { JsonLd } from "../JsonLd";
 import { HomeFaq, Services } from "../homeExtra";
 import { LandingHero, Manifesto, MediaDoors, Process, StatsBand, TeamShowcase, Ticker } from "../landing";
 import { Shell } from "../Shell";
-import { ContactSection, Dates, Portal, Reviews } from "../home";
+import { ContactSection, Dates, Portal } from "../home";
+import { EconNews } from "../EconNews";
 
 /**
  * Page d'accueil cinématique : héros plein écran animé → bandeau → grandes cartes photo des
@@ -25,7 +26,7 @@ export function HomePage({ lang }: { lang: Lang }) {
       <Services lang={lang} />
       <Dates lang={lang} />
       <TeamShowcase lang={lang} />
-      <div className="pt-20 sm:pt-28"><Reviews lang={lang} /></div>
+      <EconNews lang={lang} />
       <HomeFaq lang={lang} />
       <ContactSection lang={lang} />
     </Shell>
