@@ -237,7 +237,7 @@ export function Dates({ lang }: { lang: Lang }) {
   const t = dict(lang);
   const d = t.dates;
   return (
-    <section className="section mesh relative overflow-hidden" aria-labelledby="dates-title">
+    <section className="section relative overflow-hidden" aria-labelledby="dates-title">
       <div className="container-site">
         <SectionHead
           id="dates-title"

@@ -6,6 +6,7 @@ import { LandingHero, Manifesto, MediaDoors, Process, StatsBand, TeamShowcase, T
 import { Shell } from "../Shell";
 import { ContactSection, Dates, Portal } from "../home";
 import { EconNews } from "../EconNews";
+import { Security } from "../Security";
 
 /**
  * Page d'accueil cinématique : héros plein écran animé → bandeau → grandes cartes photo des
@@ -24,6 +25,7 @@ export function HomePage({ lang }: { lang: Lang }) {
       {portalOn() && <Portal lang={lang} />}
       <StatsBand lang={lang} />
       <Services lang={lang} />
+      <Security lang={lang} />
       <Dates lang={lang} />
       <TeamShowcase lang={lang} />
       <EconNews lang={lang} />
