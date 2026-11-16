@@ -79,6 +79,9 @@ components/           gabarits et composants (Clara, bannière Loi 25, formulair
 
 - **Image d'accueil** : `public/images/saint-leonard-*.webp`, générée avec Higgsfield (illustration d'un boulevard de l'est de Montréal, pas une photo de l'immeuble réel).
 
+- **Actualités économiques** (accueil) : titres lus automatiquement dans les fils officiels (Banque du Canada, Statistique Canada, ARC, Finances Canada), plus le taux directeur et le dollar américain. Sur Vercel, l'accueil se régénère au plus une fois par heure, sans intervention. Sources et réglages : `lib/news.ts`. `npm run build:static` produit toujours un export 100 % statique (la section affiche alors les liens vers les sources).
+- **Avis Google** : la section est retirée de l'accueil pour l'instant (composant `Reviews` conservé dans `components/home.tsx`).
+
 ## Choix techniques
 
 - **Loi 25** : aucun témoin optionnel sans consentement ; « Tout refuser » aussi visible que « Tout accepter » ; choix modifiables en tout temps (pied de page) ; carte OpenStreetMap chargée seulement sur clic ; polices hébergées localement (aucun appel à Google Fonts).
