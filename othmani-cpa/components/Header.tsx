@@ -41,6 +41,23 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
             </span>
           </Link>
 
+          {/* Liens principaux (grand écran) */}
+          <nav aria-label={t.nav.mainNav} className="hidden xl:block">
+            <ul className="flex items-center gap-1">
+              {links.map(([k, label]) => (
+                <li key={k}>
+                  <Link
+                    href={href(k, lang)}
+                    aria-current={k === routeKey ? "page" : undefined}
+                    className="hdr-link relative rounded-full px-3.5 py-2 text-[0.92rem] font-medium text-ink/80 transition-colors hover:text-navy aria-[current=page]:text-navy"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             {/* Langue */}
             <a
@@ -57,13 +74,13 @@ export function Header({ lang, routeKey }: { lang: Lang; routeKey: RouteKey; ove
             {phone ? (
               <a href={`tel:${site.phone.tel}`} className="gbtn phone-pill h-11 gap-2.5 pr-1 pl-1 sm:h-12 sm:pr-5" aria-label={`${t.cta.call} ${site.phone.display}`}>
                 <span className="ring-ico"><Icon name="phone" className="h-[1.1rem] w-[1.1rem]" /></span>
-                <span className="hidden text-[0.95rem] font-semibold tracking-wide sm:inline">{site.phone.display}</span>
+                <span className="hidden text-[0.95rem] font-semibold tracking-wide sm:inline xl:hidden 2xl:inline">{site.phone.display}</span>
               </a>
             ) : (
               <Link href={href("contact", lang)} className="gbtn phone-pill h-11 gap-2.5 pr-1 pl-1 sm:h-12 sm:pr-5">
                 <span className="ring-ico"><Icon name="chat" className="h-[1.05rem] w-[1.05rem]" /></span>
-                <span className="hidden text-[0.95rem] font-semibold sm:inline">{t.cta.talk}</span>
-                <span className="sr-only sm:hidden">{t.cta.talk}</span>
+                <span className="hidden text-[0.95rem] font-semibold sm:inline xl:hidden 2xl:inline">{t.cta.talk}</span>
+                <span className="sr-only sm:hidden xl:inline 2xl:hidden">{t.cta.talk}</span>
               </Link>
             )}
 

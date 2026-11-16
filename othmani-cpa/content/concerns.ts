@@ -41,7 +41,7 @@ export const concerns: Concern[] = [
         "Faire vos impôts au Québec sans stress : un CPA à Saint-Léonard prépare vos déclarations fédérale et provinciale. Dépôt de documents en ligne.",
       h1: "Comment faire mes impôts au Québec sans stress ?",
       answer:
-        "Au Québec, vous produisez deux déclarations : une au fédéral, une au provincial. La date limite est le 30 avril. Le plus simple : rassemblez vos feuillets, déposez-les dans votre espace sécurisé, et un CPA s'occupe du reste.",
+        "Au Québec, vous produisez deux déclarations : une au fédéral, une au provincial. La date limite est le 30 avril. Le plus simple : rassemblez vos feuillets, transmettez-les-nous, et un CPA s'occupe du reste.",
       teaser: "Vos deux déclarations, préparées par un CPA, sans courir après les papiers.",
       sections: [
         {
@@ -109,7 +109,7 @@ export const concerns: Concern[] = [
         "File your Quebec taxes without the stress. A CPA in Saint-Léonard prepares your federal and provincial returns. Upload your documents online.",
       h1: "How do I file my taxes in Quebec without the stress?",
       answer:
-        "In Quebec, you file two returns: one federal, one provincial. The deadline is April 30. The simplest way: gather your slips, upload them to your secure portal, and a CPA takes care of the rest.",
+        "In Quebec, you file two returns: one federal, one provincial. The deadline is April 30. The simplest way: gather your slips, send them to us, and a CPA takes care of the rest.",
       teaser: "Both of your returns, prepared by a CPA, without chasing paperwork.",
       sections: [
         {

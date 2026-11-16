@@ -82,10 +82,12 @@ details > summary::-webkit-details-marker { display: none; }
 @media (max-width: 639px) { [data-cookie-open] .clara-fab { display: none; } }
 
 /* Le héros n'est « long » que si le JavaScript et les animations sont actifs */
-.hero-track { height: 100svh; min-height: 38rem; }
-.js .hero-track { height: 120svh; }
-@media (min-width: 1024px) { .js .hero-track { height: 135svh; } }
-@media (prefers-reduced-motion: reduce) { .js .hero-track { height: 100svh; } }
+.hero-track { height: auto; }
+@media (min-width: 1024px) {
+  .hero-track { height: 100svh; min-height: 40rem; }
+  .js .hero-track { height: 130svh; }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) { .js .hero-track { height: 100svh; } }
 
 @media print { .reveal { opacity: 1 !important; transform: none !important; } .clara-root, [role="region"] { display: none !important; } }
 
@@ -212,3 +214,13 @@ html:has(#mobile-menu[open]) { overflow: hidden; }
 }
 @keyframes panelIn { from { opacity: 0; transform: translateY(-10px) scale(.985); } to { opacity: 1; transform: none; } }
 html:has(#mobile-menu[open]) { overflow: hidden; }
+
+/* Liens de l'en-tête : soulignement qui s'étire depuis le centre */
+.hdr-link::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: .2rem; height: 2px; border-radius: 2px; background: var(--color-sky); transition: left .3s cubic-bezier(.2,.8,.2,1), right .3s cubic-bezier(.2,.8,.2,1); }
+.hdr-link:hover::after, .hdr-link[aria-current="page"]::after { left: .9rem; right: .9rem; }
+
+/* Bandeau défilant */
+.ticker { animation: ticker 40s linear infinite; }
+.ticker:hover { animation-play-state: paused; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker { animation: none; flex-wrap: wrap; width: auto; } .ticker-row[aria-hidden] { display: none; } }

@@ -1,20 +1,26 @@
 import { businessSchema } from "@/lib/schema";
 import { portalOn, type Lang } from "@/lib/site";
 import { JsonLd } from "../JsonLd";
-import { FirstMeeting, HomeFaq, Services } from "../homeExtra";
+import { HomeFaq, Services } from "../homeExtra";
+import { ConcernBento, LandingHero, Manifesto, Process, Ticker } from "../landing";
 import { Shell } from "../Shell";
-import { ContactSection, Dates, Doors, Hero, Portal, Reviews, Steps, Why, Zouhaier } from "../home";
+import { ContactSection, Dates, Portal, Reviews, Why, Zouhaier } from "../home";
 
+/**
+ * Page d'accueil : héros en deux colonnes → bandeau → philosophie → préoccupations →
+ * comment ça marche → services → dates → pourquoi nous → avis → Zouhaier et l'équipe → FAQ → contact.
+ */
 export function HomePage({ lang }: { lang: Lang }) {
   return (
     <Shell lang={lang} routeKey="home">
       <JsonLd data={businessSchema(lang)} />
-      <Hero lang={lang} />
-      <Doors lang={lang} />
-      <Services lang={lang} />
-      <Steps lang={lang} />
-      <FirstMeeting lang={lang} />
+      <LandingHero lang={lang} />
+      <Ticker lang={lang} />
+      <Manifesto lang={lang} />
+      <ConcernBento lang={lang} />
+      <Process lang={lang} />
       {portalOn() && <Portal lang={lang} />}
+      <Services lang={lang} />
       <Dates lang={lang} />
       <Why lang={lang} />
       <Reviews lang={lang} />
