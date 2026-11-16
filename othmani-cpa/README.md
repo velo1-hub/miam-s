@@ -27,6 +27,7 @@ Tout se règle dans **`lib/site.ts`** (un champ vide est masqué du site et du S
 | `geo` | Coordonnées GPS approximatives du 8065, boul. Viau — à vérifier |
 | `portalEnabled`, `clientPortalUrl` | Espace client Pilote Fiscal : **désactivé** tant que l'application n'est pas prête. Le jour du lancement, passer `portalEnabled` à `true` et indiquer le lien : boutons, section d'accueil et mentions réapparaissent. |
 | `googleReviewsUrl`, `googleWriteReviewUrl` | Fiche Google et lien « Laisser un avis » |
+| `stats` | Chiffres clés affichés sur l'accueil (1 000+ clients, 300+ entreprises). ⚠️ Doivent rester exacts et vérifiables (règles de publicité de l'Ordre des CPA). Les mêmes chiffres apparaissent aussi en toutes lettres dans `content/pages.ts` (page À propos et description de l'accueil). |
 | `formEndpoint` | Réception des formulaires (Formspree, Basin, Netlify Forms…) — sans lui, les formulaires affichent un message de repli |
 | `heroVideo` | Vidéo du héros (`/public/media/…`, WebM + MP4, < 3 Mo, sans son) |
 

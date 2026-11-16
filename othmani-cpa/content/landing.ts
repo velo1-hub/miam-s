@@ -1,7 +1,7 @@
 /** Textes de la nouvelle page d'accueil (FR + EN). */
 export const landing = {
   fr: {
-    eyebrow: "Cabinet de CPA à Saint-Léonard · Depuis le 8065, boul. Viau",
+    eyebrow: "Cabinet de CPA · Montréal et partout au Canada",
     helpLabel: "Je cherche de l'aide pour :",
     seeAll: "Toutes les préoccupations",
     secondary: "Voir les dates fiscales",
@@ -13,12 +13,25 @@ export const landing = {
       "Mandats auprès d'organismes publics",
       "Particuliers et entreprises",
       "Français · English",
+      "Partout au Canada",
+      "Grand Montréal",
       "Saint-Léonard",
       "Anjou",
       "Saint-Michel",
       "Montréal-Nord",
       "Rivière-des-Prairies",
+      "Laval",
+      "Longueuil",
     ],
+    stats: {
+      eyebrow: "Othmani CPA en bref",
+      items: [
+        { k: "clients", label: "clients accompagnés", d: "Particuliers, familles et entreprises" },
+        { k: "businesses", label: "entreprises", d: "Travailleurs autonomes, PME et groupes de sociétés" },
+        { k: "reach", value: "Montréal · Canada", label: "notre territoire", d: "Bureau à Saint-Léonard, clients partout au pays" },
+        { k: "cpa", value: "CPA auditeur", label: "compilation, examen et audit", d: "Membre de l'Ordre des CPA du Québec" },
+      ],
+    },
     manifesto: {
       eyebrow: "Notre philosophie",
       big: "Vous ne cherchez pas un comptable. Vous voulez vous débarrasser d'un stress.",
@@ -47,7 +60,7 @@ export const landing = {
     },
   },
   en: {
-    eyebrow: "CPA firm in Saint-Léonard · 8065 Viau Blvd.",
+    eyebrow: "CPA firm · Montreal and across Canada",
     helpLabel: "I'm looking for help with:",
     seeAll: "All concerns",
     secondary: "See tax deadlines",
@@ -59,12 +72,25 @@ export const landing = {
       "Mandates for public bodies",
       "Individuals and businesses",
       "English · Français",
+      "Across Canada",
+      "Greater Montreal",
       "Saint-Léonard",
       "Anjou",
       "Saint-Michel",
       "Montréal-Nord",
       "Rivière-des-Prairies",
+      "Laval",
+      "Longueuil",
     ],
+    stats: {
+      eyebrow: "Othmani CPA at a glance",
+      items: [
+        { k: "clients", label: "clients served", d: "Individuals, families and businesses" },
+        { k: "businesses", label: "businesses", d: "Self-employed, SMEs and groups of companies" },
+        { k: "reach", value: "Montreal · Canada", label: "where we work", d: "Office in Saint-Léonard, clients across the country" },
+        { k: "cpa", value: "CPA auditor", label: "compilation, review and audit", d: "Member of the Ordre des CPA du Québec" },
+      ],
+    },
     manifesto: {
       eyebrow: "Our philosophy",
       big: "You're not looking for an accountant. You want to get rid of a worry.",

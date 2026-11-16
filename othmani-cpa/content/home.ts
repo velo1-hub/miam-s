@@ -8,7 +8,7 @@ export const homeText = {
     services: {
       eyebrow: "Nos services",
       h2: "Tout ce qu'on peut faire pour vous",
-      intro: "Un seul cabinet pour votre famille et votre entreprise. Vous avez un interlocuteur qui connaît l'ensemble de votre situation.",
+      intro: "Un seul cabinet pour votre famille et votre entreprise, à Montréal comme ailleurs au Canada. Vous avez une équipe qui connaît l'ensemble de votre situation.",
       me: "Pour vous et votre famille",
       biz: "Pour votre entreprise",
       seeAll: "Voir le détail",
@@ -51,7 +51,7 @@ export const homeText = {
       items: [
         { q: "Combien coûtent vos services ?", a: "Les honoraires dépendent de la complexité de votre dossier et du temps requis. Avant de commencer, nous vous donnons une estimation et nous la confirmons par écrit dans une lettre de mission. Vous savez à quoi vous attendre." },
         { q: "Faut-il prendre rendez-vous ?", a: "Oui, de préférence. Un rendez-vous nous permet de vous consacrer le temps nécessaire. Écrivez-nous ou appelez-nous : nous trouvons un moment qui vous convient, au bureau ou à distance." },
-        { q: "Servez-vous des clients en dehors de Saint-Léonard ?", a: "Oui. Nous servons Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies et l'ensemble de Montréal. Une bonne partie du travail peut se faire à distance." },
+        { q: "Servez-vous des clients en dehors de Montréal ?", a: "Oui. Notre bureau est à Saint-Léonard et nous servons l'ensemble du Grand Montréal, dont Laval et Longueuil. Nous accompagnons aussi des particuliers et des entreprises partout au Canada : la quasi-totalité du travail peut se faire à distance." },
         { q: "Pouvez-vous reprendre mon dossier d'un autre comptable ?", a: "Oui. Avec votre autorisation, nous récupérons l'historique nécessaire et les documents de l'année précédente. Vous n'avez pas à tout recommencer." },
         { q: "Travaillez-vous en anglais ?", a: "Oui. Nous vous servons en français ou en anglais, selon votre préférence. Vos documents peuvent être dans l'une ou l'autre langue." },
         { q: "J'ai reçu une lettre urgente de l'impôt. Que faire ?", a: "Notez la date limite inscrite sur la lettre et écrivez-nous rapidement avec une photo de la lettre. Nous vous disons si c'est urgent et ce qu'il faut faire. Ne laissez pas la lettre sans réponse." },
@@ -62,7 +62,7 @@ export const homeText = {
     services: {
       eyebrow: "Our services",
       h2: "Everything we can do for you",
-      intro: "One firm for your family and your business. You have one contact who knows your whole situation.",
+      intro: "One firm for your family and your business, in Montreal or elsewhere in Canada. You have a team that knows your whole situation.",
       me: "For you and your family",
       biz: "For your business",
       seeAll: "See the details",
@@ -105,7 +105,7 @@ export const homeText = {
       items: [
         { q: "How much do your services cost?", a: "Fees depend on how complex your file is and the time required. Before we start, we give you an estimate and confirm it in writing in an engagement letter. You know what to expect." },
         { q: "Do I need an appointment?", a: "Yes, preferably. An appointment lets us give you the time you need. Write or call us and we'll find a time that works for you, at the office or remotely." },
-        { q: "Do you serve clients outside Saint-Léonard?", a: "Yes. We serve Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies and all of Montreal. Much of the work can be done remotely." },
+        { q: "Do you serve clients outside Montreal?", a: "Yes. Our office is in Saint-Léonard and we serve all of Greater Montreal, including Laval and Longueuil. We also work with individuals and businesses across Canada: almost all the work can be done remotely." },
         { q: "Can you take over my file from another accountant?", a: "Yes. With your authorization, we retrieve the history we need and last year's documents. You don't have to start over." },
         { q: "Do you work in English?", a: "Yes. We serve you in English or French, as you prefer. Your documents can be in either language." },
         { q: "I received an urgent letter from the tax authorities. What should I do?", a: "Note the deadline on the letter and write to us quickly with a photo of it. We'll tell you whether it's urgent and what to do. Don't leave the letter unanswered." },

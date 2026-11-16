@@ -58,7 +58,12 @@ export const site = {
    * Le site est statique : sans ce lien, les formulaires affichent un message de repli.
    */
   formEndpoint: "",
-  areaServed: ["Saint-Léonard", "Anjou", "Saint-Michel", "Montréal-Nord", "Rivière-des-Prairies", "Montréal"],
+  areaServed: ["Montréal", "Saint-Léonard", "Anjou", "Saint-Michel", "Montréal-Nord", "Rivière-des-Prairies", "Laval", "Longueuil", "Canada"],
+  /**
+   * Chiffres clés fournis par le cabinet. ⚠️ Règles de publicité de l'Ordre des CPA du Québec :
+   * ces chiffres doivent rester exacts et vérifiables. Mettez-les à jour au besoin.
+   */
+  stats: { clients: 1000, businesses: 300 },
 };
 
 export type Lang = "fr" | "en";

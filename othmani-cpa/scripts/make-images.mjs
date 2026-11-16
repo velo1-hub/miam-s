@@ -19,9 +19,9 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
 <rect x="80" y="80" width="72" height="72" rx="20" fill="#ffffff"/>
 <path d="M131 103 A18 18 0 1 0 131 129" fill="none" stroke="#2a2a5c" stroke-width="5.5" stroke-linecap="round"/>
 <path d="M109.5 117 l5.5 5.5 l13 -13.5" fill="none" stroke="#6fc1d8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="80" y="300" font-family="Arial, sans-serif" font-size="68" font-weight="700" fill="#ffffff">Votre CPA à Saint-Léonard,</text>
+<text x="80" y="300" font-family="Arial, sans-serif" font-size="68" font-weight="700" fill="#ffffff">Votre cabinet CPA à Montréal,</text>
 <text x="80" y="384" font-family="Arial, sans-serif" font-size="68" font-weight="700" fill="#6fc1d8">sans le stress.</text>
-<text x="80" y="470" font-family="Arial, sans-serif" font-size="30" fill="#ffffff" opacity=".9">Particuliers et entreprises · Impôts · TPS/TVQ · États financiers</text>
+<text x="80" y="470" font-family="Arial, sans-serif" font-size="30" fill="#ffffff" opacity=".9">Particuliers et entreprises · Montréal et partout au Canada</text>
 <text x="80" y="550" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Othmani CPA Inc.</text>
 </svg>`;
 await sharp(Buffer.from(og)).png({ compressionLevel: 9 }).toFile(out + "og.png");

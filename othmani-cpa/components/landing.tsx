@@ -10,6 +10,8 @@ import { SectionHead } from "./blocks";
 import { HeroEnhance } from "./HeroEnhance";
 import { Icon } from "./Icon";
 import { NextDeadline } from "./NextDeadline";
+import { CountUp } from "./CountUp";
+import { site } from "@/lib/site";
 import { preload } from "react-dom";
 
 const HERO_SRCSET = "/images/saint-leonard-800.webp 720w, /images/saint-leonard-1000.webp 1000w, /images/saint-leonard-1600.webp 1600w";
@@ -140,6 +142,28 @@ export function Ticker({ lang }: { lang: Lang }) {
       <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-navy to-transparent" aria-hidden="true" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-navy to-transparent" aria-hidden="true" />
     </div>
+  );
+}
+
+/* ───────────── Chiffres clés ───────────── */
+export function Stats({ lang }: { lang: Lang }) {
+  const S = landing[lang].stats;
+  return (
+    <section className="relative -mt-px bg-white py-14 sm:py-20" aria-label={S.eyebrow}>
+      <div className="container-site">
+        <ul className="grid divide-y divide-line overflow-hidden rounded-[2rem] border border-line sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+          {S.items.map((it, i) => (
+            <li key={it.k} className={`reveal p-7 sm:p-8 ${i % 2 === 1 ? "sm:border-l sm:border-line lg:border-l-0" : ""} ${i > 1 ? "sm:border-t sm:border-line lg:border-t-0" : ""}`} data-delay={String((i % 3) + 1)}>
+              <p className="flex min-h-[3rem] items-end font-display text-[2.6rem] leading-none font-semibold tracking-tight text-navy sm:text-5xl">
+                {it.k === "clients" ? <CountUp to={site.stats.clients} lang={lang} suffix="+" /> : it.k === "businesses" ? <CountUp to={site.stats.businesses} lang={lang} suffix="+" /> : <span className="text-[1.55rem] leading-[1.1] sm:text-[1.7rem]">{it.value}</span>}
+              </p>
+              <p className="mt-3 font-display text-lg font-semibold text-ink">{it.label}</p>
+              <p className="mt-1 text-[0.95rem] leading-snug text-muted">{it.d}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 

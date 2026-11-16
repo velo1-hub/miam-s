@@ -2,12 +2,12 @@
 export const pagesText = {
   home: {
     fr: {
-      title: "Comptable CPA à Saint-Léonard | Othmani CPA",
-      description: "Othmani CPA, cabinet comptable à Saint-Léonard : impôts, TPS/TVQ, états financiers et audit pour particuliers et entreprises de l'est de Montréal.",
+      title: "Cabinet CPA à Montréal et Saint-Léonard | Othmani CPA",
+      description: "Othmani CPA, cabinet comptable à Montréal : impôts, TPS/TVQ, états financiers et audit. Plus de 1 000 clients, à Montréal et partout au Canada.",
     },
     en: {
-      title: "CPA accountant in Saint-Léonard | Othmani CPA",
-      description: "Othmani CPA, accounting firm in Saint-Léonard: taxes, GST/QST, financial statements and audit for individuals and businesses in east Montreal.",
+      title: "Montreal CPA firm in Saint-Léonard | Othmani CPA",
+      description: "Othmani CPA, Montreal accounting firm: taxes, GST/QST, financial statements and audit. Over 1,000 clients in Montreal and across Canada.",
     },
   },
   individuals: {
@@ -25,7 +25,7 @@ export const pagesText = {
         "Déclarations de personnes décédées et accompagnement des liquidateurs",
         "Régularisation d'années non produites",
       ],
-      areas: "Nous accueillons des clients de Saint-Léonard, d'Anjou, de Saint-Michel, de Montréal-Nord, de Rivière-des-Prairies et de partout à Montréal. Vous pouvez aussi tout faire à distance.",
+      areas: "Nous accueillons des clients de partout à Montréal — Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies, Laval, Longueuil — et de partout au Canada. Tout peut se faire à distance.",
     },
     en: {
       title: "Accountant for individuals in Saint-Léonard",
@@ -41,7 +41,7 @@ export const pagesText = {
         "Final returns for deceased persons and support for liquidators",
         "Catching up on unfiled years",
       ],
-      areas: "We welcome clients from Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies and all over Montreal. You can also do everything remotely.",
+      areas: "We welcome clients from all over Montreal — Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies, Laval, Longueuil — and from across Canada. Everything can be done remotely.",
     },
   },
   businesses: {
@@ -59,7 +59,7 @@ export const pagesText = {
         "Coordination de plusieurs sociétés et société de gestion",
         "Mandats pour OBNL et organismes publics",
       ],
-      areas: "Nous servons les entreprises de Saint-Léonard, d'Anjou, de Saint-Michel, de Montréal-Nord, de Rivière-des-Prairies et de toute la région de Montréal.",
+      areas: "Nous servons des entreprises de tout le Grand Montréal et de partout au Canada, des travailleurs autonomes aux groupes de sociétés.",
     },
     en: {
       title: "Accountant for businesses in Saint-Léonard | CPA",
@@ -75,7 +75,7 @@ export const pagesText = {
         "Coordinating multiple companies and holding companies",
         "Engagements for non-profits and public bodies",
       ],
-      areas: "We serve businesses in Saint-Léonard, Anjou, Saint-Michel, Montréal-Nord, Rivière-des-Prairies and the greater Montreal area.",
+      areas: "We serve businesses across Greater Montreal and Canada, from self-employed professionals to groups of companies.",
     },
   },
   calendar: {
@@ -118,8 +118,8 @@ export const pagesText = {
     fr: {
       title: "À propos de Zouhaier Othmani, CPA auditeur",
       description: "Zouhaier Othmani, CPA auditeur et membre de l'Ordre des CPA du Québec, dirige Othmani CPA à Saint-Léonard. Service en français et en anglais.",
-      h1: "Un CPA de quartier, rigoureux et humain",
-      intro: "Othmani CPA est un cabinet de Saint-Léonard au service des particuliers et des entreprises de l'est de Montréal.",
+      h1: "Un cabinet montréalais, rigoureux et humain",
+      intro: "Othmani CPA accompagne plus de 1 000 clients, dont plus de 300 entreprises, à Montréal et partout au Canada, depuis son bureau de Saint-Léonard.",
       approachH2: "Notre façon de travailler",
       approach: [
         ["On écoute d'abord", "Vous nous dites ce qui vous préoccupe, avec vos mots. On part de là."],
@@ -139,8 +139,8 @@ export const pagesText = {
     en: {
       title: "About Zouhaier Othmani, CPA auditor",
       description: "Zouhaier Othmani, CPA auditor and member of the Ordre des CPA du Québec, leads Othmani CPA in Saint-Léonard. Service in French and English.",
-      h1: "A neighbourhood CPA, rigorous and human",
-      intro: "Othmani CPA is a Saint-Léonard firm serving individuals and businesses in east Montreal.",
+      h1: "A Montreal firm, rigorous and human",
+      intro: "Othmani CPA serves more than 1,000 clients, including more than 300 businesses, in Montreal and across Canada, from its Saint-Léonard office.",
       approachH2: "How we work",
       approach: [
         ["We listen first", "You tell us what's on your mind, in your own words. We start there."],

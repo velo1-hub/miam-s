@@ -18,8 +18,8 @@ export function businessSchema(lang: Lang) {
     logo: abs("/icon.svg"),
     description:
       lang === "fr"
-        ? "Cabinet de CPA à Saint-Léonard (Montréal) pour particuliers et entreprises : impôts, TPS/TVQ, états financiers, audit."
-        : "CPA firm in Saint-Léonard (Montreal) for individuals and businesses: taxes, GST/QST, financial statements, audit.",
+        ? "Cabinet de CPA à Montréal (bureau à Saint-Léonard) pour particuliers et entreprises, partout au Canada : impôts, TPS/TVQ, états financiers, audit."
+        : "Montreal CPA firm (office in Saint-Léonard) for individuals and businesses across Canada: taxes, GST/QST, financial statements, audit.",
     founder: { "@type": "Person", name: site.owner, jobTitle: site.ownerTitle[lang] },
     employee: team.map((m) => ({ "@type": "Person", name: m.name, jobTitle: m[lang].role, image: abs(m.photo) })),
     address: {
@@ -39,7 +39,11 @@ export function businessSchema(lang: Lang) {
       opens: h.opens,
       closes: h.closes,
     })),
-    areaServed: site.areaServed.map((name) => ({ "@type": "Place", name })),
+    areaServed: [
+      { "@type": "City", name: "Montréal" },
+      ...site.areaServed.filter((n) => !["Montréal", "Canada"].includes(n)).map((name) => ({ "@type": "Place", name })),
+      { "@type": "Country", name: "Canada" },
+    ],
     knowsLanguage: ["fr-CA", "en-CA"],
     ...(site.googleReviewsUrl ? { sameAs: [site.googleReviewsUrl] } : {}),
   };
