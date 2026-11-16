@@ -10,13 +10,14 @@ export const NEWS_REVALIDATE = 3600;
 export type NewsItem = { title: string; url: string; date: string; source: string };
 export type Indicator = { label: string; value: string; date: string };
 
-type Feed = { source: { fr: string; en: string }; urls: { fr: string[]; en: string[] }; home: { fr: string; en: string } };
+type Feed = { max: number; source: { fr: string; en: string }; urls: { fr: string[]; en: string[] }; home: { fr: string; en: string } };
 
 const canadaNews = (lang: Lang, dept: string) =>
   `https://api.io.canada.ca/io-server/gc/news/${lang}/v2?dept=${dept}&sort=publishedDate&orderBy=desc&pick=8&format=atom&atomtitle=news`;
 
 export const feeds: Feed[] = [
   {
+    max: 2,
     source: { fr: "Banque du Canada", en: "Bank of Canada" },
     urls: {
       fr: ["https://www.banqueducanada.ca/content_type/communiques/feed/", "https://www.banqueducanada.ca/feed/"],
@@ -25,19 +26,25 @@ export const feeds: Feed[] = [
     home: { fr: "https://www.banqueducanada.ca/presse/", en: "https://www.bankofcanada.ca/press/" },
   },
   {
+    max: 2,
     source: { fr: "Statistique Canada", en: "Statistics Canada" },
     urls: {
-      fr: ["https://www150.statcan.gc.ca/n1/dai-quo/ssi/homepage/rss-fra.xml"],
-      en: ["https://www150.statcan.gc.ca/n1/dai-quo/ssi/homepage/rss-eng.xml"],
+      fr: ["https://www150.statcan.gc.ca/n1/rss/dai-quo/0-fra.atom", "https://www150.statcan.gc.ca/n1/dai-quo/ssi/homepage/rss-fra.xml"],
+      en: ["https://www150.statcan.gc.ca/n1/rss/dai-quo/0-eng.atom", "https://www150.statcan.gc.ca/n1/dai-quo/ssi/homepage/rss-eng.xml"],
     },
     home: { fr: "https://www150.statcan.gc.ca/n1/dai-quo/index-fra.htm", en: "https://www150.statcan.gc.ca/n1/dai-quo/index-eng.htm" },
   },
   {
+    max: 2,
     source: { fr: "Agence du revenu du Canada", en: "Canada Revenue Agency" },
-    urls: { fr: [canadaNews("fr", "canadarevenueagency")], en: [canadaNews("en", "canadarevenueagency")] },
+    urls: {
+      fr: [canadaNews("fr", "canadarevenueagency"), canadaNews("fr", "revenueagency")],
+      en: [canadaNews("en", "canadarevenueagency"), canadaNews("en", "revenueagency")],
+    },
     home: { fr: "https://www.canada.ca/fr/agence-revenu/nouvelles.html", en: "https://www.canada.ca/en/revenue-agency/news.html" },
   },
   {
+    max: 1,
     source: { fr: "Finances Canada", en: "Finance Canada" },
     urls: { fr: [canadaNews("fr", "departmentfinance")], en: [canadaNews("en", "departmentfinance")] },
     home: { fr: "https://www.canada.ca/fr/ministere-finances/nouvelles.html", en: "https://www.canada.ca/en/department-finance/news.html" },
@@ -47,10 +54,11 @@ export const feeds: Feed[] = [
 const decode = (s: string) =>
   s
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/&amp;/g, "&")
     .replace(/<[^>]+>/g, "")
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
-    .replace(/&quot;/g, '"').replace(/&apos;|&rsquo;/g, "’").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"').replace(/&apos;|&rsquo;/g, "’").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;|&#160;/g, " ").replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -103,7 +111,7 @@ async function readFeed(f: Feed, lang: Lang): Promise<NewsItem[]> {
   for (const url of f.urls[lang]) {
     try {
       const items = parseFeed(await get(url), f.source[lang]);
-      if (items.length) return items.slice(0, 4);
+      if (items.length) return items.sort((a, b) => b.date.localeCompare(a.date)).slice(0, f.max);
     } catch {
       /* on essaie l'adresse suivante */
     }
@@ -112,7 +120,8 @@ async function readFeed(f: Feed, lang: Lang): Promise<NewsItem[]> {
 }
 
 export async function getNews(lang: Lang, limit = 6): Promise<NewsItem[]> {
-  const all = (await Promise.all(feeds.map((f) => readFeed(f, lang)))).flat();
+  const perFeed = await Promise.all(feeds.map((f) => readFeed(f, lang)));
+  const all = perFeed.flat();
   const seen = new Set<string>();
   return all
     .filter((n) => (seen.has(n.url) ? false : (seen.add(n.url), true)))
@@ -135,4 +144,10 @@ export async function getIndicators(lang: Lang): Promise<Indicator[]> {
   } catch {
     return [];
   }
+}
+
+/** Diagnostic : nombre de titres obtenus par source (visible dans le code de la page). */
+export async function newsStatus(lang: Lang): Promise<string> {
+  const r = await Promise.all(feeds.map(async (f) => `${f.source.en}:${(await readFeed(f, lang)).length}`));
+  return r.join(", ");
 }

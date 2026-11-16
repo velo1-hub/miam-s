@@ -1,4 +1,4 @@
-import { feeds, getIndicators, getNews } from "@/lib/news";
+import { feeds, getIndicators, getNews, newsStatus } from "@/lib/news";
 import type { Lang } from "@/lib/site";
 import { SectionHead } from "./blocks";
 import { Icon } from "./Icon";
@@ -9,13 +9,13 @@ import { Icon } from "./Icon";
  */
 export async function EconNews({ lang }: { lang: Lang }) {
   const fr = lang === "fr";
-  const [news, indicators] = await Promise.all([getNews(lang, 6), getIndicators(lang)]);
+  const [news, indicators, status] = await Promise.all([getNews(lang, 6), getIndicators(lang), newsStatus(lang)]);
   const fmt = (iso: string) => new Intl.DateTimeFormat(fr ? "fr-CA" : "en-CA", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Montreal" }).format(new Date(iso));
   const now = new Intl.DateTimeFormat(fr ? "fr-CA" : "en-CA", { day: "numeric", month: "long", hour: "numeric", minute: "2-digit", timeZone: "America/Montreal" }).format(new Date());
   const [lead, ...rest] = news;
 
   return (
-    <section id="actualites" className="section" aria-labelledby="news-title">
+    <section id="actualites" className="section" aria-labelledby="news-title" data-news-status={status}>
       <div className="container-site">
         <SectionHead
           id="news-title"
