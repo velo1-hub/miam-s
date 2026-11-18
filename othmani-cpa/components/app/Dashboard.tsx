@@ -131,8 +131,14 @@ function Loadable<T>({ load, label, rows: n = 2, children }: { load: { data: T |
 }
 
 function SideNav({ section, go, badges }: { section: Section; go: (s: Section) => void; badges: Partial<Record<Section, [number, string]>> }) {
+  const bar = useRef<HTMLElement>(null);
+  // Sur petit écran, la barre défile : la section active reste visible.
+  useEffect(() => {
+    const el = bar.current, a = el?.querySelector<HTMLElement>("[aria-current=page]");
+    if (el && a && el.scrollWidth > el.clientWidth) el.scrollTo({ left: a.offsetLeft - (el.clientWidth - a.offsetWidth) / 2 });
+  }, [section]);
   return (
-    <nav aria-label="Sections du tableau de bord" className="glass -mx-4 overflow-x-auto px-3 py-2 sm:mx-0 sm:rounded-2xl lg:sticky lg:top-28 lg:self-start lg:overflow-visible lg:p-3">
+    <nav ref={bar} aria-label="Sections du tableau de bord" className="glass relative -mx-4 overflow-x-auto px-3 py-2 sm:mx-0 sm:rounded-2xl lg:sticky lg:top-28 lg:self-start lg:overflow-visible lg:p-3">
       <ul className="flex gap-1 lg:flex-col">
         {SECTIONS.map(([k, l]) => {
           const b = badges[k];
@@ -260,7 +266,7 @@ function Today({ store, staffName, openDossier, openLead, showDossiers, showLead
         { label: "Documents attendus", value: open.filter((d) => d.status === "documents_attendus").length, onClick: () => showDossiers({ stage: "documents_attendus" }) },
         { label: "Dossiers en retard", value: late.length, alert: true, onClick: () => showDossiers({ signal: "retard" }) },
       ]} />
-      <div className="grid gap-6 xl:grid-cols-2 xl:items-start">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
         <TodayCard title="Messages à lire" count={toRead.length} none="Aucun message en attente de réponse.">
           {toRead.map((d) => <TodayRow key={d.id} title={d.client_name} sub={d.title} right={<span className={warnPill}>À lire</span>} onClick={() => openDossier(d.id)} />)}
         </TodayCard>
@@ -804,9 +810,11 @@ function DossierDetail({ d, staffName, team, railTop, onPatch, onMove, onTouch }
   d: Dossier; staffName: string; team: string[]; railTop: string; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
 }) {
   useEffect(() => { onTouch(); }, [onTouch]);
+  const rail = useRef<HTMLElement>(null);
   return (
     <div className="@container">
       <DossierHeader d={d} />
+      <button type="button" onClick={() => { rail.current?.scrollIntoView({ block: "start" }); rail.current?.focus(); }} className={`${smallBtn} mt-4 @[50rem]:hidden`}>Aller aux messages et aux notes</button>
       <div className="mt-6 grid gap-6 @[50rem]:grid-cols-[minmax(0,1fr)_21rem] @[50rem]:items-start">
         <div className="min-w-0 space-y-6">
           <FollowUp d={d} team={team} onPatch={onPatch} onMove={onMove} />
@@ -815,7 +823,7 @@ function DossierDetail({ d, staffName, team, railTop, onPatch, onMove, onTouch }
           <Documents dossierId={d.id} role="cabinet" lang="fr" />
           <DossierInvoices dossierId={d.id} />
         </div>
-        <aside aria-label="Échanges et notes" className={`min-w-0 space-y-6 @[50rem]:sticky @[50rem]:max-h-[calc(100svh-8.5rem)] @[50rem]:overflow-y-auto @[50rem]:rounded-3xl ${railTop}`}>
+        <aside ref={rail} tabIndex={-1} aria-label="Échanges et notes" className={`min-w-0 scroll-mt-28 space-y-6 @[50rem]:sticky @[50rem]:max-h-[calc(100svh-8.5rem)] @[50rem]:overflow-y-auto @[50rem]:rounded-3xl ${railTop}`}>
           <Messages dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} />
           <Notes dossierId={d.id} staffName={staffName} />
         </aside>
@@ -946,7 +954,7 @@ function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move,
 
   return (
     <div>
-      <div className={`glass mb-5 rounded-2xl p-3 ${detailOpen ? "hidden lg:block" : ""}`}>
+      <div className={`glass mb-5 rounded-2xl p-3 ${detailOpen ? "hidden min-[1400px]:block" : ""}`}>
         <div className="flex flex-wrap items-center gap-2">
           <div role="group" aria-label="Affichage" className="flex gap-1">
             {([["liste", "Liste"], ["tableau", "Tableau par étape"]] as const).map(([k, l]) => (
@@ -976,8 +984,8 @@ function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move,
           {d && <Drawer label={`Dossier de ${d.client_name}`} returnTo={`[data-card="${d.id}"]`} onClose={() => setUi((u) => ({ ...u, current: null }))}>{detail(d, "@[50rem]:top-20")}</Drawer>}
         </>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start">
-          <ul aria-label="Dossiers" className={`space-y-2 ${detailOpen ? "hidden lg:block" : ""}`}>
+        <div className="grid gap-6 min-[1400px]:grid-cols-[17rem_minmax(0,1fr)] min-[1400px]:items-start">
+          <ul aria-label="Dossiers" className={`space-y-2 ${detailOpen ? "hidden min-[1400px]:block" : ""}`}>
             {shown.map((x) => (
               <li key={x.id}>
                 <button type="button" onClick={() => setUi((u) => ({ ...u, current: x.id, creating: false }))} aria-current={x.id === current ? "true" : undefined} className="w-full rounded-2xl border border-line bg-white p-4 text-left transition-colors hover:border-navy aria-[current=true]:border-navy aria-[current=true]:bg-sky-50 aria-[current=true]:shadow-[inset_4px_0_0_var(--color-navy)]">
@@ -990,8 +998,8 @@ function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move,
             ))}
             {shown.length === 0 && <li className="rounded-2xl border border-line bg-white p-4 text-sm text-muted">{filtered ? "Aucun dossier ne correspond à ces filtres." : "Aucun dossier en cours. Créez-en un avec « Nouveau dossier »."}</li>}
           </ul>
-          <div className={`min-w-0 ${detailOpen ? "" : "hidden lg:block"}`}>
-            {detailOpen && <button type="button" onClick={closeDetail} className={`${smallBtn} mb-4 lg:hidden`}>← Dossiers</button>}
+          <div className={`min-w-0 ${detailOpen ? "" : "hidden min-[1400px]:block"}`}>
+            {detailOpen && <button type="button" onClick={closeDetail} className={`${smallBtn} mb-4 min-[1400px]:hidden`}>← Dossiers</button>}
             {creating ? <NewDossier key={draft?.id ?? "nouveau"} draft={draft} onCreate={create} /> : d ? detail(d, "@[50rem]:top-28") : <p className={empty}>Choisissez un dossier dans la liste, ou créez-en un.</p>}
           </div>
         </div>
@@ -1217,9 +1225,10 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     return save(supabase().from("leads").insert(payload), { ok: "Demande ajoutée.", rollback: () => edit("leads", (list) => list.filter((x) => x.id !== l.id)) });
   }, [edit]);
   const completeTask = useCallback((t: Task) => {
+    const open = { ...t, done: false };
     const setDone = (done: boolean, ok: string, undo?: () => void) => {
-      edit("tasks", (l) => (done ? l.filter((x) => x.id !== t.id) : [...l, t]));
-      save(supabase().from("tasks").update({ done }).eq("id", t.id), { ok, undo, rollback: () => edit("tasks", (l) => (done ? [...l, t] : l.filter((x) => x.id !== t.id))) });
+      edit("tasks", (l) => (done ? l.filter((x) => x.id !== t.id) : [...l, open]));
+      save(supabase().from("tasks").update({ done }).eq("id", t.id), { ok, undo, rollback: () => edit("tasks", (l) => (done ? [...l, open] : l.filter((x) => x.id !== t.id))) });
     };
     setDone(true, "Tâche terminée.", () => setDone(false, "Tâche rouverte."));
   }, [edit]);
@@ -1228,7 +1237,12 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     save(supabase().from("document_requests").update({ received: true }).eq("id", requestId), { ok: "Marqué reçu.", rollback: () => edit("pendingReqs", (l) => [...l, requestId]) });
   }, [edit]);
 
-  const openDossier = useCallback((id: string) => { setUi((u) => ({ ...u, view: "liste", current: id, creating: false })); go("dossiers"); }, [go]);
+  const openDossier = useCallback((id: string) => {
+    // Les filtres sont remis à zéro pour que le dossier ouvert figure dans la liste à côté de sa fiche.
+    const closed = snap.current?.dossiers.find((x) => x.id === id)?.status === "ferme";
+    setUi((u) => ({ ...u, view: "liste", current: id, creating: false, filter: { ...NO_FILTER, scope: closed ? "tous" : "a_faire" } }));
+    go("dossiers");
+  }, [go]);
   const showDossiers = useCallback((f: Partial<DFilter>) => { setUi((u) => ({ ...u, view: "liste", current: null, creating: false, filter: { ...NO_FILTER, ...f } })); go("dossiers"); }, [go]);
   const showLeads = useCallback((f: string) => { setFocusLead(null); setLeadFilter(f); go("demandes"); }, [go]);
   const onCreated = useCallback((d: Dossier, lead: Lead | null) => {
@@ -1269,7 +1283,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
           </>
         ) : section === "dossiers" ? (
           <>
-            <div className={ui.view === "liste" && (ui.creating || ui.current) ? "hidden lg:block" : ""}><SectionHead title="Dossiers">{refresh}</SectionHead></div>
+            <div className={ui.view === "liste" && (ui.creating || ui.current) ? "hidden min-[1400px]:block" : ""}><SectionHead title="Dossiers">{refresh}</SectionHead></div>
             <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} />
           </>
         ) : section === "clients" ? (
