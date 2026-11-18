@@ -14,6 +14,18 @@ const LEAD_STATUS: Record<string, string> = { nouveau: "Nouveau", contacte: "Con
 const SOURCE: Record<string, string> = { contact: "Formulaire", clara: "Clara", telephone: "Téléphone", autre: "Autre" };
 const pill = "rounded-full px-2.5 py-1 text-xs font-semibold";
 
+/** Documents demandés par défaut à l'ouverture d'un dossier, selon le type de mandat (modifiable ensuite). */
+const DEFAULT_REQUESTS: Record<string, string[]> = {
+  impot_particulier: ["Avis de cotisation de l'an dernier (fédéral et Québec)", "Feuillets de revenus : T4 et Relevé 1, T5 et Relevé 3, etc.", "Reçus de cotisations REER", "Reçus de frais médicaux, de dons et de frais de garde", "Relevé 31 (locataire) ou compte de taxes municipales (propriétaire)"],
+  travailleur_autonome: ["Avis de cotisation de l'an dernier (fédéral et Québec)", "Revenus de l'année : factures émises ou relevé des ventes", "Dépenses de l'année, avec les reçus", "Relevés bancaires et de carte de crédit de l'entreprise", "Kilométrage et dépenses du véhicule", "Dépenses du bureau à domicile", "Acomptes provisionnels versés"],
+  impot_societe: ["États financiers et déclarations de l'an dernier", "Balance de vérification et grand livre de l'exercice", "Relevés bancaires et de carte de crédit de l'exercice", "Registre des salaires et sommaires T4 et Relevé 1", "Déclarations de TPS/TVQ de l'exercice", "Contrats de prêt et de location en vigueur"],
+  taxes: ["Numéros de TPS et de TVQ", "Factures de ventes de la période", "Factures d'achats et de dépenses de la période", "Relevés bancaires de la période", "Dernière déclaration produite"],
+  etats_financiers: ["États financiers de l'exercice précédent", "Balance de vérification et grand livre", "Relevés bancaires et conciliations de fin d'exercice", "Liste des comptes clients et fournisseurs", "Inventaire de fin d'exercice, s'il y a lieu", "Contrats de prêt, baux et ententes importantes"],
+  tenue_de_livres: ["Relevés bancaires et de carte de crédit", "Factures de ventes", "Factures d'achats et reçus de dépenses", "Registre des salaires"],
+  lettre_fisc: ["La lettre ou l'avis reçu, toutes les pages", "La déclaration visée et son avis de cotisation", "Les pièces justificatives demandées dans la lettre"],
+  autre: [],
+};
+
 function Leads({ onCreateDossier }: { onCreateDossier: (l: Lead) => void }) {
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [filter, setFilter] = useState("ouverts");
@@ -114,6 +126,12 @@ function DossierDetail({ d, staffName, onChange }: { d: Dossier; staffName: stri
   }, [d.id]);
   useEffect(() => { load(); }, [load]);
 
+  const [copied, setCopied] = useState(false);
+  const inviteText = `Bonjour,\n\nVotre dossier « ${d.title} » est ouvert chez Othmani CPA. Vous pouvez suivre son avancement, déposer vos documents et nous écrire dans votre espace client :\n\n${typeof window === "undefined" ? "" : window.location.origin}/espace-client/\n\nConnectez-vous avec ce courriel : ${d.client_email}. Vous recevrez un lien de connexion, sans mot de passe.\n\nL'équipe d'Othmani CPA`;
+  const invite = async () => {
+    try { await navigator.clipboard.writeText(inviteText); setCopied(true); window.setTimeout(() => setCopied(false), 3000); } catch { /* presse-papiers indisponible : le lien courriel reste offert */ }
+  };
+
   const add = async (e: FormEvent<HTMLFormElement>, table: "document_requests" | "dossier_notes") => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -129,6 +147,11 @@ function DossierDetail({ d, staffName, onChange }: { d: Dossier; staffName: stri
       <section className="rounded-3xl border border-line bg-white p-5 sm:p-6">
         <h2 className="font-display text-2xl font-bold tracking-tight text-navy">{d.title}</h2>
         <p className="mt-1 text-sm text-muted">{d.client_name} · <a className="text-navy underline underline-offset-4" href={`mailto:${d.client_email}`}>{d.client_email}</a> · {KINDS[d.kind]?.fr ?? d.kind}{d.tax_year ? ` · ${d.tax_year}` : ""}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={invite} className="btn-secondary min-h-10 px-4 py-2 text-sm">Copier l'invitation à l'espace client</button>
+          <a href={`mailto:${d.client_email}?subject=${encodeURIComponent("Votre espace client Othmani CPA")}&body=${encodeURIComponent(inviteText)}`} className="text-sm font-semibold text-navy underline underline-offset-4">L'envoyer par courriel</a>
+          <span role="status" aria-live="polite" className="text-sm text-muted">{copied ? "Invitation copiée." : ""}</span>
+        </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="d-status" className="label">Étape (visible par le client)</label>
@@ -192,9 +215,14 @@ function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffNa
   const [q, setQ] = useState(initialQuery);
   const [creating, setCreating] = useState(false);
   const [err, setErr] = useState("");
+  const [waiting, setWaiting] = useState<Set<string>>(new Set());
   const load = useCallback(async () => {
-    const { data } = await supabase().from("dossiers").select("*").order("updated_at", { ascending: false }).limit(500);
+    const [{ data }, w] = await Promise.all([
+      supabase().from("dossiers").select("*").order("updated_at", { ascending: false }).limit(500),
+      supabase().rpc("dossiers_a_repondre"),
+    ]);
     setList((data as Dossier[]) ?? []);
+    setWaiting(new Set((w.data as string[] | null) ?? []));
   }, []);
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (draft) setCreating(true); }, [draft]);
@@ -208,6 +236,8 @@ function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffNa
     };
     const { data, error } = await supabase().from("dossiers").insert(row).select().single();
     if (error) { setErr("Le dossier n'a pas pu être créé. Vérifiez les champs."); return; }
+    const reqs = DEFAULT_REQUESTS[row.kind] ?? [];
+    if (reqs.length) await supabase().from("document_requests").insert(reqs.map((label) => ({ dossier_id: (data as Dossier).id, label })));
     if (draft) await supabase().from("leads").update({ status: "client" }).eq("id", draft.id);
     setErr(""); setCreating(false); clearDraft();
     await load();
@@ -235,7 +265,10 @@ function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffNa
           {shown.map((x) => (
             <li key={x.id}>
               <button type="button" onClick={() => { setCurrent(x.id); setCreating(false); }} aria-current={x.id === current ? "true" : undefined} className="w-full rounded-2xl border border-line bg-white p-4 text-left transition-colors hover:border-navy aria-[current=true]:border-navy aria-[current=true]:bg-sky-50">
-                <span className="block font-display font-semibold text-ink">{x.client_name}</span>
+                <span className="flex items-start justify-between gap-2">
+                  <span className="font-display font-semibold text-ink">{x.client_name}</span>
+                  {waiting.has(x.id) && <span className={`${pill} shrink-0 bg-[#fff4e5] text-[#6b3d00]`}>Message à lire</span>}
+                </span>
                 <span className="block text-sm text-ink/80">{x.title}</span>
                 <span className="mt-1 block text-xs text-muted">{statusLabel[x.status]?.fr ?? x.status}{x.due_date ? ` · échéance ${fmtDate(x.due_date, "fr")}` : ""}</span>
               </button>
@@ -303,6 +336,47 @@ function Reminders() {
   );
 }
 
+/** Membres de l'équipe autorisés à ouvrir le tableau de bord. */
+function Team({ me }: { me: string }) {
+  const [list, setList] = useState<{ email: string; name: string }[] | null>(null);
+  const [err, setErr] = useState("");
+  const load = useCallback(async () => {
+    const { data } = await supabase().from("staff").select("email,name").order("name");
+    setList((data as { email: string; name: string }[]) ?? []);
+  }, []);
+  useEffect(() => { load(); }, [load]);
+  const add = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const { error } = await supabase().from("staff").insert({ email: String(f.get("email")).trim().toLowerCase(), name: String(f.get("name")).trim() });
+    if (error) { setErr("Ajout impossible. Ce courriel est peut-être déjà dans la liste."); return; }
+    setErr(""); form.reset(); load();
+  };
+  if (!list) return <p className="text-muted" role="status">…</p>;
+  return (
+    <Card title={`Équipe (${list.length})`}>
+      <p className="mb-3 text-sm text-muted">Ces personnes voient toutes les demandes, tous les dossiers et tous les documents. N'ajoutez que des membres du cabinet, et retirez sans délai toute personne qui le quitte.</p>
+      <ul className="divide-y divide-line">
+        {list.map((m) => (
+          <li key={m.email} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+            <span><span className="font-medium text-ink">{m.name || m.email}</span> <span className="text-sm text-muted">· {m.email}</span></span>
+            {m.email === me ? <span className="text-sm text-muted">Vous</span> : (
+              <button type="button" className="text-sm text-[#a3261f] underline underline-offset-4" onClick={async () => { if (window.confirm(`Retirer ${m.name || m.email} de l'équipe ?`)) { await supabase().from("staff").delete().eq("email", m.email); load(); } }}>Retirer</button>
+            )}
+          </li>
+        ))}
+      </ul>
+      <form onSubmit={add} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        <div><label htmlFor="tm-name" className="label">Nom</label><input id="tm-name" name="name" required maxLength={120} className="field" /></div>
+        <div><label htmlFor="tm-email" className="label">Courriel</label><input id="tm-email" name="email" type="email" required maxLength={200} className="field" /></div>
+        <button type="submit" className="btn-primary min-h-12">Ajouter</button>
+      </form>
+      <p role="status" aria-live="polite" className={err ? "mt-3 rounded-xl bg-[#fff4e5] px-3 py-2 text-sm text-[#6b3d00]" : "sr-only"}>{err}</p>
+    </Card>
+  );
+}
+
 /** Fiches clients : regroupe les dossiers et les demandes par courriel. */
 function Clients({ onOpen }: { onOpen: (email: string) => void }) {
   const [rows, setRows] = useState<{ email: string; name: string; dossiers: Dossier[]; leads: Lead[] }[] | null>(null);
@@ -365,10 +439,14 @@ function Overview() {
       count("dossiers").neq("status", "ferme"),
       count("dossiers").eq("status", "documents_attendus"),
       count("dossiers").neq("status", "ferme").gte("due_date", today).lte("due_date", soon),
-    ]).then((r) => setK(["Nouvelles demandes", "RDV à confirmer", "Dossiers en cours", "Documents attendus", "Échéances d'ici 30 jours"].map((l, i) => [l, r[i].count ?? 0])));
+      supabase().rpc("dossiers_a_repondre"),
+    ]).then((r) => setK([
+      ...["Nouvelles demandes", "RDV à confirmer", "Dossiers en cours", "Documents attendus", "Échéances d'ici 30 jours"].map((l, i): [string, number] => [l, (r[i] as { count: number | null }).count ?? 0]),
+      ["Messages à lire", ((r[5] as { data: unknown[] | null }).data ?? []).length],
+    ]));
   }, []);
   return (
-    <dl className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+    <dl className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       {(k ?? []).map(([l, v]) => (
         <div key={l} className="rounded-2xl border border-line bg-white px-4 py-3">
           <dt className="text-xs font-medium text-muted">{l}</dt>
@@ -381,7 +459,7 @@ function Overview() {
 
 function Board({ email }: { email: string }) {
   const [staff, setStaff] = useState<{ name: string } | null | undefined>(undefined);
-  const [tab, setTab] = useState<"leads" | "clients" | "dossiers" | "rappels">("leads");
+  const [tab, setTab] = useState<"leads" | "clients" | "dossiers" | "rappels" | "equipe">("leads");
   const [draft, setDraft] = useState<Lead | null>(null);
   const [query, setQuery] = useState("");
   useEffect(() => {
@@ -399,8 +477,8 @@ function Board({ email }: { email: string }) {
   return (
     <div>
       <Overview key={tab} />
-      <div role="tablist" aria-label="Sections" className="mb-6 inline-flex rounded-full border border-line bg-white p-1">
-        {([["leads", "Demandes"], ["clients", "Clients"], ["dossiers", "Dossiers"], ["rappels", "Rappels"]] as const).map(([k, l]) => (
+      <div role="tablist" aria-label="Sections" className="mb-6 inline-flex max-w-full flex-wrap rounded-3xl border border-line bg-white p-1">
+        {([["leads", "Demandes"], ["clients", "Clients"], ["dossiers", "Dossiers"], ["rappels", "Rappels"], ["equipe", "Équipe"]] as const).map(([k, l]) => (
           <button key={k} role="tab" type="button" aria-selected={tab === k} onClick={() => { setTab(k); setQuery(""); }} className="rounded-full px-4 sm:px-5 py-2 text-sm font-semibold text-ink aria-selected:bg-navy aria-selected:text-white">{l}</button>
         ))}
       </div>
@@ -408,6 +486,7 @@ function Board({ email }: { email: string }) {
       {tab === "clients" && <Clients onOpen={(e) => { setQuery(e); setTab("dossiers"); }} />}
       {tab === "dossiers" && <Dossiers staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} initialQuery={query} />}
       {tab === "rappels" && <Reminders />}
+      {tab === "equipe" && <Team me={email.toLowerCase()} />}
     </div>
   );
 }
