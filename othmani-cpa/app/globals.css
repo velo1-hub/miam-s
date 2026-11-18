@@ -50,7 +50,7 @@
   .prose-site ul { @apply mb-4 space-y-2.5; }
   .prose-site li { @apply relative pl-6 leading-relaxed text-ink/90; }
   .prose-site li::before { content: ""; @apply absolute top-[0.6em] left-0 h-2 w-2 rounded-full bg-sky; }
-  .field { @apply block w-full rounded-xl border border-[#8a8ea3] bg-white px-4 py-3 text-base text-ink placeholder:text-muted/70 focus:border-navy; }
+  .field { @apply block w-full rounded-xl border border-[#8a8ea3] bg-white px-4 py-3 text-base text-ink placeholder:text-muted focus:border-navy; }
   .label { @apply mb-1.5 block text-sm font-semibold text-ink; }
 }
 

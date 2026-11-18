@@ -106,7 +106,7 @@ function Toaster({ lang }: { lang: Lang }) {
 export function Skeleton({ rows = 3, label }: { rows?: number; label: string }) {
   return (
     <div role="status" aria-label={label} className="space-y-3">
-      {Array.from({ length: rows }, (_, i) => <div key={i} className="h-20 animate-pulse rounded-3xl bg-white/70" />)}
+      {Array.from({ length: rows }, (_, i) => <div key={i} className="h-20 animate-pulse rounded-3xl bg-[#e3e8f1] motion-reduce:animate-none" />)}
     </div>
   );
 }
@@ -260,17 +260,20 @@ export function Documents({ dossierId, role, lang }: { dossierId: string; role: 
     }
     if (input.current) input.current.value = "";
     setState(failed ? "error" : "idle");
+    if (!failed) toast(lang === "fr" ? "Document déposé." : "Document uploaded.");
     load();
   };
 
   const open = async (d: Doc) => {
+    // Fenêtre ouverte tout de suite (sinon Safari la bloque), adresse fixée après la réponse.
+    const w = window.open("", "_blank");
     const { data } = await supabase().storage.from("documents").createSignedUrl(d.path, 120);
-    if (data?.signedUrl) window.open(data.signedUrl, "_blank", "noopener");
+    if (!data?.signedUrl) { w?.close(); toast(lang === "fr" ? "Ce document ne peut pas être ouvert pour l'instant." : "This document cannot be opened right now.", "error"); return; }
+    if (w) { w.opener = null; w.location.href = data.signedUrl; } else window.location.href = data.signedUrl;
   };
   const remove = async (d: Doc) => {
     if (!window.confirm(`${t.remove} « ${d.name} » ?`)) return;
-    await supabase().storage.from("documents").remove([d.path]);
-    await supabase().from("documents").delete().eq("id", d.id);
+    if (await save(supabase().from("documents").delete().eq("id", d.id), { ok: lang === "fr" ? "Document supprimé." : "Document deleted.", lang })) await supabase().storage.from("documents").remove([d.path]);
     load();
   };
 
@@ -305,7 +308,7 @@ export function Documents({ dossierId, role, lang }: { dossierId: string; role: 
 }
 
 /** Fil de messages d'un dossier. */
-export function Messages({ dossierId, role, lang, authorName }: { dossierId: string; role: Role; lang: Lang; authorName: string }) {
+export function Messages({ dossierId, role, lang, authorName, onSent }: { dossierId: string; role: Role; lang: Lang; authorName: string; onSent?: () => void }) {
   const t = tx[lang];
   const [list, setList] = useState<Message[]>([]);
   const [body, setBody] = useState("");
@@ -326,9 +329,9 @@ export function Messages({ dossierId, role, lang, authorName }: { dossierId: str
     const text = body.trim();
     if (!text || busy) return;
     setBusy(true);
-    const { error } = await supabase().from("messages").insert({ dossier_id: dossierId, author_role: role, author_name: authorName.slice(0, 160), body: text.slice(0, 4000) });
+    const ok = await save(supabase().from("messages").insert({ dossier_id: dossierId, author_role: role, author_name: authorName.slice(0, 160), body: text.slice(0, 4000) }), { ok: lang === "fr" ? "Message envoyé." : "Message sent.", lang });
     setBusy(false);
-    if (!error) { setBody(""); load(); }
+    if (ok) { setBody(""); load(); onSent?.(); }
   };
 
   return (
