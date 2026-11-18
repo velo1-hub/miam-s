@@ -49,7 +49,7 @@ export async function saveLead(l: LeadInput) {
     p_topic: clip(l.topic, 120),
     p_message: clip(l.message, 4000),
   });
-  if (r.ok) await notify(l);
+  if (r.ok) await Promise.allSettled([notify(l), confirmToClient(l)]);
   return r;
 }
 
@@ -80,6 +80,61 @@ async function notify(l: LeadInput) {
   } catch {
     /* l'avis est un plus : la demande est déjà enregistrée */
   }
+}
+
+/**
+ * Automatisation : dès qu'une demande est enregistrée, la personne reçoit en même temps un courriel
+ * et un texto qui confirment qu'un membre du bureau va l'appeler. Aucune date ni heure n'est promise.
+ * Actif seulement si les services sont configurés dans Vercel :
+ *   courriel : RESEND_API_KEY (+ LEADS_FROM_EMAIL, une adresse du domaine du cabinet)
+ *   texto    : TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM (numéro ou service d'envoi)
+ */
+const PHONE = "514 448-0924";
+const confirmText = {
+  fr: (name: string) => ({
+    subject: "Othmani CPA : nous avons bien reçu votre demande",
+    sms: `Othmani CPA : bonjour ${name}, nous avons bien reçu votre demande. Un membre de notre bureau vous appellera. Pour nous joindre : ${PHONE}.`,
+    body: `Bonjour ${name},\n\nNous avons bien reçu votre demande. Un membre de notre bureau vous appellera pour en discuter et convenir de la suite.\n\nD'ici là, vous n'avez rien à faire. Si votre situation est urgente (par exemple une lettre de l'impôt avec une date limite), appelez-nous au ${PHONE}.\n\nPar sécurité, n'envoyez jamais votre numéro d'assurance sociale ni vos renseignements bancaires par courriel.\n\nL'équipe d'Othmani CPA Inc.\n8065, boul. Viau, bureau 204, Saint-Léonard (Québec) H1R 2T2`,
+  }),
+  en: (name: string) => ({
+    subject: "Othmani CPA: we have received your request",
+    sms: `Othmani CPA: hello ${name}, we have received your request. A member of our office will call you. To reach us: ${PHONE}.`,
+    body: `Hello ${name},\n\nWe have received your request. A member of our office will call you to discuss it and agree on next steps.\n\nUntil then, there is nothing you need to do. If your situation is urgent (for example a tax letter with a deadline), call us at ${PHONE}.\n\nFor your security, never send your social insurance number or banking details by email.\n\nThe Othmani CPA Inc. team\n8065 Viau Blvd., Suite 204, Saint-Léonard, Quebec H1R 2T2`,
+  }),
+};
+
+/** Numéro nord-américain au format international, sinon null (on n'envoie rien). */
+export function e164(phone: string): string | null {
+  const d = phone.replace(/\D/g, "");
+  if (d.length === 10 && /^[2-9]/.test(d)) return `+1${d}`;
+  if (d.length === 11 && d.startsWith("1") && /^[2-9]/.test(d.slice(1))) return `+${d}`;
+  return null;
+}
+
+async function confirmToClient(l: LeadInput) {
+  const t = confirmText[l.lang === "en" ? "en" : "fr"](clip(l.name, 60).replace(/[\r\n<>]/g, " "));
+  const jobs: Promise<unknown>[] = [];
+  const email = clip(l.email, 200);
+  const resend = process.env.RESEND_API_KEY;
+  if (resend && email) {
+    jobs.push(fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${resend}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: process.env.LEADS_FROM_EMAIL || "Othmani CPA <onboarding@resend.dev>", to: [email], subject: t.subject, text: t.body }),
+    }));
+  }
+  const sid = process.env.TWILIO_ACCOUNT_SID, token = process.env.TWILIO_AUTH_TOKEN, from = process.env.TWILIO_FROM;
+  const to = e164(clip(l.phone, 40));
+  if (sid && token && from && to) {
+    const body = new URLSearchParams({ To: to, Body: t.sms });
+    body.set(from.startsWith("MG") ? "MessagingServiceSid" : "From", from);
+    jobs.push(fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: "POST",
+      headers: { Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`, "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    }));
+  }
+  await Promise.allSettled(jobs); // la demande est déjà enregistrée : un envoi raté ne bloque rien
 }
 
 /** Champs d'un formulaire HTML ou d'un corps JSON. */

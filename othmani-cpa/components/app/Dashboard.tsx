@@ -592,5 +592,5 @@ function Board({ email }: { email: string }) {
 }
 
 export function Dashboard() {
-  return <AppFrame lang="fr" title="Tableau de bord" subtitle="Gestion du cabinet">{(s) => <Board email={s.user.email ?? ""} />}</AppFrame>;
+  return <AppFrame lang="fr" title="Tableau de bord" subtitle="Gestion du cabinet" demo="cabinet" wide>{(s) => <Board email={s.email} />}</AppFrame>;
 }

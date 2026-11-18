@@ -104,5 +104,5 @@ function View({ lang, email }: { lang: Lang; email: string }) {
 
 export function Portal({ lang }: { lang: Lang }) {
   const t = tx[lang];
-  return <AppFrame lang={lang} title={t.title} subtitle={t.sub}>{(s) => <View lang={lang} email={s.user.email ?? ""} />}</AppFrame>;
+  return <AppFrame lang={lang} title={t.title} subtitle={t.sub} demo="client">{(s) => <View lang={lang} email={s.email} />}</AppFrame>;
 }

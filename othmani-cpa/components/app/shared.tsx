@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { backendReady, supabase } from "@/lib/supabase";
+import { backendReady, real, supabase } from "@/lib/supabase";
+import { DEMO_CODE, DEMO_EMAIL, demoRole, setDemo, type DemoRole } from "@/lib/demo";
 import { site, type Lang } from "@/lib/site";
 import { LogoMark } from "../Logo";
 
@@ -58,70 +58,165 @@ const tx = {
   },
 };
 
-/** Cadre commun : en-tête sobre, connexion par lien courriel, puis contenu. */
-export function AppFrame({ lang, title, subtitle, children }: { lang: Lang; title: string; subtitle: string; children: (s: Session) => ReactNode }) {
+/** Session de l'application : vraie (courriel vérifié) ou démonstration (code 0000, données fictives). */
+export type AppSession = { email: string; demo: boolean };
+
+/* ───────────── Messages de confirmation (toasts) ───────────── */
+type Toast = { id: number; text: string; kind: "ok" | "error"; undo?: () => void };
+let pushToast: (t: Omit<Toast, "id">) => void = () => {};
+/** Affiche une confirmation ou une erreur en bas de l'écran. `undo` ajoute un bouton « Annuler ». */
+export const toast = (text: string, kind: "ok" | "error" = "ok", undo?: () => void) => pushToast({ text, kind, undo });
+const FAIL = { fr: "Non enregistré. Vérifiez votre connexion et réessayez.", en: "Not saved. Check your connection and try again." };
+/**
+ * Exécute une écriture et dit toujours ce qui s'est passé. Renvoie true si elle a réussi ;
+ * sinon affiche l'erreur et appelle `rollback` pour remettre l'écran dans son état précédent.
+ */
+export async function save(q: PromiseLike<{ error: unknown }>, o: { ok?: string; rollback?: () => void; undo?: () => void; lang?: Lang } = {}): Promise<boolean> {
+  let failed = false;
+  try { failed = Boolean((await q).error); } catch { failed = true; }
+  if (failed) { o.rollback?.(); toast(FAIL[o.lang ?? "fr"], "error"); return false; }
+  if (o.ok) toast(o.ok, "ok", o.undo);
+  return true;
+}
+
+function Toaster({ lang }: { lang: Lang }) {
+  const [list, setList] = useState<Toast[]>([]);
+  useEffect(() => {
+    let n = 0;
+    pushToast = (t) => {
+      const id = ++n;
+      setList((l) => [...l.slice(-2), { ...t, id }]);
+      window.setTimeout(() => setList((l) => l.filter((x) => x.id !== id)), t.undo ? 7000 : 3500);
+    };
+    return () => { pushToast = () => {}; };
+  }, []);
+  return (
+    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[70] flex flex-col items-center gap-2 px-4 sm:bottom-6">
+      {list.map((t) => (
+        <div key={t.id} className={`pointer-events-auto flex max-w-md items-center gap-4 rounded-2xl px-4 py-3 text-sm font-medium shadow-[0_18px_50px_-20px_rgba(23,23,58,.6)] ${t.kind === "ok" ? "bg-navy text-white" : "bg-[#7a1c16] text-white"}`}>
+          <span>{t.text}</span>
+          {t.undo && <button type="button" className="shrink-0 font-semibold underline underline-offset-4" onClick={() => { t.undo!(); setList((l) => l.filter((x) => x.id !== t.id)); }}>{lang === "fr" ? "Annuler" : "Undo"}</button>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Blocs gris animés pendant un chargement (au lieu de « … »). */
+export function Skeleton({ rows = 3, label }: { rows?: number; label: string }) {
+  return (
+    <div role="status" aria-label={label} className="space-y-3">
+      {Array.from({ length: rows }, (_, i) => <div key={i} className="h-20 animate-pulse rounded-3xl bg-white/70" />)}
+    </div>
+  );
+}
+
+/** Erreur de chargement, distincte d'une liste vide. */
+export function LoadError({ lang, retry }: { lang: Lang; retry: () => void }) {
+  return (
+    <div role="alert" className="max-w-xl rounded-3xl border border-[#e9c7a0] bg-[#fff4e5] p-6 text-[#6b3d00]">
+      <p className="font-display text-lg font-semibold">{lang === "fr" ? "Impossible de charger les données." : "We could not load the data."}</p>
+      <p className="mt-1 text-sm">{lang === "fr" ? "Vos renseignements sont en sécurité. Vérifiez votre connexion, puis réessayez." : "Your information is safe. Check your connection, then try again."}</p>
+      <button type="button" onClick={retry} className="btn-secondary mt-4 min-h-11">{lang === "fr" ? "Réessayer" : "Try again"}</button>
+    </div>
+  );
+}
+
+/**
+ * Cadre commun : en-tête vitré, connexion, puis contenu.
+ * Connexion réelle : courriel, puis code à 6 chiffres reçu par courriel (ou lien du même courriel).
+ * Code 0000 : mode démonstration, données fictives seulement (voir lib/demo.ts).
+ */
+export function AppFrame({ lang, title, subtitle, demo, wide = false, children }: { lang: Lang; title: string; subtitle: string; demo: DemoRole; wide?: boolean; children: (s: AppSession) => ReactNode }) {
   const t = tx[lang];
-  const [session, setSession] = useState<Session | null | undefined>(backendReady ? undefined : null);
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const fr = lang === "fr";
+  const [session, setSession] = useState<AppSession | null | undefined>(undefined);
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "error" | "badcode">("idle");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    if (!backendReady) return;
-    supabase().auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = supabase().auth.onAuthStateChange((_e, s) => setSession(s));
+    if (demoRole() === demo) { setSession({ email: DEMO_EMAIL[demo], demo: true }); return; }
+    if (demoRole()) setDemo(null);
+    if (!backendReady) { setSession(null); return; }
+    real().auth.getSession().then(({ data }) => setSession(data.session?.user.email ? { email: data.session.user.email, demo: false } : null));
+    const { data } = real().auth.onAuthStateChange((_e, s) => { if (!demoRole()) setSession(s?.user.email ? { email: s.user.email, demo: false } : null); });
     return () => data.subscription.unsubscribe();
-  }, []);
+  }, [demo]);
 
-  const login = async (e: FormEvent<HTMLFormElement>) => {
+  const enterDemo = () => { setDemo(demo); setSession({ email: DEMO_EMAIL[demo], demo: true }); };
+  const logout = async () => {
+    if (session?.demo) { setDemo(null); setSession(null); setState("idle"); return; }
+    await real().auth.signOut();
+  };
+  const sendCode = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const email = String(new FormData(e.currentTarget).get("email") ?? "").trim().toLowerCase();
+    const v = String(new FormData(e.currentTarget).get("email") ?? "").trim().toLowerCase();
+    if (v === DEMO_CODE) { enterDemo(); return; }
+    if (!backendReady) { setState("error"); return; }
+    setEmail(v);
     setState("sending");
-    const { error } = await supabase().auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin + window.location.pathname } });
+    const { error } = await real().auth.signInWithOtp({ email: v, options: { emailRedirectTo: window.location.origin + window.location.pathname } });
     setState(error ? "error" : "sent");
   };
+  const verify = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const code = String(new FormData(e.currentTarget).get("code") ?? "").replace(/\s/g, "");
+    if (code === DEMO_CODE) { enterDemo(); return; }
+    const { error } = await real().auth.verifyOtp({ email, token: code, type: "email" });
+    if (error) setState("badcode");
+  };
+  const msg = state === "error" ? t.error : state === "badcode" ? (fr ? "Ce code n'est pas valide ou a expiré. Demandez-en un nouveau." : "This code is invalid or has expired. Request a new one.") : "";
 
   return (
-    <div className="min-h-svh bg-[#f5f7fb]">
-      <header className="border-b border-line bg-white">
-        <div className="container-site flex items-center justify-between gap-4 py-4">
-          <a href={lang === "fr" ? "/" : "/en/"} className="flex items-center gap-2.5 text-navy" aria-label={`${site.name}, ${t.back}`}>
-            <LogoMark className="h-9 w-auto" />
-            <span className="font-display text-lg font-bold tracking-tight">{site.name}</span>
+    <div className="mesh min-h-svh">
+      <header className="glass sticky top-0 z-40 border-b border-white/70 pt-[env(safe-area-inset-top)]">
+        <div className={`${wide ? "mx-auto max-w-[96rem] px-4 sm:px-6" : "container-site"} flex items-center justify-between gap-4 py-3`}>
+          <a href={fr ? "/" : "/en/"} className="flex items-center gap-2.5 text-navy" aria-label={`${site.name}, ${t.back}`}>
+            <LogoMark className="h-8 w-auto" />
+            <span className="font-display text-base font-bold tracking-tight sm:text-lg">{subtitle}</span>
           </a>
           {session ? (
             <div className="flex items-center gap-3 text-sm">
-              <span className="hidden text-muted sm:inline">{session.user.email}</span>
-              <button type="button" onClick={() => supabase().auth.signOut()} className="btn-secondary min-h-10 px-4 py-2 text-sm">{t.logout}</button>
+              <span className="hidden text-ink/80 md:inline">{session.email}</span>
+              <button type="button" onClick={logout} className="rounded-full px-3 py-2 text-sm font-medium text-navy underline underline-offset-4">{session.demo ? (fr ? "Quitter la démo" : "Exit demo") : t.logout}</button>
             </div>
           ) : (
-            <a href={lang === "fr" ? "/" : "/en/"} className="text-sm font-medium text-navy underline underline-offset-4">{t.back}</a>
+            <a href={fr ? "/" : "/en/"} className="text-sm font-medium text-navy underline underline-offset-4">{t.back}</a>
           )}
         </div>
+        {session?.demo && <p className="bg-navy px-4 py-1.5 text-center text-xs font-medium text-white">{fr ? "Mode démonstration : données fictives, rien n'est enregistré." : "Demo mode: fictional data, nothing is saved."}</p>}
       </header>
-      <main id="contenu" className="container-site py-10 sm:py-14">
-        <p className="text-xs font-semibold tracking-[0.14em] text-navy/70 uppercase">{subtitle}</p>
-        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-navy sm:text-4xl">{title}</h1>
-        {!backendReady ? (
-          <div className="mt-8 max-w-xl rounded-3xl border border-line bg-white p-7">
-            <p className="font-display text-xl font-semibold text-ink">{t.notReady}</p>
-            <p className="mt-2 leading-relaxed text-muted">{t.notReadyD}</p>
-            <p className="mt-4 text-ink"><a className="font-semibold text-navy underline underline-offset-4" href={`tel:${site.phone.tel}`}>{site.phone.display}</a> · <a className="font-semibold text-navy underline underline-offset-4" href={`mailto:${site.email}`}>{site.email}</a></p>
-          </div>
-        ) : session === undefined ? (
-          <p className="mt-8 text-muted" role="status">…</p>
+      <main id="contenu" className={`${wide ? "mx-auto max-w-[96rem] px-4 sm:px-6" : "container-site"} py-6 sm:py-10`}>
+        {session === undefined ? (
+          <Skeleton label={fr ? "Chargement" : "Loading"} />
         ) : session === null ? (
-          <form onSubmit={login} className="mt-8 max-w-md rounded-3xl border border-line bg-white p-7">
-            <label htmlFor="app-email" className="label">{t.email}</label>
-            <input id="app-email" name="email" type="email" required autoComplete="email" className="field" />
-            <button type="submit" disabled={state === "sending"} className="btn-primary mt-4 w-full">{state === "sending" ? t.sending : t.send}</button>
-            <p className="mt-3 text-sm text-muted">{t.noPwd}</p>
-            <p role="status" aria-live="polite" className={state === "sent" || state === "error" ? `mt-4 rounded-2xl px-4 py-3 text-sm ${state === "sent" ? "bg-sky-50 text-navy" : "bg-[#fff4e5] text-[#6b3d00]"}` : "sr-only"}>
-              {state === "sent" ? t.sent : state === "error" ? t.error : ""}
-            </p>
-          </form>
+          <div className="mx-auto max-w-md pt-6">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-navy">{title}</h1>
+            {state === "sent" || state === "badcode" ? (
+              <form onSubmit={verify} className="mt-6 rounded-3xl border border-white bg-white p-6 shadow-[0_24px_60px_-40px_rgba(23,23,58,.5)]">
+                <p className="leading-relaxed text-ink">{fr ? <>Nous avons envoyé un code à <strong>{email}</strong>. Entrez-le ici, ou ouvrez le lien du courriel.</> : <>We sent a code to <strong>{email}</strong>. Enter it here, or open the link in the email.</>}</p>
+                <label htmlFor="app-code" className="label mt-4">{fr ? "Code reçu par courriel" : "Code from the email"}</label>
+                <input id="app-code" name="code" inputMode="numeric" autoComplete="one-time-code" required maxLength={10} className="field text-center font-display text-2xl tracking-[0.4em]" />
+                <button type="submit" className="btn-primary mt-4 w-full">{fr ? "Entrer" : "Sign in"}</button>
+                <p className="mt-3 text-sm text-muted">{fr ? "Rien reçu ? Vérifiez vos indésirables, ou " : "Nothing received? Check your spam folder, or "}<button type="button" className="font-semibold text-navy underline underline-offset-4" onClick={() => setState("idle")}>{fr ? "recommencez" : "start over"}</button>.</p>
+                <p role="alert" className={msg ? "mt-4 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
+              </form>
+            ) : (
+              <form onSubmit={sendCode} className="mt-6 rounded-3xl border border-white bg-white p-6 shadow-[0_24px_60px_-40px_rgba(23,23,58,.5)]">
+                <label htmlFor="app-email" className="label">{fr ? "Votre courriel, ou votre code d'accès" : "Your email, or your access code"}</label>
+                <input id="app-email" name="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} className="field" />
+                <button type="submit" disabled={state === "sending"} className="btn-primary mt-4 w-full">{state === "sending" ? t.sending : (fr ? "Continuer" : "Continue")}</button>
+                <p className="mt-3 text-sm text-muted">{fr ? "Pas de mot de passe : vous recevez un code par courriel. Pour une démonstration, entrez le code 0000." : "No password: you receive a code by email. For a demo, enter the code 0000."}</p>
+                <p role="alert" className={msg ? "mt-4 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
+              </form>
+            )}
+            <p className="mt-6 text-center text-sm text-ink/80">{fr ? "Besoin d'aide ? " : "Need help? "}<a className="font-semibold text-navy underline underline-offset-4" href={`tel:${site.phone.tel}`}>{site.phone.display}</a></p>
+          </div>
         ) : (
-          <div className="mt-8">{children(session)}</div>
+          children(session)
         )}
       </main>
+      <Toaster lang={lang} />
     </div>
   );
 }
