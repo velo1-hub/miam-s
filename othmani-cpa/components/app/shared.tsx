@@ -8,7 +8,7 @@ import { LogoMark } from "../Logo";
 export type Role = "client" | "cabinet";
 export type Dossier = {
   id: string; created_at: string; updated_at: string; client_email: string; client_name: string; title: string;
-  kind: string; tax_year: number | null; status: string; next_step: string; due_date: string | null; lead_id: string | null;
+  kind: string; tax_year: number | null; status: string; next_step: string; due_date: string | null; lead_id: string | null; assignee?: string;
 };
 export type Doc = { id: string; dossier_id: string; created_at: string; uploader_role: Role; path: string; name: string; size: number };
 export type Message = { id: string; dossier_id: string; created_at: string; author_role: Role; author_name: string; body: string };

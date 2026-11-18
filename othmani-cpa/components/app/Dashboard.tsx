@@ -8,6 +8,7 @@ type Lead = {
   audience: string | null; topic: string | null; message: string; status: string; notes: string;
 };
 type Note = { id: string; created_at: string; author: string; body: string };
+type Task = { id: string; dossier_id: string; label: string; assignee: string; due_date: string | null; done: boolean };
 type Sub = { id: string; email: string; lang: string; consent_at: string; unsubscribed_at: string | null };
 
 const LEAD_STATUS: Record<string, string> = { nouveau: "Nouveau", contacte: "Contacté", rdv_a_confirmer: "Rendez-vous à confirmer", client: "Devenu client", ferme: "Fermé" };
@@ -113,14 +114,17 @@ function Leads({ onCreateDossier }: { onCreateDossier: (l: Lead) => void }) {
   );
 }
 
-function DossierDetail({ d, staffName, onChange }: { d: Dossier; staffName: string; onChange: (p: Partial<Dossier>) => void }) {
+function DossierDetail({ d, staffName, team, onChange }: { d: Dossier; staffName: string; team: string[]; onChange: (p: Partial<Dossier>) => void }) {
   const [reqs, setReqs] = useState<DocRequest[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const load = useCallback(async () => {
-    const [r, n] = await Promise.all([
+    const [r, n, t] = await Promise.all([
       supabase().from("document_requests").select("*").eq("dossier_id", d.id).order("created_at"),
       supabase().from("dossier_notes").select("*").eq("dossier_id", d.id).order("created_at", { ascending: false }),
+      supabase().from("tasks").select("*").eq("dossier_id", d.id).order("done").order("created_at"),
     ]);
+    setTasks((t.data as Task[]) ?? []);
     setReqs((r.data as DocRequest[]) ?? []);
     setNotes((n.data as Note[]) ?? []);
   }, [d.id]);
@@ -130,6 +134,17 @@ function DossierDetail({ d, staffName, onChange }: { d: Dossier; staffName: stri
   const inviteText = `Bonjour,\n\nVotre dossier « ${d.title} » est ouvert chez Othmani CPA. Vous pouvez suivre son avancement, déposer vos documents et nous écrire dans votre espace client :\n\n${typeof window === "undefined" ? "" : window.location.origin}/espace-client/\n\nConnectez-vous avec ce courriel : ${d.client_email}. Vous recevrez un lien de connexion, sans mot de passe.\n\nL'équipe d'Othmani CPA`;
   const invite = async () => {
     try { await navigator.clipboard.writeText(inviteText); setCopied(true); window.setTimeout(() => setCopied(false), 3000); } catch { /* presse-papiers indisponible : le lien courriel reste offert */ }
+  };
+
+  const addTask = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const label = String(f.get("label") ?? "").trim();
+    if (!label) return;
+    await supabase().from("tasks").insert({ dossier_id: d.id, label: label.slice(0, 300), assignee: String(f.get("assignee") ?? ""), due_date: String(f.get("due") ?? "") || null });
+    form.reset();
+    load();
   };
 
   const add = async (e: FormEvent<HTMLFormElement>, table: "document_requests" | "dossier_notes") => {
@@ -164,9 +179,40 @@ function DossierDetail({ d, staffName, onChange }: { d: Dossier; staffName: stri
             <input id="d-due" type="date" defaultValue={d.due_date ?? ""} className="field" onBlur={(e) => (e.target.value || null) !== d.due_date && onChange({ due_date: e.target.value || null })} />
           </div>
         </div>
+        <label htmlFor="d-assignee" className="label mt-4">Responsable au cabinet</label>
+        <select id="d-assignee" value={d.assignee ?? ""} onChange={(e) => onChange({ assignee: e.target.value })} className="field sm:max-w-xs">
+          <option value="">Non attribué</option>
+          {[...new Set([...team, d.assignee ?? ""].filter(Boolean))].map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
         <label htmlFor="d-next" className="label mt-4">Prochaine étape (visible par le client)</label>
         <textarea id="d-next" key={d.id} defaultValue={d.next_step} rows={2} maxLength={500} className="field resize-y" onBlur={(e) => e.target.value !== d.next_step && onChange({ next_step: e.target.value })} />
       </section>
+
+      <Card title="Tâches internes">
+        {tasks.length === 0 ? <p className="text-sm text-muted">Aucune tâche pour ce dossier.</p> : (
+          <ul className="space-y-2">
+            {tasks.map((t) => (
+              <li key={t.id} className="flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2">
+                <label className="flex min-w-0 items-center gap-3 text-ink">
+                  <input type="checkbox" checked={t.done} className="h-5 w-5 shrink-0 accent-navy" onChange={async (e) => { await supabase().from("tasks").update({ done: e.target.checked }).eq("id", t.id); load(); }} />
+                  <span className={t.done ? "text-muted line-through" : ""}>{t.label}</span>
+                </label>
+                <span className="flex shrink-0 items-center gap-3 text-xs text-muted">
+                  {t.assignee && <span>{t.assignee}</span>}
+                  {t.due_date && <span className={!t.done && t.due_date < new Date().toISOString().slice(0, 10) ? "font-semibold text-[#a3261f]" : ""}>{fmtDate(t.due_date, "fr")}</span>}
+                  <button type="button" className="text-sm text-[#a3261f] underline underline-offset-4" onClick={async () => { await supabase().from("tasks").delete().eq("id", t.id); load(); }}>Retirer</button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form onSubmit={addTask} className="mt-3 grid gap-2 sm:grid-cols-[1fr_11rem_10rem_auto]">
+          <div><label htmlFor="tk-label" className="sr-only">Tâche</label><input id="tk-label" name="label" placeholder="Ex. Rappeler le client pour le Relevé 1" maxLength={300} className="field min-h-11 py-2" /></div>
+          <div><label htmlFor="tk-who" className="sr-only">Responsable</label><select id="tk-who" name="assignee" defaultValue={d.assignee ?? ""} className="field min-h-11 py-2"><option value="">Non attribuée</option>{team.map((n) => <option key={n} value={n}>{n}</option>)}</select></div>
+          <div><label htmlFor="tk-due" className="sr-only">Échéance de la tâche</label><input id="tk-due" name="due" type="date" className="field min-h-11 py-2" /></div>
+          <button type="submit" className="btn-secondary min-h-11 px-4">Ajouter</button>
+        </form>
+      </Card>
 
       <Card title="Documents demandés au client">
         <ul className="space-y-2">
@@ -216,11 +262,16 @@ function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffNa
   const [creating, setCreating] = useState(false);
   const [err, setErr] = useState("");
   const [waiting, setWaiting] = useState<Set<string>>(new Set());
+  const [team, setTeam] = useState<string[]>([]);
+  const [view, setView] = useState<"liste" | "etapes">("liste");
+  const [mine, setMine] = useState(false);
   const load = useCallback(async () => {
-    const [{ data }, w] = await Promise.all([
+    const [{ data }, w, st] = await Promise.all([
       supabase().from("dossiers").select("*").order("updated_at", { ascending: false }).limit(500),
       supabase().rpc("dossiers_a_repondre"),
+      supabase().from("staff").select("name,email").order("name"),
     ]);
+    setTeam(((st.data as { name: string; email: string }[] | null) ?? []).map((m) => m.name || m.email));
     setList((data as Dossier[]) ?? []);
     setWaiting(new Set((w.data as string[] | null) ?? []));
   }, []);
@@ -250,12 +301,60 @@ function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffNa
 
   const shown = useMemo(() => {
     const n = q.trim().toLowerCase();
-    return (list ?? []).filter((d) => !n || `${d.client_name} ${d.client_email} ${d.title}`.toLowerCase().includes(n));
-  }, [list, q]);
+    return (list ?? []).filter((d) => (!mine || d.assignee === staffName) && (!n || `${d.client_name} ${d.client_email} ${d.title}`.toLowerCase().includes(n)));
+  }, [list, q, mine, staffName]);
   if (!list) return <p className="text-muted" role="status">…</p>;
   const d = list.find((x) => x.id === current);
 
+  const bar = (
+    <div className="mb-4 flex flex-wrap items-center gap-2">
+      {([["liste", "Liste"], ["etapes", "Par étape"]] as const).map(([k, l]) => (
+        <button key={k} type="button" onClick={() => setView(k)} aria-pressed={view === k} className="rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-ink aria-pressed:border-navy aria-pressed:bg-navy aria-pressed:text-white">{l}</button>
+      ))}
+      <label className="ml-2 flex items-center gap-2 text-sm text-ink"><input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} className="h-5 w-5 accent-navy" /> Mes dossiers seulement</label>
+    </div>
+  );
+
+  if (view === "etapes" && !creating)
+    return (
+      <div>
+        {bar}
+        <p className="mb-3 text-sm text-muted">Glissez un dossier d'une colonne à l'autre, ou changez son étape dans le menu. Le client voit la nouvelle étape dans son espace.</p>
+        <div className="flex gap-3 overflow-x-auto pb-3">
+          {STATUSES.map((st, i) => {
+            const col = shown.filter((x) => x.status === st);
+            return (
+              <section key={st} aria-label={statusLabel[st].fr} className="w-64 shrink-0 rounded-2xl border border-line bg-white/60 p-2.5" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { const id = e.dataTransfer.getData("text/plain"); if (id) patch(id, { status: st }); }}>
+                <h3 className="flex items-center justify-between px-1.5 pb-2 font-display text-sm font-semibold text-navy"><span>{i + 1}. {statusLabel[st].fr}</span><span className="text-muted">{col.length}</span></h3>
+                <ul className="min-h-16 space-y-2">
+                  {col.map((x) => (
+                    <li key={x.id} draggable onDragStart={(e) => e.dataTransfer.setData("text/plain", x.id)} className="cursor-grab rounded-xl border border-line bg-white p-3 active:cursor-grabbing">
+                      <button type="button" onClick={() => { setCurrent(x.id); setView("liste"); }} className="block w-full text-left">
+                        <span className="block font-display font-semibold text-ink">{x.client_name}</span>
+                        <span className="block text-sm text-ink/80">{x.title}</span>
+                      </button>
+                      <span className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                        {x.assignee ? <span>{x.assignee}</span> : <span>Non attribué</span>}
+                        {x.due_date && <span>· {fmtDate(x.due_date, "fr")}</span>}
+                        {waiting.has(x.id) && <span className={`${pill} bg-[#fff4e5] text-[#6b3d00]`}>Message à lire</span>}
+                      </span>
+                      <label className="sr-only" htmlFor={`mv-${x.id}`}>Étape de {x.client_name}</label>
+                      <select id={`mv-${x.id}`} value={x.status} onChange={(e) => patch(x.id, { status: e.target.value })} className="field mt-2 min-h-9 py-1 text-xs">
+                        {STATUSES.map((s2, j) => <option key={s2} value={s2}>{j + 1}. {statusLabel[s2].fr}</option>)}
+                      </select>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
+      </div>
+    );
+
   return (
+    <div>
+    {bar}
     <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
       <div>
         <button type="button" onClick={() => { setCreating((c) => !c); if (creating) clearDraft(); }} className="btn-primary min-h-11 w-full">{creating ? "Annuler" : "Nouveau dossier"}</button>
@@ -294,11 +393,12 @@ function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffNa
             <p role="status" aria-live="polite" className={err ? "rounded-xl bg-[#fff4e5] px-3 py-2 text-sm text-[#6b3d00]" : "sr-only"}>{err}</p>
           </form>
         ) : d ? (
-          <DossierDetail key={d.id} d={d} staffName={staffName} onChange={(p) => patch(d.id, p)} />
+          <DossierDetail key={d.id} d={d} staffName={staffName} team={team} onChange={(p) => patch(d.id, p)} />
         ) : (
           <p className="rounded-3xl border border-line bg-white p-6 text-muted">Choisissez un dossier dans la liste, ou créez-en un.</p>
         )}
       </div>
+    </div>
     </div>
   );
 }
