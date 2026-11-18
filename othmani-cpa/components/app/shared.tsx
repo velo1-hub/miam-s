@@ -203,10 +203,10 @@ export function AppFrame({ lang, title, subtitle, demo, wide = false, children }
               </form>
             ) : (
               <form onSubmit={sendCode} className="mt-6 rounded-3xl border border-white bg-white p-6 shadow-[0_24px_60px_-40px_rgba(23,23,58,.5)]">
-                <label htmlFor="app-email" className="label">{fr ? "Votre courriel, ou votre code d'accès" : "Your email, or your access code"}</label>
+                <label htmlFor="app-email" className="label">{fr ? "Votre courriel" : "Your email"}</label>
                 <input id="app-email" name="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} className="field" />
                 <button type="submit" disabled={state === "sending"} className="btn-primary mt-4 w-full">{state === "sending" ? t.sending : (fr ? "Continuer" : "Continue")}</button>
-                <p className="mt-3 text-sm text-muted">{fr ? "Pas de mot de passe : vous recevez un code par courriel. Pour une démonstration, entrez le code 0000." : "No password: you receive a code by email. For a demo, enter the code 0000."}</p>
+                <p className="mt-3 text-sm text-muted">{fr ? "Pas de mot de passe à retenir : vous recevez un code par courriel, valide quelques minutes." : "No password to remember: you receive a code by email, valid for a few minutes."}</p>
                 <p role="alert" className={msg ? "mt-4 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
               </form>
             )}
