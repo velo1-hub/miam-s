@@ -96,7 +96,7 @@ Tout est dans le code, mais rien ne s'active tant que les variables ci-dessous n
 
 | Élément | Adresse | Rôle |
 |---|---|---|
-| Tableau de bord du cabinet | `/gestion/` | Demandes (formulaire + Clara), dossiers, documents demandés, fichiers, messages, notes internes, inscrits aux rappels (export CSV). Réservé aux courriels de la table `staff`. |
+| Tableau de bord du cabinet (CRM) | `/gestion/` | Chiffres du jour, demandes (formulaire, Clara, ajout manuel), fiches clients, dossiers, documents demandés, fichiers, messages, notes internes, inscrits aux rappels (export CSV). Réservé aux courriels de la table `staff`. |
 | Espace client Pilote Fiscal | `/espace-client/` · `/en/client-portal/` | Le client suit son dossier (7 étapes), voit les documents à fournir, dépose ses fichiers et écrit au cabinet. Il ne voit que les dossiers liés à son courriel. |
 | Formulaires | `/api/lead/` · `/api/reminder/` | Le formulaire de contact et l'inscription aux rappels arrivent dans le tableau de bord. |
 | Clara agent | `/api/clara/` | Répond aux questions de comptabilité et de fiscalité, prend les demandes avec l'accord de la personne. **Ne propose ni ne confirme jamais de date ou d'heure** : l'équipe rappelle. Consignes : `lib/claraPrompt.ts`. |

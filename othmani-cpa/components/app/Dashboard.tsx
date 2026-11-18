@@ -22,6 +22,17 @@ function Leads({ onCreateDossier }: { onCreateDossier: (l: Lead) => void }) {
     setLeads((data as Lead[]) ?? []);
   }, []);
   useEffect(() => { load(); }, [load]);
+  const [adding, setAdding] = useState(false);
+  const [addErr, setAddErr] = useState("");
+  const addLead = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    const v = (k: string) => String(f.get(k) ?? "").trim();
+    if (!v("email") && !v("phone")) { setAddErr("Indiquez un courriel ou un téléphone."); return; }
+    const { error } = await supabase().from("leads").insert({ source: "telephone", lang: "fr", name: v("name"), email: v("email").toLowerCase() || null, phone: v("phone") || null, audience: v("audience"), topic: v("topic") || null, message: v("message") });
+    if (error) { setAddErr("La demande n'a pas pu être enregistrée."); return; }
+    setAddErr(""); setAdding(false); load();
+  };
   const patch = async (id: string, p: Partial<Lead>) => {
     setLeads((l) => l?.map((x) => (x.id === id ? { ...x, ...p } : x)) ?? null);
     await supabase().from("leads").update(p).eq("id", id);
@@ -36,8 +47,26 @@ function Leads({ onCreateDossier }: { onCreateDossier: (l: Lead) => void }) {
             {l} <span className="opacity-70">({leads.filter((x) => (k === "tous" ? true : k === "ouverts" ? !["client", "ferme"].includes(x.status) : x.status === k)).length})</span>
           </button>
         ))}
-        <button type="button" onClick={load} className="ml-auto text-sm font-medium text-navy underline underline-offset-4">Actualiser</button>
+        <button type="button" onClick={() => setAdding((a) => !a)} className="btn-secondary ml-auto min-h-10 px-4 py-2 text-sm">{adding ? "Annuler" : "Ajouter une demande"}</button>
+        <button type="button" onClick={load} className="text-sm font-medium text-navy underline underline-offset-4">Actualiser</button>
       </div>
+      {adding && (
+        <form onSubmit={addLead} className="mb-4 space-y-4 rounded-3xl border border-line bg-white p-5 sm:p-6">
+          <h2 className="font-display text-xl font-semibold text-navy">Nouvelle demande (appel, visite, référence)</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div><label htmlFor="nl-name" className="label">Nom</label><input id="nl-name" name="name" required maxLength={120} className="field" /></div>
+            <div><label htmlFor="nl-email" className="label">Courriel</label><input id="nl-email" name="email" type="email" maxLength={200} className="field" /></div>
+            <div><label htmlFor="nl-phone" className="label">Téléphone</label><input id="nl-phone" name="phone" type="tel" maxLength={40} className="field" /></div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
+            <div><label htmlFor="nl-aud" className="label">Pour</label><select id="nl-aud" name="audience" className="field"><option value="moi">Particulier</option><option value="entreprise">Entreprise</option></select></div>
+            <div><label htmlFor="nl-topic" className="label">Sujet</label><input id="nl-topic" name="topic" maxLength={120} className="field" /></div>
+          </div>
+          <div><label htmlFor="nl-msg" className="label">Détails</label><textarea id="nl-msg" name="message" rows={3} maxLength={4000} className="field resize-y" /></div>
+          <button type="submit" className="btn-primary min-h-11">Enregistrer</button>
+          <p role="status" aria-live="polite" className={addErr ? "rounded-xl bg-[#fff4e5] px-3 py-2 text-sm text-[#6b3d00]" : "sr-only"}>{addErr}</p>
+        </form>
+      )}
       {shown.length === 0 ? <p className="rounded-3xl border border-line bg-white p-6 text-muted">Aucune demande ici.</p> : (
         <ul className="space-y-4">
           {shown.map((l) => (
@@ -157,10 +186,10 @@ function DossierDetail({ d, staffName, onChange }: { d: Dossier; staffName: stri
   );
 }
 
-function Dossiers({ staffName, draft, clearDraft }: { staffName: string; draft: Lead | null; clearDraft: () => void }) {
+function Dossiers({ staffName, draft, clearDraft, initialQuery = "" }: { staffName: string; draft: Lead | null; clearDraft: () => void; initialQuery?: string }) {
   const [list, setList] = useState<Dossier[] | null>(null);
   const [current, setCurrent] = useState<string | null>(null);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
   const [creating, setCreating] = useState(false);
   const [err, setErr] = useState("");
   const load = useCallback(async () => {
@@ -274,10 +303,87 @@ function Reminders() {
   );
 }
 
+/** Fiches clients : regroupe les dossiers et les demandes par courriel. */
+function Clients({ onOpen }: { onOpen: (email: string) => void }) {
+  const [rows, setRows] = useState<{ email: string; name: string; dossiers: Dossier[]; leads: Lead[] }[] | null>(null);
+  const [q, setQ] = useState("");
+  useEffect(() => {
+    Promise.all([
+      supabase().from("dossiers").select("*").order("updated_at", { ascending: false }).limit(1000),
+      supabase().from("leads").select("*").order("created_at", { ascending: false }).limit(1000),
+    ]).then(([d, l]) => {
+      const map = new Map<string, { email: string; name: string; dossiers: Dossier[]; leads: Lead[] }>();
+      for (const x of (d.data as Dossier[]) ?? []) {
+        const r = map.get(x.client_email) ?? { email: x.client_email, name: x.client_name, dossiers: [], leads: [] };
+        r.dossiers.push(x); map.set(x.client_email, r);
+      }
+      for (const x of (l.data as Lead[]) ?? []) { if (x.email && map.has(x.email)) map.get(x.email)!.leads.push(x); }
+      setRows([...map.values()].sort((a, b) => a.name.localeCompare(b.name, "fr")));
+    });
+  }, []);
+  if (!rows) return <p className="text-muted" role="status">…</p>;
+  const n = q.trim().toLowerCase();
+  const shown = rows.filter((r) => !n || `${r.name} ${r.email}`.toLowerCase().includes(n));
+  return (
+    <div>
+      <label htmlFor="cl-q" className="sr-only">Chercher un client</label>
+      <input id="cl-q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Chercher un client…" className="field mb-4 min-h-11 max-w-md py-2" />
+      {shown.length === 0 ? <p className="rounded-3xl border border-line bg-white p-6 text-muted">Aucun client. Un client apparaît ici dès qu'un dossier est ouvert à son nom.</p> : (
+        <ul className="grid gap-4 md:grid-cols-2">
+          {shown.map((r) => {
+            const active = r.dossiers.filter((d) => d.status !== "ferme");
+            return (
+              <li key={r.email} className="rounded-3xl border border-line bg-white p-5">
+                <p className="font-display text-lg font-semibold text-ink">{r.name}</p>
+                <p className="mt-0.5 text-sm"><a href={`mailto:${r.email}`} className="font-semibold text-navy underline underline-offset-4">{r.email}</a>{r.leads[0]?.phone ? <> · <a href={`tel:${r.leads[0].phone}`} className="font-semibold text-navy underline underline-offset-4">{r.leads[0].phone}</a></> : null}</p>
+                <p className="mt-3 text-sm text-muted">{active.length} dossier{active.length > 1 ? "s" : ""} en cours · {r.dossiers.length - active.length} fermé{r.dossiers.length - active.length > 1 ? "s" : ""} · dernière activité {fmtDate(r.dossiers[0].updated_at, "fr")}</p>
+                <ul className="mt-3 space-y-1.5">
+                  {r.dossiers.slice(0, 4).map((d) => (
+                    <li key={d.id} className="flex items-center justify-between gap-3 text-sm"><span className="truncate text-ink">{d.title}</span><span className={`${pill} shrink-0 bg-[#eef0f6] text-ink`}>{statusLabel[d.status]?.fr ?? d.status}</span></li>
+                  ))}
+                </ul>
+                <button type="button" onClick={() => onOpen(r.email)} className="btn-secondary mt-4 min-h-10 px-4 py-2 text-sm">Voir ses dossiers</button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** Chiffres du jour, en haut du tableau de bord. */
+function Overview() {
+  const [k, setK] = useState<[string, number][] | null>(null);
+  useEffect(() => {
+    const soon = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    const count = (t: string) => supabase().from(t).select("id", { count: "exact", head: true });
+    Promise.all([
+      count("leads").eq("status", "nouveau"),
+      count("leads").eq("status", "rdv_a_confirmer"),
+      count("dossiers").neq("status", "ferme"),
+      count("dossiers").eq("status", "documents_attendus"),
+      count("dossiers").neq("status", "ferme").gte("due_date", today).lte("due_date", soon),
+    ]).then((r) => setK(["Nouvelles demandes", "RDV à confirmer", "Dossiers en cours", "Documents attendus", "Échéances d'ici 30 jours"].map((l, i) => [l, r[i].count ?? 0])));
+  }, []);
+  return (
+    <dl className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
+      {(k ?? []).map(([l, v]) => (
+        <div key={l} className="rounded-2xl border border-line bg-white px-4 py-3">
+          <dt className="text-xs font-medium text-muted">{l}</dt>
+          <dd className="mt-1 font-display text-2xl font-bold text-navy">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function Board({ email }: { email: string }) {
   const [staff, setStaff] = useState<{ name: string } | null | undefined>(undefined);
-  const [tab, setTab] = useState<"leads" | "dossiers" | "rappels">("leads");
+  const [tab, setTab] = useState<"leads" | "clients" | "dossiers" | "rappels">("leads");
   const [draft, setDraft] = useState<Lead | null>(null);
+  const [query, setQuery] = useState("");
   useEffect(() => {
     supabase().from("staff").select("name").eq("email", email.toLowerCase()).maybeSingle().then(({ data }) => setStaff((data as { name: string } | null) ?? null));
   }, [email]);
@@ -292,13 +398,15 @@ function Board({ email }: { email: string }) {
   const staffName = staff.name || email;
   return (
     <div>
+      <Overview key={tab} />
       <div role="tablist" aria-label="Sections" className="mb-6 inline-flex rounded-full border border-line bg-white p-1">
-        {([["leads", "Demandes"], ["dossiers", "Dossiers"], ["rappels", "Rappels"]] as const).map(([k, l]) => (
-          <button key={k} role="tab" type="button" aria-selected={tab === k} onClick={() => setTab(k)} className="rounded-full px-5 py-2 text-sm font-semibold text-ink aria-selected:bg-navy aria-selected:text-white">{l}</button>
+        {([["leads", "Demandes"], ["clients", "Clients"], ["dossiers", "Dossiers"], ["rappels", "Rappels"]] as const).map(([k, l]) => (
+          <button key={k} role="tab" type="button" aria-selected={tab === k} onClick={() => { setTab(k); setQuery(""); }} className="rounded-full px-4 sm:px-5 py-2 text-sm font-semibold text-ink aria-selected:bg-navy aria-selected:text-white">{l}</button>
         ))}
       </div>
       {tab === "leads" && <Leads onCreateDossier={(l) => { setDraft(l); setTab("dossiers"); }} />}
-      {tab === "dossiers" && <Dossiers staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} />}
+      {tab === "clients" && <Clients onOpen={(e) => { setQuery(e); setTab("dossiers"); }} />}
+      {tab === "dossiers" && <Dossiers staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} initialQuery={query} />}
       {tab === "rappels" && <Reminders />}
     </div>
   );
