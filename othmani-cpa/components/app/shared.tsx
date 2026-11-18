@@ -10,7 +10,7 @@ export type Dossier = {
   id: string; created_at: string; updated_at: string; client_email: string; client_name: string; title: string;
   kind: string; tax_year: number | null; status: string; next_step: string; due_date: string | null; lead_id: string | null; assignee?: string;
 };
-export type Doc = { id: string; dossier_id: string; created_at: string; uploader_role: Role; path: string; name: string; size: number };
+export type Doc = { id: string; dossier_id: string; created_at: string; uploader_role: Role; path: string; name: string; size: number; request_id?: string | null };
 export type Message = { id: string; dossier_id: string; created_at: string; author_role: Role; author_name: string; body: string };
 export type DocRequest = { id: string; dossier_id: string; label: string; received: boolean };
 
@@ -91,7 +91,7 @@ function Toaster({ lang }: { lang: Lang }) {
     return () => { pushToast = () => {}; };
   }, []);
   return (
-    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[70] flex flex-col items-center gap-2 px-4 sm:bottom-6">
+    <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 top-[calc(4.5rem+env(safe-area-inset-top))] z-[70] flex flex-col items-center gap-2 px-4 sm:top-auto sm:bottom-6">
       {list.map((t) => (
         <div key={t.id} className={`pointer-events-auto flex max-w-md items-center gap-4 rounded-2xl px-4 py-3 text-sm font-medium shadow-[0_18px_50px_-20px_rgba(23,23,58,.6)] ${t.kind === "ok" ? "bg-navy text-white" : "bg-[#7a1c16] text-white"}`}>
           <span>{t.text}</span>
