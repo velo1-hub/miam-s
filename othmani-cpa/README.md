@@ -117,8 +117,19 @@ Connexion sans mot de passe (lien envoyé par courriel). Ces pages ne sont ni in
 | `ANTHROPIC_API_KEY` | clé API Anthropic | Clara agent |
 | `NEXT_PUBLIC_CLARA_AGENT` | `on` | Clara agent (toute autre valeur : Clara locale) |
 | `CLARA_MODEL` | facultatif | modèle utilisé par Clara |
-| `RESEND_API_KEY`, `LEADS_NOTIFY_EMAIL`, `LEADS_FROM_EMAIL` | facultatif | courriel d'avis au cabinet à chaque nouvelle demande |
+| `RESEND_API_KEY`, `LEADS_FROM_EMAIL` | clé Resend, adresse d'expédition du domaine du cabinet | courriel de confirmation au client à chaque demande |
+| `LEADS_NOTIFY_EMAIL` | facultatif | courriel d'avis au cabinet à chaque nouvelle demande |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | compte Twilio, numéro d'envoi | texto de confirmation au client (formulaire de contact, Canada et États-Unis seulement) |
+| `STRIPE_SECRET_KEY` | clé secrète Stripe | liens de paiement des factures (carte, Apple Pay, Google Pay) |
+| `CLARA_DAILY_MAX` | facultatif (1500 par défaut) | plafond quotidien de messages de Clara |
 
 5. **Lancement de l'espace client** : passer `portalEnabled` à `true` dans `lib/site.ts`. Le bouton et la section « Pilote Fiscal » apparaissent alors sur le site.
 
 Avant d'activer : mettre à jour la politique de confidentialité (hébergeur de la base, assistant automatisé, durée de conservation) et la faire valider par le cabinet. Aucune clé secrète de base de données n'est utilisée par le site : la sécurité repose sur les règles RLS, testées dans le script.
+
+### Connexion, démonstration et application
+
+- **Connexion** : courriel, puis code reçu par courriel. Pour que le courriel contienne le code, ajouter `{{ .Token }}` au modèle « Magic Link » dans Supabase → Authentication → Emails.
+- **Code 0000** : mode démonstration de `/gestion/` et de `/espace-client/`, avec des données fictives en mémoire (`lib/demo.ts`). Il ne donne jamais accès à la vraie base.
+- **Application iOS / Android** : voir `mobile/README.md`.
+- **Sécurité** : en-têtes (CSP, HSTS, anti-cadre) dans `next.config.ts` ; règles d'accès et durcissement dans `supabase/migrations/`. Réglages Supabase à vérifier : Confirm email ON, Secure email change ON, connexions anonymes OFF.

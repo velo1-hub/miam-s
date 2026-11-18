@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { backendOn, saveLead } from "@/lib/backend";
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { backendOn, foreignOrigin, saveLead } from "@/lib/backend";
 import { claraSystem, leadTool } from "@/lib/claraPrompt";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +25,28 @@ function limited(ip: string) {
   return list.length > 30;
 }
 
-type Turn = { role: "user" | "assistant"; content: string };
+type Turn = { role: "user" | "assistant"; content: string; sig?: string };
+
+/** Les réponses de Clara sont signées : le navigateur ne peut pas lui faire dire ce qu'elle n'a pas dit. */
+const sign = (text: string) => createHmac("sha256", `clara:${process.env.ANTHROPIC_API_KEY}`).update(text).digest("hex");
+const signed = (m: Turn) => {
+  if (typeof m.sig !== "string" || m.sig.length !== 64) return false;
+  try { return timingSafeEqual(Buffer.from(m.sig, "hex"), Buffer.from(sign(m.content), "hex")); } catch { return false; }
+};
+
+// Plafond quotidien global (par instance) : au-delà, le site repasse à la Clara locale.
+const DAILY_MAX = Number(process.env.CLARA_DAILY_MAX) || 1500;
+let day = "", used = 0;
+function overBudget() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today !== day) { day = today; used = 0; }
+  return ++used > DAILY_MAX;
+}
 
 export async function POST(req: Request) {
   if (!agentOn()) return Response.json({ off: true }, { status: 503 });
+  if (foreignOrigin(req)) return Response.json({ error: "forbidden" }, { status: 403 });
+  if (overBudget()) return Response.json({ off: true }, { status: 503 });
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
   if (limited(ip)) return Response.json({ error: "rate_limited" }, { status: 429 });
 
@@ -37,7 +56,10 @@ export async function POST(req: Request) {
   const turns: Turn[] = (Array.isArray(body.messages) ? body.messages : [])
     .filter((m): m is Turn => !!m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim() !== "")
     .slice(-24)
-    .map((m) => ({ role: m.role, content: m.content.slice(0, 1500) }));
+    .filter((m) => m.role === "user" || signed(m))
+    .map((m) => ({ role: m.role, content: m.role === "user" ? m.content.slice(0, 1500) : m.content }))
+    // deux messages de suite du même auteur (après un tri) : on les fusionne
+    .reduce<Turn[]>((acc, m) => { const last = acc[acc.length - 1]; if (last && last.role === m.role) last.content += "\n" + m.content; else acc.push({ ...m }); return acc; }, []);
   while (turns.length && turns[0].role !== "user") turns.shift();
   if (!turns.length || turns[turns.length - 1].role !== "user") return Response.json({ error: "bad_request" }, { status: 400 });
 
@@ -59,7 +81,7 @@ export async function POST(req: Request) {
     for (let i = 0; i < 4; i++) {
       const res = await client.messages.create({
         model: MODEL,
-        max_tokens: 2000,
+        max_tokens: 1500,
         system,
         tools: backendOn() ? [leadTool] : [],
         messages,
@@ -68,7 +90,7 @@ export async function POST(req: Request) {
       const uses = res.content.filter((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
       if (res.stop_reason !== "tool_use" || uses.length === 0) {
         const reply = res.content.filter((b): b is Anthropic.TextBlock => b.type === "text").map((b) => b.text).join("\n").trim();
-        if (reply) return Response.json({ reply, lead });
+        if (reply) return Response.json({ reply, lead, sig: sign(reply) });
         break;
       }
       messages.push({ role: "assistant", content: res.content });

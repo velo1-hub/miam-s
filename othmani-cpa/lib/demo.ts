@@ -12,7 +12,7 @@ export const demoRole = (): DemoRole | null => {
   try { const v = sessionStorage.getItem(KEY); return v === "cabinet" || v === "client" ? v : null; } catch { return null; }
 };
 export const setDemo = (r: DemoRole | null) => { try { if (r) sessionStorage.setItem(KEY, r); else sessionStorage.removeItem(KEY); } catch { /* stockage indisponible */ } };
-export const DEMO_EMAIL = { cabinet: "demo@othmanicpa.com", client: "marie.tremblay@exemple.ca" };
+export const DEMO_EMAIL = { cabinet: "demo@exemple.ca", client: "marie.tremblay@exemple.ca" };
 
 type Row = Record<string, unknown>;
 const ago = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
@@ -24,7 +24,7 @@ function seed(): Record<string, Row[]> {
   const d = (id: string, client_name: string, client_email: string, title: string, kind: string, status: string, assignee: string, next_step: string, due: number | null, upd: number): Row =>
     ({ id, created_at: ago(upd + 9), updated_at: ago(upd), client_name, client_email, title, kind, tax_year: year - 1, status, assignee, next_step, due_date: due === null ? null : inDays(due), lead_id: null });
   return {
-    staff: [{ email: DEMO_EMAIL.cabinet, name: "Démonstration" }, { email: "zouhaier@othmanicpa.com", name: "Zouhaier Othmani" }, { email: "racha@othmanicpa.com", name: "Racha Ghazoini" }],
+    staff: [{ email: DEMO_EMAIL.cabinet, name: "Démonstration", is_admin: true }, { email: "associe@exemple.ca", name: "Zouhaier Othmani" }, { email: "technicienne@exemple.ca", name: "Racha Ghazoini" }],
     leads: [
       { id: "l1", created_at: ago(0.1), source: "clara", lang: "fr", name: "Jean Lavoie", email: "jean.lavoie@exemple.ca", phone: "514 555-0142", audience: "moi", topic: "Lettre de Revenu Québec", message: "A reçu un avis de cotisation et souhaite être rappelé. Préfère la fin de journée (préférence notée, non confirmée).", status: "nouveau", notes: "" },
       { id: "l2", created_at: ago(1), source: "contact", lang: "en", name: "Sarah Cohen", email: "sarah.cohen@example.ca", phone: null, audience: "entreprise", topic: null, message: "We are incorporating next month and need help with GST/QST registration.", status: "contacte", notes: "Rappelée. Attend ses documents d'incorporation." },

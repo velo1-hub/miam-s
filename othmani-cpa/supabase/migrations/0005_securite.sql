@@ -1,0 +1,9 @@
+-- Durcissement après audit de sécurité (appliqué en production le 2026-11-18).
+--  * jwt_email() lit le courriel VÉRIFIÉ du compte (auth.users), plus le jeton ;
+--  * seul un administrateur (staff.is_admin) ajoute ou retire un membre de l'équipe ;
+--  * la base fixe elle-même l'identifiant, la date et le nom affiché des messages et documents des clients ;
+--  * fonctions publiques : courriel strict, limite par personne insensible au format du téléphone,
+--    plafond global en simple coupe-circuit (600 / 10 min), pas de réinscription d'une personne désinscrite.
+-- Le SQL complet est dans l'historique des migrations Supabase (« securite_durcissement »).
+-- Réglages à faire dans Supabase → Authentication : Confirm email ON, Secure email change ON,
+-- connexions anonymes OFF, téléphone OFF, expiration du code ≤ 10 minutes.

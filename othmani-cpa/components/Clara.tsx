@@ -66,7 +66,7 @@ const agentText = {
   },
 };
 
-type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string }; badge?: string };
+type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string }; badge?: string; sig?: string };
 
 export function Clara({ lang }: { lang: Lang }) {
   const base = dict(lang).clara;
@@ -140,13 +140,13 @@ export function Clara({ lang }: { lang: Lang }) {
       const res = await fetch("/api/clara/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, leadSaved: leadSaved.current, messages: history.map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text })) }),
+        body: JSON.stringify({ lang, leadSaved: leadSaved.current, messages: history.map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text, sig: m.sig })) }),
       });
       if (!res.ok) throw new Error(String(res.status));
-      const data = (await res.json()) as { reply?: string; lead?: boolean };
+      const data = (await res.json()) as { reply?: string; lead?: boolean; sig?: string };
       if (!data.reply) throw new Error("empty");
       if (data.lead) leadSaved.current = true;
-      setMsgs((m) => [...m, { from: "clara", text: data.reply!, badge: data.lead ? t.sent : undefined }]);
+      setMsgs((m) => [...m, { from: "clara", text: data.reply!, badge: data.lead ? t.sent : undefined, sig: data.sig }]);
     } catch {
       // L'agent ne répond pas : Clara continue avec la recherche locale dans les pages.
       agentDown.current = true;
