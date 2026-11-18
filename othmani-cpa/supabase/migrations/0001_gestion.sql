@@ -15,7 +15,7 @@ create table if not exists public.staff (
 alter table public.staff enable row level security;
 
 create or replace function public.jwt_email() returns text
-language sql stable as $$ select lower(coalesce(auth.jwt() ->> 'email', '')) $$;
+language sql stable set search_path = '' as $$ select lower(coalesce(auth.jwt() ->> 'email', '')) $$;
 
 create or replace function public.is_staff() returns boolean
 language sql stable security definer set search_path = public as $$
@@ -130,6 +130,7 @@ create table if not exists public.dossiers (
   lead_id      uuid references public.leads (id) on delete set null
 );
 create index if not exists dossiers_client_idx on public.dossiers (client_email);
+create index if not exists dossiers_lead_idx on public.dossiers (lead_id);
 alter table public.dossiers enable row level security;
 create policy dossiers_staff on public.dossiers for all to authenticated
   using (public.is_staff()) with check (public.is_staff());
@@ -149,6 +150,7 @@ create table if not exists public.dossier_notes (
   author     text not null default '',
   body       text not null check (char_length(body) between 1 and 4000)
 );
+create index if not exists notes_dossier_idx on public.dossier_notes (dossier_id);
 alter table public.dossier_notes enable row level security;
 create policy notes_staff on public.dossier_notes for all to authenticated
   using (public.is_staff()) with check (public.is_staff());
@@ -210,7 +212,7 @@ create policy messages_client_add on public.messages for insert to authenticated
 
 -- updated_at automatique
 create or replace function public.touch_updated_at() returns trigger
-language plpgsql as $$ begin new.updated_at := now(); return new; end $$;
+language plpgsql set search_path = '' as $$ begin new.updated_at := now(); return new; end $$;
 drop trigger if exists leads_touch on public.leads;
 create trigger leads_touch before update on public.leads for each row execute function public.touch_updated_at();
 drop trigger if exists dossiers_touch on public.dossiers;
@@ -219,6 +221,7 @@ create trigger dossiers_touch before update on public.dossiers for each row exec
 -- ───────────────────────── Droits de base ─────────────────────────
 revoke all on all tables in schema public from anon;
 grant select, insert, update, delete on all tables in schema public to authenticated; -- filtré par les politiques RLS
+revoke all on function public.is_staff(), public.owns_dossier(uuid) from public, anon;
 grant execute on function public.is_staff(), public.jwt_email(), public.owns_dossier(uuid) to authenticated;
 
 -- ───────────────────────── Stockage privé des documents ─────────────────────────
@@ -232,7 +235,7 @@ values ('documents', 'documents', false, 26214400,
 on conflict (id) do nothing;
 
 create or replace function public.path_dossier(p_name text) returns uuid
-language plpgsql immutable as $$
+language plpgsql immutable set search_path = '' as $$
 begin return split_part(p_name, '/', 1)::uuid; exception when others then return null; end $$;
 
 create policy docs_storage_staff on storage.objects for all to authenticated

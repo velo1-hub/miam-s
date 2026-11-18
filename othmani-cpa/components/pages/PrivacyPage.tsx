@@ -8,7 +8,7 @@ import { Shell } from "../Shell";
 
 type Block = { id?: string; h2: string; p?: string[]; list?: string[] };
 
-const UPDATED = "2026-11-15";
+const UPDATED = "2026-11-18";
 
 const fr: Block[] = [
   {
@@ -46,6 +46,7 @@ const fr: Block[] = [
     p: [
       "Seuls les membres de l'équipe qui en ont besoin pour vous servir. Nous sommes tenus au secret professionnel.",
       "Nous pouvons faire appel à des fournisseurs (hébergement du site, réception des formulaires, transfert sécurisé de documents, logiciels fiscaux). Ils sont liés par contrat et ne peuvent utiliser vos renseignements que pour nous rendre service. Certains peuvent conserver des données à l'extérieur du Québec ; nous évaluons alors les risques avant de leur communiquer des renseignements, comme l'exige la loi.",
+      "Les demandes envoyées par le formulaire de contact et les inscriptions aux rappels fiscaux sont enregistrées dans une base de données hébergée au Canada (fournisseur : Supabase), accessible seulement à l'équipe du cabinet.",
       "Avec votre autorisation, nous transmettons des renseignements à Revenu Québec et à l'Agence du revenu du Canada.",
     ],
   },
@@ -120,6 +121,7 @@ const en: Block[] = [
     p: [
       "Only team members who need it to serve you. We are bound by professional secrecy.",
       "We may use service providers (website hosting, form handling, secure document transfer, tax software). They are bound by contract and may only use your information to provide services to us. Some may store data outside Quebec; we assess the risks before sharing information with them, as the law requires.",
+      "Requests sent through the contact form and tax reminder sign-ups are stored in a database hosted in Canada (provider: Supabase), accessible only to the firm's team.",
       "With your authorization, we send information to Revenu Québec and the Canada Revenue Agency.",
     ],
   },
