@@ -29,7 +29,7 @@ export function Header({ locale }: { locale: Locale }) {
           {nav.map((n) => <Link key={n.href} href={n.href} className={`whitespace-nowrap rounded-full px-2.5 py-2 text-[13.5px] font-medium transition-colors ${n.xl ? "hidden xl:block" : ""} ${dark ? "text-white/85 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-navy-900/5"} ${pathname === n.href ? "font-semibold" : ""}`}>{n.label}</Link>)}
         </nav>
         <div className="flex items-center gap-2">
-          <Link href={altPath(pathname, other)} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} className={`flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-semibold ${dark ? "bg-white/10 hover:bg-white/20" : "bg-navy-900/5 hover:bg-navy-900/10"}`} aria-label={other === "fr" ? "Version française" : "English version"}>{other.toUpperCase()}</Link>
+          <Link href={altPath(pathname, other)} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} className={`hidden h-10 w-10 items-center justify-center rounded-full text-[13px] font-semibold sm:flex ${dark ? "bg-white/10 hover:bg-white/20" : "bg-navy-900/5 hover:bg-navy-900/10"}`} aria-label={other === "fr" ? "Version française" : "English version"}>{other.toUpperCase()}</Link>
           <a href={`tel:${BIZ.phone}`} className={`hidden items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-[13.5px] font-semibold md:flex ${dark ? "border-amber-400/60 text-white hover:bg-white/10" : "border-line text-navy-950 hover:border-navy-900"}`}><span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-navy-950"><I.phone width={13} height={13} strokeWidth={2.2} /></span>{BIZ.phoneDisplay}</a>
           <Link href={pagePath(locale, "quote")} className="btn btn-primary hidden !min-h-10 whitespace-nowrap !px-4 !py-2 !text-[14px] sm:inline-flex">{locale === "fr" ? "Soumission" : "Get a quote"}</Link>
           <button className={`flex h-10 w-10 items-center justify-center rounded-full lg:hidden ${dark ? "bg-white/10" : "bg-navy-900/5"}`} aria-expanded={open} aria-controls="mobile-nav" aria-label="Menu" onClick={() => setOpen(!open)}>{open ? <I.x width={20} height={20} /> : <I.menu width={20} height={20} />}</button>
@@ -40,6 +40,7 @@ export function Header({ locale }: { locale: Locale }) {
           <nav className="flex flex-col" aria-label="Mobile">
             {nav.map((n) => <Link key={n.href} href={n.href} className="rounded-2xl px-4 py-3 text-[16px] font-medium hover:bg-navy-900/5">{n.label}</Link>)}
             <Link href={pagePath(locale, "careers")} className="rounded-2xl px-4 py-3 text-[16px] font-medium hover:bg-navy-900/5">{d.nav.careers}</Link>
+            <Link href={altPath(pathname, other)} hrefLang={other === "fr" ? "fr-CA" : "en-CA"} className="rounded-2xl px-4 py-3 text-[16px] font-medium hover:bg-navy-900/5 sm:hidden"><I.globe width={18} height={18} className="mr-2 inline" />{other === "fr" ? "Français" : "English"}</Link>
             <div className="mt-2 flex gap-2 p-1"><Link href={pagePath(locale, "quote")} className="btn btn-primary flex-1">{d.nav.quote}</Link><a href={`tel:${BIZ.phone}`} className="btn btn-ghost flex-1"><I.phone width={18} height={18} />{d.nav.call}</a></div>
           </nav>
         </div>
