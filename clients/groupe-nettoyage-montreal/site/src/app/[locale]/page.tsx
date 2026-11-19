@@ -85,7 +85,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <Reveal index={1}>
             <div className="relative flex h-full min-h-[460px] flex-col justify-between overflow-hidden rounded-[2rem] bg-navy-950 p-8 text-white sm:p-10">
               <InlineVideo webm="/media/hero-mobile.webm" mp4="/media/hero-mobile.mp4" poster="/media/hero-poster-mobile.jpg" position="center 30%" portraitAlt={{ webm: "/media/hero.webm", mp4: "/media/hero.mp4", poster: "/media/hero-poster.jpg" }} />
-              <div className="absolute inset-0 bg-gradient-to-b from-navy-950/70 via-navy-950/75 to-navy-950/95" aria-hidden />
+              <div className="absolute inset-0 bg-gradient-to-b from-navy-950/45 via-navy-950/60 to-navy-950/92" aria-hidden />
               <div className="relative">
                 <p className="eyebrow !text-amber-400">{fr ? "Résidentiel et Airbnb" : "Residential and Airbnb"}</p>
                 <h2 className="text-h2 mt-3 font-display font-semibold">{fr ? "Votre prix ferme en deux minutes. Pas d'appel, pas d'attente." : "Your firm price in two minutes. No call, no waiting."}</h2>
