@@ -210,6 +210,14 @@ export function AppFrame({ lang, title, subtitle, demo, wide = false, children }
                 <p role="alert" className={msg ? "mt-4 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
               </form>
             )}
+            <form onSubmit={(e) => { e.preventDefault(); if (String(new FormData(e.currentTarget).get("access") ?? "").trim() === DEMO_CODE) enterDemo(); else setState("badcode"); }} className="mt-4 rounded-3xl border border-white bg-white/80 p-5">
+              <label htmlFor="app-access" className="label">{fr ? "Code d'accès" : "Access code"}</label>
+              <div className="flex gap-2">
+                <input id="app-access" name="access" inputMode="numeric" autoComplete="off" maxLength={8} className="field min-h-11 flex-1 py-2 text-center font-display text-xl tracking-[0.4em]" />
+                <button type="submit" className="btn-secondary min-h-11 px-5">{fr ? "Entrer" : "Enter"}</button>
+              </div>
+              <p className="mt-2 text-xs text-muted">{fr ? "Le code d'accès ouvre l'application avec des données d'exemple." : "The access code opens the app with sample data."}</p>
+            </form>
             <p className="mt-6 text-center text-sm text-ink/80">{fr ? "Besoin d'aide ? " : "Need help? "}<a className="font-semibold text-navy underline underline-offset-4" href={`tel:${site.phone.tel}`}>{site.phone.display}</a></p>
           </div>
         ) : (
