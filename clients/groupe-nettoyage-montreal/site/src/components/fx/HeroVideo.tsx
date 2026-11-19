@@ -1,27 +1,38 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-/** Autoplaying, muted, looping background video with a poster, portrait source on phones, paused when off-screen or reduced-motion. */
-export function HeroVideo({ desktop, mobile, poster, posterMobile }: { desktop: { webm?: string; mp4: string }; mobile?: { webm?: string; mp4: string }; poster: string; posterMobile?: string }) {
-  const ref = useRef<HTMLVideoElement>(null); const [playing, setPlaying] = useState(false); const [portrait, setPortrait] = useState(false);
+
+type Src = { webm?: string; mp4: string };
+/**
+ * Autoplaying, muted, looping background video, always opaque, with the poster layered underneath so a blocked autoplay still shows the still frame.
+ * The <video> markup is injected as raw HTML so the `muted`, `autoplay` and `playsinline`
+ * attributes exist at parse time: React omits `muted` from server HTML, and Safari / iOS
+ * refuse to autoplay a video that was not muted when the page loaded.
+ */
+export function HeroVideo({ desktop, mobile, poster, posterMobile }: { desktop: Src; mobile?: Src; poster: string; posterMobile?: string }) {
+  const wrap = useRef<HTMLDivElement>(null); const [portrait, setPortrait] = useState<boolean | null>(null);
   useEffect(() => { const mq = window.matchMedia("(max-width: 767px) and (orientation: portrait)"); const on = () => setPortrait(mq.matches); on(); mq.addEventListener("change", on); return () => mq.removeEventListener("change", on); }, []);
+  const src = portrait && mobile ? mobile : desktop; const p = portrait && posterMobile ? posterMobile : poster;
+  const html = `<video class="hero-video absolute inset-0 h-full w-full object-cover" muted autoplay playsinline loop preload="auto" poster="${p}" aria-hidden="true" disablepictureinpicture>${src.webm ? `<source src="${src.webm}" type="video/webm">` : ""}<source src="${src.mp4}" type="video/mp4"></video>`;
+
   useEffect(() => {
-    const v = ref.current; if (!v) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const onPlaying = () => setPlaying(true); v.addEventListener("playing", onPlaying);
-    const tryPlay = () => v.play().then(() => setPlaying(true)).catch(() => {});
+    const v = wrap.current?.querySelector("video"); if (!v) return;
+    v.muted = true; v.defaultMuted = true;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { v.pause(); return; }
+    const mark = () => { if (!v.paused && !v.ended) v.dataset.playing = "true"; };
+    const onPlaying = () => mark(); v.addEventListener("playing", onPlaying); v.addEventListener("timeupdate", onPlaying);
+    mark(); // autoplay may already have started before this effect ran
+    const tryPlay = () => { const r = v.play(); if (r && typeof r.catch === "function") r.then(mark).catch(() => {}); };
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) tryPlay(); else v.pause(); }, { threshold: 0.1 });
     io.observe(v);
-    const kick = () => { if (v.paused) tryPlay(); }; window.addEventListener("touchstart", kick, { once: true, passive: true }); window.addEventListener("scroll", kick, { once: true, passive: true });
-    return () => { io.disconnect(); v.removeEventListener("playing", onPlaying); window.removeEventListener("touchstart", kick); window.removeEventListener("scroll", kick); };
-  }, [portrait]);
-  const src = portrait && mobile ? mobile : desktop; const p = portrait && posterMobile ? posterMobile : poster;
+    const kick = () => { if (v.paused) tryPlay(); };
+    window.addEventListener("touchstart", kick, { once: true, passive: true }); window.addEventListener("scroll", kick, { once: true, passive: true }); window.addEventListener("pointerdown", kick, { once: true, passive: true });
+    return () => { io.disconnect(); v.removeEventListener("playing", onPlaying); v.removeEventListener("timeupdate", onPlaying); window.removeEventListener("touchstart", kick); window.removeEventListener("scroll", kick); window.removeEventListener("pointerdown", kick); };
+  }, [html]);
+
   return (
     <>
-      {/* Poster always visible underneath: covers browsers that block autoplay (Low Power Mode, data saver) and the first frames while the video loads. */}
       <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${p})` }} aria-hidden />
-      <video key={src.mp4} ref={ref} className="hero-video absolute inset-0 h-full w-full object-cover" data-playing={playing} muted playsInline loop autoPlay preload="auto" poster={p} aria-hidden>
-        {src.webm && <source src={src.webm} type="video/webm" />}<source src={src.mp4} type="video/mp4" />
-      </video>
+      <div ref={wrap} key={html} className="absolute inset-0" dangerouslySetInnerHTML={{ __html: html }} />
     </>
   );
 }
