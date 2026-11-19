@@ -122,6 +122,123 @@ export function LoadError({ lang, retry }: { lang: Lang; retry: () => void }) {
   );
 }
 
+/* ───────────── Notifications : cloche, pastille, alertes du navigateur ───────────── */
+type Notice = { id: string; text: string; at: string; hash?: string };
+const SEEN = (role: Role | "cabinet" | "client") => `ocpa-notif-seen-${role}`;
+const readSeen = (role: string) => { try { return localStorage.getItem(SEEN(role as Role)) ?? ""; } catch { return ""; } };
+
+async function fetchNotices(role: "cabinet" | "client", lang: Lang): Promise<Notice[]> {
+  const fr = lang === "fr";
+  const since = new Date(Date.now() - 14 * 86400000).toISOString();
+  const db = supabase();
+  const get = async <T,>(q: PromiseLike<{ data: unknown; error: unknown }>) => { const r = await q; return r.error ? [] : ((r.data as T[]) ?? []); };
+  if (role === "cabinet") {
+    const [acts, leads] = await Promise.all([
+      get<{ id: number; created_at: string; kind: string; detail: string; actor_role: string }>(db.from("activity").select("*").eq("actor_role", "client").gte("created_at", since).order("created_at", { ascending: false }).limit(20)),
+      get<{ id: string; created_at: string; name: string; topic: string | null; source: string }>(db.from("leads").select("*").eq("status", "nouveau").gte("created_at", since).order("created_at", { ascending: false }).limit(20)),
+    ]);
+    return [
+      ...acts.map((a) => ({ id: `a${a.id}`, at: a.created_at, hash: "#dossiers", text: a.kind === "message" ? `Nouveau message d'un client : « ${a.detail} »` : a.kind === "document_depose" ? `Un client a déposé un document : ${a.detail}` : `Activité d'un client : ${a.detail}` })),
+      ...leads.map((l) => ({ id: `l${l.id}`, at: l.created_at, hash: "#demandes", text: `Nouvelle demande${l.source === "clara" ? " (Clara)" : ""} : ${l.name}${l.topic ? `, ${l.topic}` : ""}` })),
+    ].sort((a, b) => b.at.localeCompare(a.at));
+  }
+  const [msgs, docs, invs] = await Promise.all([
+    get<Message>(db.from("messages").select("*").eq("author_role", "cabinet").gte("created_at", since).order("created_at", { ascending: false }).limit(20)),
+    get<Doc>(db.from("documents").select("*").eq("uploader_role", "cabinet").gte("created_at", since).order("created_at", { ascending: false }).limit(20)),
+    get<{ id: string; created_at: string; label: string }>(db.from("invoices").select("*").eq("status", "a_payer").gte("created_at", since).order("created_at", { ascending: false }).limit(20)),
+  ]);
+  return [
+    ...msgs.map((m) => ({ id: `m${m.id}`, at: m.created_at, text: fr ? `Nouveau message du cabinet : « ${m.body.slice(0, 90)} »` : `New message from the firm: "${m.body.slice(0, 90)}"` })),
+    ...docs.map((d) => ({ id: `d${d.id}`, at: d.created_at, text: fr ? `Le cabinet vous a envoyé un document : ${d.name}` : `The firm sent you a document: ${d.name}` })),
+    ...invs.map((i) => ({ id: `i${i.id}`, at: i.created_at, text: fr ? `Honoraires à régler : ${i.label}` : `Fees to pay: ${i.label}` })),
+  ].sort((a, b) => b.at.localeCompare(a.at));
+}
+
+function Bell({ role, lang }: { role: "cabinet" | "client"; lang: Lang }) {
+  const fr = lang === "fr";
+  const [items, setItems] = useState<Notice[]>([]);
+  const [seen, setSeen] = useState("");
+  const [open, setOpen] = useState(false);
+  const [perm, setPerm] = useState<string>("default");
+  const known = useRef<Set<string> | null>(null);
+  const box = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSeen(readSeen(role));
+    setPerm(typeof Notification === "undefined" ? "unsupported" : Notification.permission);
+    let stop = false;
+    const tick = async () => {
+      const list = await fetchNotices(role, lang).catch(() => [] as Notice[]);
+      if (stop) return;
+      // Une alerte seulement pour ce qui arrive pendant que l'application est ouverte.
+      if (known.current) {
+        const fresh = list.filter((n) => !known.current!.has(n.id));
+        if (fresh.length) {
+          toast(fresh[0].text.slice(0, 120));
+          if (document.hidden && typeof Notification !== "undefined" && Notification.permission === "granted") {
+            try { new Notification(role === "cabinet" ? "Othmani CPA · Gestion" : "Pilote Fiscal", { body: fresh[0].text, icon: "/icons/icon-192.png", tag: fresh[0].id }); } catch { /* alerte indisponible */ }
+          }
+        }
+      }
+      known.current = new Set(list.map((n) => n.id));
+      setItems(list);
+    };
+    tick();
+    const id = window.setInterval(tick, 45_000);
+    const onFocus = () => tick();
+    window.addEventListener("focus", onFocus);
+    return () => { stop = true; window.clearInterval(id); window.removeEventListener("focus", onFocus); };
+  }, [role, lang]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => { if (e instanceof KeyboardEvent ? e.key === "Escape" : !box.current?.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
+  }, [open]);
+
+  const unread = items.filter((n) => n.at > seen).length;
+  const markRead = () => { const now = new Date().toISOString(); try { localStorage.setItem(SEEN(role), now); } catch { /* stockage indisponible */ } setSeen(now); };
+  const enable = async () => { try { setPerm(await Notification.requestPermission()); } catch { setPerm("denied"); } };
+
+  return (
+    <div ref={box} className="relative">
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={fr ? `Notifications${unread ? `, ${unread} nouvelle${unread > 1 ? "s" : ""}` : ""}` : `Notifications${unread ? `, ${unread} new` : ""}`} className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white bg-white/70 text-navy transition-shadow hover:shadow-[0_0_24px_-6px_rgba(111,193,216,.9)]">
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" /><path d="M10 20a2.2 2.2 0 0 0 4 0" /></svg>
+        {unread > 0 && <span className="fx-dot absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#c0392b] px-1 text-[0.68rem] font-bold text-white" aria-hidden="true">{unread > 9 ? "9+" : unread}</span>}
+      </button>
+      {open && (
+        <div role="dialog" aria-label="Notifications" className="absolute right-0 z-50 mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-white bg-white shadow-[0_40px_90px_-40px_rgba(23,23,58,.7)]">
+          <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+            <p className="font-display font-semibold text-navy">Notifications</p>
+            {unread > 0 && <button type="button" onClick={markRead} className="text-sm font-semibold text-navy underline underline-offset-4">{fr ? "Tout marquer comme lu" : "Mark all as read"}</button>}
+          </div>
+          {items.length === 0 ? <p className="px-5 py-6 text-sm text-muted">{fr ? "Rien de nouveau pour l'instant." : "Nothing new for now."}</p> : (
+            <ul className="max-h-[22rem] divide-y divide-line overflow-y-auto">
+              {items.map((n) => (
+                <li key={n.id}>
+                  <a href={n.hash ?? "#"} onClick={(e) => { if (!n.hash) e.preventDefault(); setOpen(false); markRead(); }} className="flex gap-3 px-5 py-3 text-sm hover:bg-[#f3f7fc]">
+                    <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${n.at > seen ? "bg-[#3fa9c9]" : "bg-transparent"}`} aria-hidden="true" />
+                    <span><span className={`block leading-snug ${n.at > seen ? "font-semibold text-ink" : "text-ink/80"}`}>{n.text}</span><span className="mt-0.5 block text-xs text-muted">{fmtDate(n.at, lang, true)}</span></span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          {perm === "default" && (
+            <div className="border-t border-line bg-[#f3f7fc] px-5 py-3.5">
+              <button type="button" onClick={enable} className="btn-secondary min-h-10 w-full px-4 py-2 text-sm">{fr ? "Activer les alertes sur cet appareil" : "Turn on alerts on this device"}</button>
+              <p className="mt-2 text-xs text-muted">{fr ? "Vous serez averti quand l'application est ouverte en arrière-plan." : "You will be alerted while the app is open in the background."}</p>
+            </div>
+          )}
+          {perm === "denied" && <p className="border-t border-line bg-[#f3f7fc] px-5 py-3 text-xs text-muted">{fr ? "Les alertes sont bloquées dans les réglages de votre navigateur." : "Alerts are blocked in your browser settings."}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * Cadre commun : en-tête vitré, connexion, puis contenu.
  * Connexion réelle : courriel, puis code à 6 chiffres reçu par courriel (ou lien du même courriel).
@@ -169,17 +286,18 @@ export function AppFrame({ lang, title, subtitle, demo, wide = false, children }
   const msg = state === "error" ? t.error : state === "badcode" ? (fr ? "Ce code n'est pas valide ou a expiré. Demandez-en un nouveau." : "This code is invalid or has expired. Request a new one.") : "";
 
   return (
-    <div className="mesh min-h-svh">
+    <div className="app-fx min-h-svh" data-auth={session ? "" : undefined}>
       <header className={`glass sticky top-0 z-40 border-b border-white/70 pt-[env(safe-area-inset-top)] ${session ? "" : "hidden"}`}>
         <div className={`${wide ? "mx-auto max-w-[96rem] px-4 sm:px-6" : "container-site"} flex items-center justify-between gap-4 py-3`}>
           <a href={fr ? "/" : "/en/"} className="flex items-center gap-2.5 text-navy" aria-label={`${site.name}, ${t.back}`}>
             <LogoMark className="h-8 w-auto" />
-            <span className="font-display text-base font-bold tracking-tight sm:text-lg">{subtitle}</span>
+            <span className="font-display text-base font-bold tracking-tight whitespace-nowrap sm:text-lg">{subtitle}</span>
           </a>
           {session ? (
             <div className="flex items-center gap-3 text-sm">
+              <Bell role={demo} lang={lang} />
               <span className="hidden text-ink/80 md:inline">{session.email}</span>
-              <button type="button" onClick={logout} className="rounded-full px-3 py-2 text-sm font-medium text-navy underline underline-offset-4">{session.demo ? (fr ? "Quitter la démo" : "Exit demo") : t.logout}</button>
+              <button type="button" onClick={logout} className="rounded-full px-2 py-2 text-sm font-medium whitespace-nowrap text-navy underline underline-offset-4">{session.demo ? (fr ? "Quitter" : "Exit") : t.logout}</button>
             </div>
           ) : (
             <a href={fr ? "/" : "/en/"} className="text-sm font-medium text-navy underline underline-offset-4">{t.back}</a>
