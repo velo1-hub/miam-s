@@ -8,7 +8,7 @@ import { LogoMark } from "../Logo";
 export type Role = "client" | "cabinet";
 export type Dossier = {
   id: string; created_at: string; updated_at: string; client_email: string; client_name: string; title: string;
-  kind: string; tax_year: number | null; status: string; next_step: string; due_date: string | null; lead_id: string | null; assignee?: string;
+  kind: string; tax_year: number | null; status: string; next_step: string; due_date: string | null; lead_id: string | null; assignee?: string; savings_cents?: number | null; weather?: "degage" | "nuageux" | "orage" | null; weather_note?: string;
 };
 export type Doc = { id: string; dossier_id: string; created_at: string; uploader_role: Role; path: string; name: string; size: number; request_id?: string | null };
 export type Message = { id: string; dossier_id: string; created_at: string; author_role: Role; author_name: string; body: string };
@@ -526,3 +526,23 @@ export function Messages({ dossierId, role, lang, authorName, onSent, aiDraft }:
     </Card>
   );
 }
+
+/* ───────────── Présentation Pilote Fiscal : 5 étapes visibles, météo fiscale, types partagés ───────────── */
+/** Les 7 étapes internes sont montrées au client en 5 étapes, comme un suivi de colis. */
+export const STEPS5 = [
+  { key: "recus", fr: "Documents reçus", en: "Documents received", of: ["ouvert", "documents_attendus"] },
+  { key: "preparation", fr: "En préparation", en: "In preparation", of: ["en_preparation"] },
+  { key: "revision", fr: "Révision du CPA", en: "CPA review", of: ["en_revision"] },
+  { key: "signer", fr: "Prêt à signer", en: "Ready to sign", of: ["a_signer"] },
+  { key: "transmis", fr: "Transmis", en: "Filed", of: ["transmis", "ferme"] },
+] as const;
+export const step5 = (status: string) => Math.max(0, STEPS5.findIndex((s) => (s.of as readonly string[]).includes(status)));
+export const WEATHER: Record<string, { fr: string; en: string }> = {
+  degage: { fr: "ciel dégagé", en: "clear skies" },
+  nuageux: { fr: "nuage à l'horizon", en: "clouds ahead" },
+  orage: { fr: "à régler rapidement", en: "needs attention" },
+};
+export type Appointment = { id: string; dossier_id: string; created_at: string; preference: string; mode: "bureau" | "telephone" | "video"; status: "demande" | "confirme" | "annule"; confirmed_at: string | null; staff_note: string };
+export type Signature = { id: string; dossier_id: string; created_at: string; title: string; body: string; status: "a_signer" | "signe" | "annule"; signed_at: string | null; signed_name: string | null };
+export type Invoice = { id: string; dossier_id: string; created_at: string; label: string; amount_cents: number; status: "brouillon" | "a_payer" | "payee" | "annulee"; pay_url: string | null; paid_at: string | null };
+export const cad = (cents: number, lang: Lang = "fr") => new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);

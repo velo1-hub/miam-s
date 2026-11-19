@@ -258,79 +258,32 @@ html:not(:has(#mobile-menu[open])) .site-header[data-dark-top]:not([data-scrolle
 @media (min-width: 1700px) { .hdr-tag { display: block; } }
 @media (min-width: 1700px) { .hdr-shell { max-width: 90rem; } .site-header[data-scrolled] .hdr-shell { max-width: 88rem; } }
 
-/* ───────────── Application (tableau de bord et espace client) : clair, verre et lumière ───────────── */
-.app-fx { position: relative; isolation: isolate; background: #f3f7fc; }
+/* ───────────── Application Pilote Fiscal : le style de la présentation ─────────────
+   Fond clair uni, cartes blanches nettes, marine profond, accents ciel et violet doux. */
+.app-fx { position: relative; isolation: isolate; background: #f4f5fa; }
 .app-fx::before {
-  content: ""; position: fixed; inset: -20%; z-index: -2; pointer-events: none;
-  background:
-    radial-gradient(38% 34% at 16% 18%, rgba(111, 193, 216, .42), transparent 70%),
-    radial-gradient(34% 32% at 86% 12%, rgba(125, 120, 230, .26), transparent 70%),
-    radial-gradient(40% 36% at 78% 88%, rgba(111, 193, 216, .34), transparent 70%),
-    radial-gradient(36% 32% at 8% 92%, rgba(42, 42, 92, .16), transparent 70%);
-  animation: fx-aurora 26s ease-in-out infinite alternate;
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(50% 40% at 100% 0%, rgba(125, 120, 230, .10), transparent 70%), radial-gradient(45% 40% at 0% 100%, rgba(111, 193, 216, .12), transparent 70%);
 }
-.app-fx::after {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5;
-  background-image: linear-gradient(rgba(42, 42, 92, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(42, 42, 92, .045) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
-}
-@keyframes fx-aurora { from { transform: translate3d(-2%, -1%, 0) rotate(0deg) scale(1); } to { transform: translate3d(3%, 2%, 0) rotate(6deg) scale(1.08); } }
-@keyframes fx-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fx-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes fx-sheen { to { background-position: 200% 0; } }
 @keyframes fx-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(111, 193, 216, .55); } 50% { box-shadow: 0 0 0 7px rgba(111, 193, 216, 0); } }
-
-/* Cartes : verre translucide, bord en dégradé lumineux */
-.app-fx[data-auth] main :is(section, article, form, li, div, dl > div, button, a).rounded-3xl:is(.bg-white, .border),
-.app-fx[data-auth] main :is(li, div, button, a, dl > div).rounded-2xl.bg-white {
-  border: 1px solid transparent;
-  background:
-    linear-gradient(rgba(255, 255, 255, .78), rgba(255, 255, 255, .66)) padding-box,
-    linear-gradient(140deg, rgba(111, 193, 216, .95), rgba(255, 255, 255, .9) 38%, rgba(125, 120, 230, .45) 72%, rgba(111, 193, 216, .7)) border-box;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 28px 60px -42px rgba(42, 42, 92, .55), 0 2px 10px -6px rgba(42, 42, 92, .12);
-  transition: transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s;
-}
-.app-fx[data-auth] main :is(section, article, form).rounded-3xl:is(.bg-white, .border) { animation: fx-rise .5s cubic-bezier(.2, .7, .2, 1) both; }
-.app-fx[data-auth] main :is(button, a):is(.rounded-3xl, .rounded-2xl).bg-white:hover {
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 #fff, 0 30px 60px -36px rgba(42, 42, 92, .6), 0 0 0 1px rgba(111, 193, 216, .55), 0 0 34px -8px rgba(111, 193, 216, .7);
-}
-.app-fx[data-auth] main [aria-current]:is(.rounded-2xl, .rounded-3xl).bg-white,
-.app-fx[data-auth] main [aria-current="true"] { box-shadow: 0 0 0 1px rgba(111, 193, 216, .8), 0 0 30px -8px rgba(111, 193, 216, .75); }
-
-/* Titres et grands chiffres : dégradé marine → ciel */
-.app-fx[data-auth] main :is(h1, h2.font-display, dd.font-display, .font-display.text-2xl, .font-display.text-3xl):not(.text-white, .\!text-white) {
-  background: linear-gradient(100deg, #2a2a5c 10%, #4b4fb0 55%, #3fa9c9 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.app-fx .on-dark :is(h1, h2, dd, .font-display), .app-fx .bg-navy :is(h1, h2, h3, dd, .font-display) { background: none; color: #fff; -webkit-text-fill-color: currentColor; }
-
-/* Boutons */
-.app-fx .btn-primary {
-  background: linear-gradient(120deg, #2a2a5c, #3d3f9a 55%, #2f7fa6 130%); background-size: 200% 100%;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 14px 30px -14px rgba(42, 42, 92, .8);
-  transition: background-position .5s, box-shadow .25s, transform .2s;
-}
-.app-fx .btn-primary:hover { background-position: 100% 0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 16px 34px -12px rgba(42, 42, 92, .8), 0 0 28px -6px rgba(111, 193, 216, .9); transform: translateY(-1px); }
-.app-fx .btn-secondary { background: rgba(255, 255, 255, .7); border-color: rgba(111, 193, 216, .7); }
-.app-fx .btn-secondary:hover { box-shadow: 0 0 24px -8px rgba(111, 193, 216, .9); }
-
-/* Champs : verre, halo au focus */
-.app-fx .field { background: rgba(255, 255, 255, .82); border-color: rgba(42, 42, 92, .3); transition: box-shadow .2s, border-color .2s; }
-.app-fx .field:focus { border-color: #3fa9c9; box-shadow: 0 0 0 4px rgba(111, 193, 216, .28), 0 0 26px -8px rgba(111, 193, 216, .8); outline: none; }
-
-/* Navigation : élément actif lumineux */
-.app-fx nav [aria-current="page"] { box-shadow: 0 10px 26px -12px rgba(42, 42, 92, .75), 0 0 26px -8px rgba(111, 193, 216, .85); }
-.app-fx header.glass { background: rgba(255, 255, 255, .62); box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 18px 40px -34px rgba(42, 42, 92, .6); }
+.app-fx[data-auth] main :is(section, article, form).rounded-3xl:is(.bg-white, .border) { animation: fx-rise .4s cubic-bezier(.2, .7, .2, 1) both; }
+.app-fx[data-auth] main :is(section, article, form, li, div, button, a).rounded-3xl:is(.bg-white, .border),
+.app-fx[data-auth] main :is(li, div, button, a).rounded-2xl.bg-white { border-color: #e6e8f2; box-shadow: 0 1px 2px rgba(23, 23, 58, .04), 0 18px 40px -34px rgba(23, 23, 58, .35); }
+.app-fx[data-auth] main :is(button, a):is(.rounded-3xl, .rounded-2xl).bg-white { transition: transform .2s, box-shadow .2s, border-color .2s; }
+.app-fx[data-auth] main :is(button, a):is(.rounded-3xl, .rounded-2xl).bg-white:hover { transform: translateY(-1px); border-color: #b9dfeb; box-shadow: 0 22px 44px -30px rgba(23, 23, 58, .5); }
+.app-fx .btn-primary { background: linear-gradient(120deg, #23234f, #2f3070); box-shadow: 0 10px 22px -14px rgba(23, 23, 58, .9); transition: box-shadow .2s, transform .2s; }
+.app-fx .btn-primary:hover { box-shadow: 0 14px 28px -12px rgba(23, 23, 58, .9); transform: translateY(-1px); }
+.app-fx .field:focus { border-color: #3fa9c9; box-shadow: 0 0 0 4px rgba(111, 193, 216, .25); outline: none; }
+.app-fx header.glass { background: rgba(255, 255, 255, .86); box-shadow: 0 1px 0 #e6e8f2; }
 .app-fx .fx-dot { animation: fx-pulse 2.2s ease-out infinite; }
-.app-fx .animate-pulse { background: linear-gradient(90deg, rgba(255, 255, 255, .5), rgba(111, 193, 216, .28), rgba(255, 255, 255, .5)); background-size: 200% 100%; animation: fx-sheen 1.4s linear infinite; }
-.app-fx ::-webkit-scrollbar { width: 10px; height: 10px; }
-.app-fx ::-webkit-scrollbar-thumb { background: rgba(42, 42, 92, .22); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
-
+.app-fx .animate-pulse { background: linear-gradient(90deg, #eceff6, #dfe9f3, #eceff6); background-size: 200% 100%; animation: fx-sheen 1.4s linear infinite; }
+/* Dégradé de marque de la présentation (Clara, compteur d'économies, pastilles) */
+.pf-clara { background: linear-gradient(135deg, #6fc1d8, #8b7cf0); color: #fff; }
+.pf-navy { background: linear-gradient(140deg, #23234f 0%, #2f3070 55%, #3f5fa0 120%); color: #fff; }
+.pf-eyebrow { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: #6b6f8a; }
 @media (prefers-reduced-motion: reduce) {
-  .app-fx::before, .app-fx .fx-dot, .app-fx .animate-pulse, .app-fx[data-auth] main :is(section, article, form).rounded-3xl { animation: none; }
+  .app-fx .fx-dot, .app-fx .animate-pulse, .app-fx[data-auth] main :is(section, article, form).rounded-3xl { animation: none; }
   .app-fx .btn-primary, .app-fx[data-auth] main :is(button, a) { transition: none; }
-}
-@media (prefers-reduced-transparency: reduce) {
-  .app-fx[data-auth] main :is(section, article, form, li, div, button, a).rounded-3xl:is(.bg-white, .border), .app-fx[data-auth] main :is(li, div, button, a).rounded-2xl.bg-white { background: #fff; border-color: var(--color-line); }
 }

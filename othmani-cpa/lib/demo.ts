@@ -22,7 +22,7 @@ const uid = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.r
 function seed(): Record<string, Row[]> {
   const year = new Date().getFullYear();
   const d = (id: string, client_name: string, client_email: string, title: string, kind: string, status: string, assignee: string, next_step: string, due: number | null, upd: number): Row =>
-    ({ id, created_at: ago(upd + 9), updated_at: ago(upd), client_name, client_email, title, kind, tax_year: year - 1, status, assignee, next_step, due_date: due === null ? null : inDays(due), lead_id: null });
+    ({ id, created_at: ago(upd + 9), updated_at: ago(upd), client_name, client_email, title, kind, tax_year: year - 1, status, assignee, next_step, due_date: due === null ? null : inDays(due), lead_id: null, savings_cents: id === "d1" ? 420000 : null, weather: id === "d1" ? "degage" : id === "d2" ? "nuageux" : null, weather_note: id === "d1" ? "Tout est à jour. Prochaine échéance : votre acompte de mars." : id === "d2" ? "Relevés bancaires à recevoir." : "" });
   return {
     staff: [{ email: DEMO_EMAIL.cabinet, name: "Démonstration", is_admin: true }, { email: "associe@exemple.ca", name: "Zouhaier Othmani" }, { email: "technicienne@exemple.ca", name: "Racha Ghazoini" }],
     leads: [
@@ -68,6 +68,11 @@ function seed(): Record<string, Row[]> {
       { id: 2, dossier_id: "d1", created_at: ago(3), actor: "Marie Tremblay", actor_role: "client", kind: "document_depose", detail: "T4.pdf" },
       { id: 1, dossier_id: "d1", created_at: ago(9), actor: "Racha Ghazoini", actor_role: "cabinet", kind: "dossier_ouvert", detail: "Déclarations de revenus" },
     ],
+    appointment_requests: [{ id: "ap1", dossier_id: "d3", created_at: ago(1), preference: "En fin de journée, si possible", mode: "telephone", status: "demande", confirmed_at: null, staff_note: "" }],
+    signatures: [
+      { id: "sg1", dossier_id: "d3", created_at: ago(1), title: "Autorisation de transmettre la réponse à Revenu Québec", body: "J'ai lu le projet de réponse préparé par Othmani CPA Inc. J'autorise le cabinet à le transmettre en mon nom à Revenu Québec.", status: "a_signer", signed_at: null, signed_name: null },
+      { id: "sg2", dossier_id: "d1", created_at: ago(9), title: "Lettre de mission", body: "J'accepte la lettre de mission décrivant les services, les honoraires estimés et les responsabilités de chacun.", status: "signe", signed_at: ago(8), signed_name: "Marie Tremblay" },
+    ],
     reminder_subscribers: [
       { id: "s1", email: "abonne@exemple.ca", lang: "fr", consent_at: ago(12), unsubscribed_at: null },
       { id: "s2", email: "subscriber@example.ca", lang: "en", consent_at: ago(30), unsubscribed_at: null },
@@ -109,6 +114,7 @@ class Query implements PromiseLike<{ data: unknown; error: null | { message: str
     if (this.mode === "insert") {
       const rows = (Array.isArray(this.payload) ? this.payload : [this.payload!]).map((p) => ({ id: uid(), created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ...p }));
       all.push(...rows);
+      if (this.table === "documents") for (const r of rows) { const req = (data().document_requests ?? []).find((x) => x.id === (r as Row).request_id); if (req) req.received = true; }
       return { data: this.one ? rows[0] : rows, error: null, count: rows.length };
     }
     if (this.mode === "update") { all.filter(match).forEach((r) => Object.assign(r, this.payload, "updated_at" in r ? { updated_at: new Date().toISOString() } : {})); return { data: null, error: null, count: null }; }
@@ -129,7 +135,13 @@ class Query implements PromiseLike<{ data: unknown; error: null | { message: str
 export function demoClient(role: DemoRole) {
   return {
     from: (t: string) => new Query(t, role),
-    rpc: async (fn: string) => {
+    rpc: async (fn: string, args?: Record<string, unknown>) => {
+      if (fn === "sign_document") {
+        const row = (data().signatures ?? []).find((x) => x.id === args?.p_id && x.status === "a_signer");
+        if (!row) return { data: null, error: { message: "not_allowed" } };
+        Object.assign(row, { status: "signe", signed_at: new Date().toISOString(), signed_name: String(args?.p_name ?? "") });
+        return { data: null, error: null };
+      }
       if (fn !== "dossiers_a_repondre") return { data: null, error: null };
       const last = new Map<string, Row>();
       for (const m of [...(data().messages ?? [])].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))) last.set(String(m.dossier_id), m);
