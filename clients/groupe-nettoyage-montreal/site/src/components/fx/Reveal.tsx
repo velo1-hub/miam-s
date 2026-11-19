@@ -10,5 +10,5 @@ export function Reveal({ children, index = 0, className = "", as: Tag = "div" }:
     io.observe(el); return () => io.disconnect();
   }, []);
   const T = Tag as ElementType;
-  return <T ref={ref} className={`reveal ${className}`} style={{ "--d": `${index * 90}ms` } as CSSProperties}>{children}</T>;
+  return <T ref={ref} className={`reveal ${className}`} style={{ "--d": `${index * 60}ms` } as CSSProperties}>{children}</T>;
 }

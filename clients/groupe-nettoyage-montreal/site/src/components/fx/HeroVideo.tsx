@@ -12,7 +12,7 @@ export function HeroVideo({ desktop, mobile, poster, posterMobile }: { desktop: 
   const wrap = useRef<HTMLDivElement>(null); const [portrait, setPortrait] = useState<boolean | null>(null);
   useEffect(() => { const mq = window.matchMedia("(max-width: 767px) and (orientation: portrait)"); const on = () => setPortrait(mq.matches); on(); mq.addEventListener("change", on); return () => mq.removeEventListener("change", on); }, []);
   const src = portrait && mobile ? mobile : desktop; const p = portrait && posterMobile ? posterMobile : poster;
-  const html = `<video class="hero-video absolute inset-0 h-full w-full object-cover" muted autoplay playsinline loop preload="auto" poster="${p}" aria-hidden="true" disablepictureinpicture>${src.webm ? `<source src="${src.webm}" type="video/webm">` : ""}<source src="${src.mp4}" type="video/mp4"></video>`;
+  const html = `<video class="hero-video absolute inset-0 h-full w-full object-cover" muted autoplay playsinline loop preload="metadata" poster="${p}" aria-hidden="true" disablepictureinpicture>${src.webm ? `<source src="${src.webm}" type="video/webm">` : ""}<source src="${src.mp4}" type="video/mp4"></video>`;
 
   useEffect(() => {
     const v = wrap.current?.querySelector("video"); if (!v) return;

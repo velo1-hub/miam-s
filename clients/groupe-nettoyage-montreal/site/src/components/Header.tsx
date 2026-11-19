@@ -13,7 +13,7 @@ import { altPath } from "@/i18n/alt";
 export function Header({ locale }: { locale: Locale }) {
   const d = t(locale); const [open, setOpen] = useState(false); const [scrolled, setScrolled] = useState(false); const pathname = usePathname();
   const isHome = pathname === "/" || pathname === "/en";
-  useEffect(() => { const on = () => setScrolled(window.scrollY > 40); on(); window.addEventListener("scroll", on, { passive: true }); return () => window.removeEventListener("scroll", on); }, []);
+  useEffect(() => { let raf = 0; const on = () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; setScrolled((v) => { const n = window.scrollY > 40; return n === v ? v : n; }); }); }; on(); window.addEventListener("scroll", on, { passive: true }); return () => { window.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); }; }, []);
   useEffect(() => { setOpen(false); }, [pathname]);
   const dark = isHome && !scrolled;
   const nav = [

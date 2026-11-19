@@ -23,12 +23,6 @@ importers:
       geist:
         specifier: ^1.9.2
         version: 1.9.2(next@15.5.29(@opentelemetry/api@1.10.0)(@playwright/test@1.65.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
-      gsap:
-        specifier: ^3.15.1
-        version: 3.15.1
-      lenis:
-        specifier: ^1.3.27
-        version: 1.3.27(react@19.1.0)
       next:
         specifier: 15.5.29
         version: 15.5.29(@opentelemetry/api@1.10.0)(@playwright/test@1.65.1)(@types/node@20.19.43)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -650,9 +644,6 @@ packages:
   graceful-fs@4.2.12:
     resolution: {integrity: sha512-iuyGF2E4oafQfPsRrG2wtY2ILupMhvtdrhzrxB+0VcjsPpSPttpfYdjnGFGsTi5MaJFjI1jOKHPQ6UTbTj9TAw==}
 
-  gsap@3.15.1:
-    resolution: {integrity: sha512-63yjWRFWj3QRP1UOuD8kcidCcy3nxb1mMRpwHr/xJRvPfm9GtWOXFAYUiL0ro1fgPq2nY53LR+98pAgy9BumBg==}
-
   iceberg-js@0.8.1:
     resolution: {integrity: sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA==}
     engines: {node: '>=20.0.0'}
@@ -664,20 +655,6 @@ packages:
   json-schema-to-ts@3.1.1:
     resolution: {integrity: sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==}
     engines: {node: '>=16'}
-
-  lenis@1.3.27:
-    resolution: {integrity: sha512-QIHNH4LIfWyLfgH/5K0aTGZgyFJJ7GfHNcaH/AIgyKjb8gstLh5siNGvrVqz1w5ClLXzOvllBVk7vby8JzUVPQ==}
-    peerDependencies:
-      '@nuxt/kit': '>=3.0.0'
-      react: '>=17.0.0'
-      vue: '>=3.0.0'
-    peerDependenciesMeta:
-      '@nuxt/kit':
-        optional: true
-      react:
-        optional: true
-      vue:
-        optional: true
 
   lightningcss-android-arm64@1.33.0:
     resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
@@ -1325,8 +1302,6 @@ snapshots:
 
   graceful-fs@4.2.12: {}
 
-  gsap@3.15.1: {}
-
   iceberg-js@0.8.1: {}
 
   jiti@2.7.0: {}
@@ -1335,10 +1310,6 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.14
       ts-algebra: 2.0.0
-
-  lenis@1.3.27(react@19.1.0):
-    optionalDependencies:
-      react: 19.1.0
 
   lightningcss-android-arm64@1.33.0:
     optional: true

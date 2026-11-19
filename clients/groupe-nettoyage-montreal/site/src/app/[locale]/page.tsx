@@ -19,6 +19,7 @@ import { HeroVideo } from "@/components/fx/HeroVideo";
 import { Marquee } from "@/components/fx/Marquee";
 import { BeforeAfter } from "@/components/fx/BeforeAfter";
 import { InlineVideo } from "@/components/fx/InlineVideo";
+import { preload } from "react-dom";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -33,6 +34,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const { locale: raw } = await params; if (!isLocale(raw)) notFound(); const locale: Locale = raw; const d = t(locale); const fr = locale === "fr";
   const expertise = (["residential", "airbnb", "office", "property"] as const).map((id) => SERVICES.find((s) => s.id === id)!);
   const steps = fr ? [["Décrivez votre espace", "En ligne ou avec l'assistant : type de logement ou superficie, fréquence, extras. Deux minutes."], ["Prix ferme, créneau choisi", "Le prix s'affiche avant de réserver. Calendrier en direct, confirmation par courriel et texto."], ["Équipe attitrée, liste signée", "Les mêmes personnes reviennent. Chaque visite suit la même liste de vérification, cochée sur place."], ["Rapport photo, garantie 24 h", "Photos horodatées à la fin. Un oubli? On revient gratuitement dans les 24 heures."]] : [["Describe your space", "Online or with the assistant: home size or square footage, frequency, extras. Two minutes."], ["Firm price, slot chosen", "The price shows before you book. Live calendar, confirmation by email and text."], ["Dedicated team, signed checklist", "The same people come back. Every visit follows the same checklist, ticked on site."], ["Photo report, 24-hour guarantee", "Time-stamped photos at the end. Something missed? We return free within 24 hours."]];
+  preload("/media/hero-poster.jpg", { as: "image", fetchPriority: "high" });
   const hasBeforeAfter = existsSync(join(process.cwd(), "public", "media", "before.webp")) && existsSync(join(process.cwd(), "public", "media", "after.webp"));
   const certs = fr ? [["CNESST", "Employés déclarés, cotisations à jour"], ["Assurance responsabilité", `${BIZ.insurance.amount} · certificat sur demande`], ["Antécédents vérifiés", "Chaque membre d'équipe, avant la première visite"], ["Produits écocertifiés", "Sécuritaires enfants, animaux, surfaces alimentaires"]] : [["CNESST", "Declared employees, contributions up to date"], ["Liability insurance", `${BIZ.insurance.amount} · certificate on request`], ["Background checks", "Every team member, before the first visit"], ["Eco-certified products", "Safe for kids, pets and food surfaces"]];
   return (

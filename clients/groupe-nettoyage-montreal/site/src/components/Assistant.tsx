@@ -32,12 +32,12 @@ export function Assistant({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="gnm-assistant" className="fixed bottom-20 right-4 z-40 flex h-14 items-center gap-3 rounded-full bg-navy-950 pl-2 pr-5 text-white shadow-lift ring-1 ring-white/15 transition-transform hover:scale-[1.03] sm:bottom-6 sm:right-6">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="gnm-assistant" className="fixed bottom-[5.25rem] right-3 z-40 flex h-14 items-center gap-3 rounded-full bg-navy-950 pl-2 pr-2 text-white shadow-lift ring-1 ring-white/15 transition-transform hover:scale-[1.03] sm:bottom-6 sm:right-6 sm:pr-5">
         <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-amber-500 text-navy-950">{open ? <I.x width={20} height={20} /> : <I.chat width={20} height={20} />}<span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-navy-950 bg-leaf" /></span>
-        <span className="text-[14px] font-semibold">{open ? t(locale).common.close : (locale === "fr" ? "Assistant 24/7" : "Assistant 24/7")}</span>
+        <span className="hidden text-[14px] font-semibold sm:inline">{open ? t(locale).common.close : "Assistant 24/7"}</span><span className="sr-only sm:hidden">{open ? t(locale).common.close : "Assistant 24/7"}</span>
       </button>
       {open && (
-        <section id="gnm-assistant" role="dialog" aria-label={d.title} className="fixed inset-x-3 bottom-[9.5rem] z-40 flex max-h-[72vh] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-soft sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[400px]">
+        <section id="gnm-assistant" role="dialog" aria-label={d.title} className="fixed inset-x-3 bottom-[9.25rem] z-40 flex max-h-[70vh] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-soft sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[400px]">
           <header className="flex items-center gap-3 border-b border-line bg-navy-950 px-4 py-3 text-white"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500 text-navy-950"><I.sparkles width={18} height={18} /></span><div><p className="text-[14px] font-semibold">{d.title}</p><p className="text-[12px] text-white/70">{d.subtitle}</p></div></header>
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 text-[14.5px]">
             <Bubble role="assistant">{d.hello}</Bubble>

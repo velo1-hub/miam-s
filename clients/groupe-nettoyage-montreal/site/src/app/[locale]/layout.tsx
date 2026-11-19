@@ -8,7 +8,6 @@ import { Consent } from "@/components/Consent";
 import { Assistant } from "@/components/Assistant";
 import { StickyBar } from "@/components/StickyBar";
 import { JsonLd, businessJsonLd } from "@/components/JsonLd";
-import { SmoothScroll } from "@/components/fx/SmoothScroll";
 import { ScrollProgress } from "@/components/fx/ScrollProgress";
 import { BIZ } from "@/content/business";
 
@@ -32,7 +31,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
       <body>
         <a href="#main" className="sr-only sr-only-focusable">{locale === "fr" ? "Aller au contenu" : "Skip to content"}</a>
         <JsonLd data={businessJsonLd(locale)} />
-        <SmoothScroll /><ScrollProgress />
+        <ScrollProgress />
         <Header locale={locale} />
         <main id="main">{children}</main>
         <Footer locale={locale} />
