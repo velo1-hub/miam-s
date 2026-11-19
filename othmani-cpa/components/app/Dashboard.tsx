@@ -768,6 +768,36 @@ function Requests({ d, staffName }: { d: Dossier; staffName: string }) {
   );
 }
 
+/** Journal d'activité : écrit par la base elle-même, il ne peut être ni modifié ni effacé depuis l'application. */
+type Act = { id: number; created_at: string; actor: string; actor_role: string; kind: string; detail: string };
+const ACT: Record<string, string> = {
+  dossier_ouvert: "Dossier ouvert", etape: "Étape changée", responsable: "Responsable", echeance: "Échéance", message_suite: "Message au client sur la suite",
+  courriel_client: "Courriel du client modifié", document_depose: "Document déposé", document_supprime: "Document supprimé", document_recu: "Document marqué reçu",
+  message: "Message", facture_creee: "Facture créée", facture_statut: "Facture",
+};
+const actDetail = (a: Act) => (a.kind === "etape" || a.kind === "facture_statut" ? a.detail.replace(/\b[a-z_]+\b/g, (w) => statusLabel[w]?.fr ?? ({ brouillon: "Brouillon", a_payer: "À payer", payee: "Payée", annulee: "Annulée" } as Record<string, string>)[w] ?? w) : a.detail);
+
+function Journal({ dossierId }: { dossierId: string }) {
+  const load = useLoad(() => rows<Act>(supabase().from("activity").select("*").eq("dossier_id", dossierId).order("created_at", { ascending: false }).limit(50)), dossierId);
+  return (
+    <Card title="Journal d'activité">
+      <p className="-mt-2 mb-3 text-xs text-muted">Qui a fait quoi, et quand. Tenu automatiquement ; personne ne peut le modifier.</p>
+      <Loadable load={load} label="Chargement du journal" rows={1}>
+        {(acts) => acts.length === 0 ? <p className="text-sm text-muted">Aucune activité enregistrée pour ce dossier.</p> : (
+          <ol className="max-h-80 space-y-2.5 overflow-y-auto pr-1">
+            {acts.map((a) => (
+              <li key={a.id} className="border-l-2 border-line pl-3 text-sm">
+                <p className="text-ink"><span className="font-semibold">{ACT[a.kind] ?? a.kind}</span>{a.detail ? <> : {actDetail(a)}</> : null}</p>
+                <p className="text-xs text-muted">{a.actor_role === "client" ? "Client" : a.actor} · {fmtDate(a.created_at, "fr", true)}</p>
+              </li>
+            ))}
+          </ol>
+        )}
+      </Loadable>
+    </Card>
+  );
+}
+
 function Notes({ dossierId, staffName }: { dossierId: string; staffName: string }) {
   const load = useLoad(() => rows<Note>(supabase().from("dossier_notes").select("*").eq("dossier_id", dossierId).order("created_at", { ascending: false })), dossierId);
   const add = async (e: FormEvent<HTMLFormElement>) => {
@@ -826,6 +856,7 @@ function DossierDetail({ d, staffName, team, railTop, onPatch, onMove, onTouch }
         <aside ref={rail} tabIndex={-1} aria-label="Échanges et notes" className={`min-w-0 scroll-mt-28 space-y-6 @[50rem]:sticky @[50rem]:max-h-[calc(100svh-8.5rem)] @[50rem]:overflow-y-auto @[50rem]:rounded-3xl ${railTop}`}>
           <Messages dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} />
           <Notes dossierId={d.id} staffName={staffName} />
+            <Journal dossierId={d.id} />
         </aside>
       </div>
     </div>

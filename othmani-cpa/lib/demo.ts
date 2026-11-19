@@ -63,6 +63,11 @@ function seed(): Record<string, Row[]> {
       { id: "i1", dossier_id: "d3", created_at: ago(1), label: "Réponse à la lettre de Revenu Québec", amount_cents: 28744, status: "a_payer", pay_url: null, paid_at: null },
       { id: "i2", dossier_id: "d5", created_at: ago(6), label: `Déclarations de revenus ${year - 1}`, amount_cents: 40241, status: "payee", pay_url: null, paid_at: ago(4) },
     ],
+    activity: [
+      { id: 3, dossier_id: "d1", created_at: ago(2.9), actor: "Racha Ghazoini", actor_role: "cabinet", kind: "message", detail: "Bien reçu, merci ! Il nous manque seulement votre Relevé 1." },
+      { id: 2, dossier_id: "d1", created_at: ago(3), actor: "Marie Tremblay", actor_role: "client", kind: "document_depose", detail: "T4.pdf" },
+      { id: 1, dossier_id: "d1", created_at: ago(9), actor: "Racha Ghazoini", actor_role: "cabinet", kind: "dossier_ouvert", detail: "Déclarations de revenus" },
+    ],
     reminder_subscribers: [
       { id: "s1", email: "abonne@exemple.ca", lang: "fr", consent_at: ago(12), unsubscribed_at: null },
       { id: "s2", email: "subscriber@example.ca", lang: "en", consent_at: ago(30), unsubscribed_at: null },

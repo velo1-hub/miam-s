@@ -1,0 +1,5 @@
+-- Journal d'activité par dossier, écrit par la base (déclencheurs) : lecture réservée à l'équipe,
+-- aucune écriture possible depuis l'application. Événements : ouverture, étape, responsable, échéance,
+-- message au client, courriel du client, documents déposés / supprimés / reçus, messages, factures.
+-- Le SQL complet (table public.activity, fonction public.log_activity et ses déclencheurs) est dans
+-- l'historique des migrations Supabase sous le nom « journal_activite ».
