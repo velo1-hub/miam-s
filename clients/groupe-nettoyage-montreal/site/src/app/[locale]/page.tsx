@@ -19,6 +19,8 @@ import { HeroVideo } from "@/components/fx/HeroVideo";
 import { Marquee } from "@/components/fx/Marquee";
 import { BeforeAfter } from "@/components/fx/BeforeAfter";
 import { InlineVideo } from "@/components/fx/InlineVideo";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params; const fr = locale === "fr";
@@ -31,6 +33,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const { locale: raw } = await params; if (!isLocale(raw)) notFound(); const locale: Locale = raw; const d = t(locale); const fr = locale === "fr";
   const expertise = (["residential", "airbnb", "office", "property"] as const).map((id) => SERVICES.find((s) => s.id === id)!);
   const steps = fr ? [["Décrivez votre espace", "En ligne ou avec l'assistant : type de logement ou superficie, fréquence, extras. Deux minutes."], ["Prix ferme, créneau choisi", "Le prix s'affiche avant de réserver. Calendrier en direct, confirmation par courriel et texto."], ["Équipe attitrée, liste signée", "Les mêmes personnes reviennent. Chaque visite suit la même liste de vérification, cochée sur place."], ["Rapport photo, garantie 24 h", "Photos horodatées à la fin. Un oubli? On revient gratuitement dans les 24 heures."]] : [["Describe your space", "Online or with the assistant: home size or square footage, frequency, extras. Two minutes."], ["Firm price, slot chosen", "The price shows before you book. Live calendar, confirmation by email and text."], ["Dedicated team, signed checklist", "The same people come back. Every visit follows the same checklist, ticked on site."], ["Photo report, 24-hour guarantee", "Time-stamped photos at the end. Something missed? We return free within 24 hours."]];
+  const hasBeforeAfter = existsSync(join(process.cwd(), "public", "media", "before.webp")) && existsSync(join(process.cwd(), "public", "media", "after.webp"));
   const certs = fr ? [["CNESST", "Employés déclarés, cotisations à jour"], ["Assurance responsabilité", `${BIZ.insurance.amount} · certificat sur demande`], ["Antécédents vérifiés", "Chaque membre d'équipe, avant la première visite"], ["Produits écocertifiés", "Sécuritaires enfants, animaux, surfaces alimentaires"]] : [["CNESST", "Declared employees, contributions up to date"], ["Liability insurance", `${BIZ.insurance.amount} · certificate on request`], ["Background checks", "Every team member, before the first visit"], ["Eco-certified products", "Safe for kids, pets and food surfaces"]];
   return (
     <>
@@ -142,7 +145,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {/* PROOF */}
       <Section tone="navy">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <Reveal><BeforeAfter labels={fr ? ["Avant", "Après"] : ["Before", "After"]} /></Reveal>
+          <Reveal>{hasBeforeAfter ? <BeforeAfter before="/media/before.webp" after="/media/after.webp" labels={fr ? ["Avant", "Après"] : ["Before", "After"]} /> : <img src="/media/after.webp" alt={fr ? "Cuisine après notre passage" : "Kitchen after our visit"} className="aspect-[4/3] w-full rounded-3xl object-cover" />}</Reveal>
           <Reveal index={1}>
             <Heading light eyebrow={fr ? "Des preuves, pas des promesses" : "Proof, not promises"} title={fr ? "Vous voyez ce qui a été fait. À chaque visite." : "You see what was done. Every visit."} sub={fr ? "Un rapport photo horodaté, la liste cochée et signée, l'heure d'arrivée et de départ. Envoyé par courriel ou texto dès que l'équipe quitte. Les photos avant / après de vrais chantiers seront publiées ici avec l'accord des clients." : "A time-stamped photo report, the signed checklist, arrival and departure times. Sent by email or text as soon as the team leaves. Before / after photos of real jobs will be published here with client consent."} />
             <ul className="mt-8 grid gap-3 sm:grid-cols-2">{(fr ? ["Photos horodatées des pièces clés", "Liste de vérification signée", "Heures d'arrivée et de départ", "Bouton « un oubli? » dans le rapport"] : ["Time-stamped photos of key rooms", "Signed checklist", "Arrival and departure times", "\"Something missed?\" button in the report"]).map((x) => <li key={x} className="flex items-start gap-3 text-[15.5px] text-white/85"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 text-navy-950"><I.check width={13} height={13} strokeWidth={2.5} /></span>{x}</li>)}</ul>
