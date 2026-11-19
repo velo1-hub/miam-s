@@ -135,7 +135,7 @@ export function Today({ store, staffName, firstName, demo, refresh, openDossier,
       <ul className="hidden gap-4 lg:grid lg:grid-cols-4" aria-label="Chiffres du jour">
         <Kpi label="Dossiers en cours" value={String(c.open.length)} note={c.late.length ? `dont ${c.late.length} en retard` : "aucun en retard"} onClick={() => showDossiers({})} />
         <Kpi label="Prêts à réviser" value={String(c.review.length)} tone="text-[#5140b8]" note="étape Révision par un CPA" onClick={() => showDossiers({ stage: "en_revision" })} />
-        <Kpi label="Prospects à approuver" value={String(c.fresh.length)} tone="text-[#8a4b00]" note={c.fresh.length > 1 ? "nouveaux" : "nouveau"} onClick={() => showLeads("nouveau")} />
+        <Kpi label="Prospects à approuver" value={String(c.fresh.length)} tone="text-[#8a4b00]" note={c.fresh.length > 1 ? "nouveaux" : c.fresh.length ? "nouveau" : "aucun en attente"} onClick={() => showLeads("nouveau")} />
         <Kpi label="Payé ce mois-ci" value={money.format(c.paidCents / 100)} tone="text-[#1e5b2e]" note={plural(c.paid.length, "facture payée", "factures payées")} onClick={() => go("facturation")} />
       </ul>
 

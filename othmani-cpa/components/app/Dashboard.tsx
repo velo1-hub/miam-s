@@ -121,6 +121,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     setFocus((f) => (what ? { what, n: (f?.n ?? 0) + 1 } : null));
     go("dossiers");
   }, [go]);
+  const clearFocus = useCallback(() => setFocus(null), []);
   const openLead = useCallback((id: string) => { setLeadFilter("ouverts"); setFocusLead(id); go("prospects"); }, [go]);
   const openClient = useCallback((email: string) => { setClientUi({ email, tab: "apercu" }); go("clients"); }, [go]);
   /** Accepter un prospect : on passe par la création du dossier, où le courriel est relu ; le prospect devient client une fois le dossier créé. */
@@ -188,7 +189,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
         ) : section === "dossiers" ? (
           <>
             <div className={detailOpen ? "hidden min-[1400px]:block" : ""}><SectionHead title="Dossiers">{refresh}</SectionHead></div>
-            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onInvoices={syncInvoices} />
+            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} />
           </>
         ) : section === "clients" ? (
           <>

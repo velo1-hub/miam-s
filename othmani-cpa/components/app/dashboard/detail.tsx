@@ -310,7 +310,7 @@ export function ClientValue({ d, onPatch }: { d: Dossier; onPatch: (p: Partial<D
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="d-savings" className="label">Économies réalisées pour le client ($)</label>
-          <input id="d-savings" key={d.savings_cents ?? ""} inputMode="decimal" defaultValue={d.savings_cents == null ? "" : String(d.savings_cents / 100).replace(".", ",")} placeholder="Ex. 4200" aria-describedby="d-savings-h" className="field" onBlur={(e) => saveSavings(e.target.value)} />
+          <input id="d-savings" key={d.savings_cents ?? ""} inputMode="decimal" defaultValue={d.savings_cents == null ? "" : (d.savings_cents / 100).toFixed(d.savings_cents % 100 ? 2 : 0).replace(".", ",")} placeholder="Ex. 4200" aria-describedby="d-savings-h" className="field" onBlur={(e) => saveSavings(e.target.value)} />
           <p id="d-savings-h" className="mt-1 text-xs text-muted">Montant constaté par le cabinet, en dollars.</p>
           <SavedAt at={saved.savings ?? null} />
         </div>
@@ -442,12 +442,14 @@ export function Appointments({ dossierId }: { dossierId: string }) {
 }
 
 /** Fiche d'un dossier : le travail à gauche, les échanges à droite (colonne fixe quand la place le permet). */
-export function DossierDetail({ d, staffName, team, railTop, focus, onPatch, onMove, onTouch, onInvoices }: {
-  onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
+export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices }: {
+  onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
 }) {
   useEffect(() => { onTouch(); }, [onTouch]);
   const rail = useRef<HTMLElement>(null);
   const root = useRef<HTMLDivElement>(null);
+  const done = useRef(onFocused);
+  done.current = onFocused;
   // Arrivée depuis une fiche client ou la recherche : on amène la bonne carte à l'écran et on y place le focus.
   useEffect(() => {
     if (!focus) return;
@@ -456,6 +458,8 @@ export function DossierDetail({ d, staffName, team, railTop, focus, onPatch, onM
       if (!el) return;
       el.scrollIntoView({ block: "start" });
       (el.querySelector<HTMLElement>(focus.what === "facture" ? "input[name=label]" : focus.what === "messages" ? "textarea" : "[tabindex]") ?? el).focus({ preventScroll: true });
+      // Une fois appliqué, le repère est effacé : ouvrir ensuite un autre dossier ne doit pas y ramener.
+      done.current?.();
     }, 60);
     return () => window.clearTimeout(id);
   }, [focus]);

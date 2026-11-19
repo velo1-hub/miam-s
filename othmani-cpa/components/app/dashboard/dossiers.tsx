@@ -88,8 +88,8 @@ export function StageBoard({ shown, waiting, hidesClosed, onOpen, onMove }: { sh
   );
 }
 
-export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move, onCreated, onTouch, focus, onInvoices }: {
-  onInvoices: (dossierId: string, list: Invoice[]) => void; focus: { what: Focus; n: number } | null; store: Store; ui: DossierUi; setUi: (f: (u: DossierUi) => DossierUi) => void; staffName: string; draft: Lead | null; clearDraft: () => void;
+export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move, onCreated, onTouch, focus, onFocused, onInvoices }: {
+  onFocused: () => void; onInvoices: (dossierId: string, list: Invoice[]) => void; focus: { what: Focus; n: number } | null; store: Store; ui: DossierUi; setUi: (f: (u: DossierUi) => DossierUi) => void; staffName: string; draft: Lead | null; clearDraft: () => void;
   patch: PatchDossier; move: (id: string, status: string) => void; onCreated: (d: Dossier, lead: Lead | null) => void; onTouch: () => void;
 }) {
   const { filter: f, view, current, creating } = ui;
@@ -124,7 +124,7 @@ export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch
     onCreated(made, draft);
     return true;
   };
-  const detail = (x: Dossier, railTop: string) => <DossierDetail key={x.id} d={x} staffName={staffName} team={store.team} railTop={railTop} focus={focus} onInvoices={onInvoices} onPatch={(p, o) => patch(x.id, p, o)} onMove={(s) => move(x.id, s)} onTouch={onTouch} />;
+  const detail = (x: Dossier, railTop: string) => <DossierDetail key={x.id} d={x} staffName={staffName} team={store.team} railTop={railTop} focus={focus} onFocused={onFocused} onInvoices={onInvoices} onPatch={(p, o) => patch(x.id, p, o)} onMove={(s) => move(x.id, s)} onTouch={onTouch} />;
 
   return (
     <div>

@@ -54,7 +54,8 @@ export function DocumentsSection({ store, openDossier, markReceived }: { store: 
 export function MessagesSection({ store, staffName, current, setCurrent, openDossier, onSent }: { store: Store; staffName: string; current: string | null; setCurrent: (id: string | null) => void; openDossier: OpenDossier; onSent: (dossierId: string) => void }) {
   const byId = useMemo(() => new Map(store.dossiers.map((d) => [d.id, d])), [store.dossiers]);
   const waiting = useMemo(() => new Set(store.waiting), [store.waiting]);
-  const threads = useMemo(() => store.lastMsgs.filter((m) => byId.has(m.dossier_id)).sort((a, b) => Number(waiting.has(b.dossier_id)) - Number(waiting.has(a.dossier_id)) || b.created_at.localeCompare(a.created_at)), [store.lastMsgs, byId, waiting]);
+  // Un dossier qui attend une réponse figure toujours dans la liste, même si son dernier message est trop ancien pour avoir été chargé.
+  const threads = useMemo(() => [...store.lastMsgs.filter((m) => byId.has(m.dossier_id)), ...store.waiting.filter((id) => byId.has(id) && !store.lastMsgs.some((m) => m.dossier_id === id)).map((id) => ({ dossier_id: id, created_at: byId.get(id)!.updated_at, author_role: "client", author_name: "", body: "Message du client à lire." }))].sort((a, b) => Number(waiting.has(b.dossier_id)) - Number(waiting.has(a.dossier_id)) || b.created_at.localeCompare(a.created_at)), [store.lastMsgs, store.waiting, byId, waiting]);
   const d = current ? byId.get(current) : undefined;
   return (
     <div className="grid gap-5 lg:grid-cols-[21rem_minmax(0,1fr)] lg:items-start">

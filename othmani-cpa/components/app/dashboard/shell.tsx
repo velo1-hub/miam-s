@@ -141,7 +141,7 @@ function Search({ store, to }: { store: Store | null; to: SearchTargets }) {
 /** Barre du haut : recherche, repère « données d'exemple », pastille de la personne connectée. La cloche et la déconnexion du cadre commun se placent à sa droite. */
 export function TopBar({ store, to, staffName, demo }: { store: Store | null; to: SearchTargets; staffName: string; demo: boolean }) {
   return (
-    <div className="z-30 flex items-center gap-3 bg-[#f4f5fa] px-4 pt-3 pb-2 sm:px-6 lg:sticky lg:top-0 lg:h-[4.25rem] lg:py-0 lg:pr-[11.5rem]">
+    <div className="z-30 flex items-center gap-3 bg-[#f4f5fa] px-4 pt-3 pb-2 sm:px-6 lg:sticky lg:top-0 lg:h-[4.25rem] lg:py-0 lg:pr-[15rem]">
       <Search store={store} to={to} />
       {demo && <span className="hidden shrink-0 rounded-full bg-[#e6e8f2] px-3 py-1.5 text-xs font-medium text-ink lg:inline" title="Mode démonstration : données fictives, rien n'est enregistré.">Données d'exemple<span className="sr-only"> : mode démonstration, rien n'est enregistré</span></span>}
       <span className="hidden lg:block" title={staffName}><Avatar name={staffName} className="h-9 w-9 text-xs" /><span className="sr-only">Connecté : {staffName}</span></span>

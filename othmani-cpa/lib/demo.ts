@@ -55,7 +55,7 @@ function seed(): Record<string, Row[]> {
     ],
     dossier_notes: [{ id: "n1", dossier_id: "d1", created_at: ago(2), author: "Racha Ghazoini", body: "Feuillets REER reçus par courriel, classés au dossier." }],
     tasks: [
-      { id: "t1", dossier_id: "d1", created_at: ago(2), label: "Rappeler la cliente pour le Relevé 1", assignee: "Racha Ghazoini", due_date: inDays(2), done: false },
+      { id: "t1", dossier_id: "d1", created_at: ago(2), label: "Rappeler la cliente pour le Relevé 1", assignee: "Démonstration", due_date: inDays(2), done: false },
       { id: "t2", dossier_id: "d1", created_at: ago(3), label: "Vérifier les reçus REER", assignee: "Zouhaier Othmani", due_date: null, done: true },
       { id: "t3", dossier_id: "d4", created_at: ago(4), label: "Réviser la déclaration avant transmission", assignee: "Zouhaier Othmani", due_date: inDays(-1), done: false },
     ],
