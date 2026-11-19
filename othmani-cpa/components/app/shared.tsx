@@ -465,7 +465,8 @@ export function Documents({ dossierId, role, lang }: { dossierId: string; role: 
 }
 
 /** Fil de messages d'un dossier. */
-export function Messages({ dossierId, role, lang, authorName, onSent }: { dossierId: string; role: Role; lang: Lang; authorName: string; onSent?: () => void }) {
+export function Messages({ dossierId, role, lang, authorName, onSent, aiDraft }: { dossierId: string; role: Role; lang: Lang; authorName: string; onSent?: () => void; aiDraft?: () => Promise<string | null> }) {
+  const [thinking, setThinking] = useState(false);
   const t = tx[lang];
   const [list, setList] = useState<Message[]>([]);
   const [body, setBody] = useState("");
@@ -510,8 +511,17 @@ export function Messages({ dossierId, role, lang, authorName, onSent }: { dossie
       )}
       <form onSubmit={send} className="mt-4">
         <label htmlFor={`msg-${dossierId}`} className="label">{t.write}</label>
-        <textarea id={`msg-${dossierId}`} value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={4000} className="field resize-y" />
-        <button type="submit" disabled={busy || !body.trim()} className="btn-primary mt-3 min-h-11">{t.sendMsg}</button>
+        <textarea id={`msg-${dossierId}`} value={body} onChange={(e) => setBody(e.target.value)} rows={body.length > 120 ? 8 : 3} maxLength={4000} className="field resize-y" />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button type="submit" disabled={busy || !body.trim()} className="btn-primary min-h-11">{t.sendMsg}</button>
+          {aiDraft && (
+            <button type="button" disabled={thinking} onClick={async () => { setThinking(true); const d = await aiDraft(); setThinking(false); if (d) setBody(d); }} className="btn-secondary min-h-11 px-4">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 2l1.8 5.6L19.5 9l-5.7 1.4L12 16l-1.8-5.6L4.5 9l5.7-1.4L12 2Zm7 12 .9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14Z" /></svg>
+              {thinking ? "Rédaction…" : "Rédiger avec l'IA"}
+            </button>
+          )}
+        </div>
+        {aiDraft && <p className="mt-2 text-xs text-muted">Brouillon proposé par l'IA : relisez-le avant d'envoyer. Rien ne part sans vous.</p>}
       </form>
     </Card>
   );

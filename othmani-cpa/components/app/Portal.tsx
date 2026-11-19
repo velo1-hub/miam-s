@@ -1,4 +1,5 @@
 "use client";
+import { Clara } from "../Clara";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { site, type Lang } from "@/lib/site";
@@ -643,9 +644,11 @@ function View({ lang, email }: { lang: Lang; email: string }) {
 
   const d = dossiers.find((x) => x.id === current) ?? dossiers[0];
   const many = dossiers.length > 1;
+  const claraContext = [`Dossier : ${d.title}`, `Étape : ${statusLabel[d.status]?.fr ?? d.status}`, d.next_step ? `Message du cabinet sur la suite : ${d.next_step}` : "", d.due_date ? `Échéance : ${d.due_date}` : ""].filter(Boolean).join(". ");
 
   return (
     <div className={`mx-auto max-w-2xl ${tab === "messages" ? "pb-40 lg:pb-0" : "pb-24 lg:pb-4"}`}>
+      {tab !== "messages" && <Clara lang={lang} raised context={claraContext} />}
       <nav aria-label={t.nav} className="glass fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)] lg:static lg:mb-8 lg:rounded-full lg:p-1.5">
         <ul className="mx-auto grid max-w-2xl grid-cols-4 lg:gap-1">
           {TABS.map((x) => {

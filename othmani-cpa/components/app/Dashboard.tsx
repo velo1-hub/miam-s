@@ -768,6 +768,45 @@ function Requests({ d, staffName }: { d: Dossier; staffName: string }) {
   );
 }
 
+/** Assistant IA de l'équipe : demande un brouillon au serveur. En démonstration, renvoie un exemple local. */
+const AI_OFF = "L'assistant IA n'est pas disponible pour l'instant.";
+async function askAi(dossierId: string, task: "reply" | "summary" | "relance"): Promise<string | null> {
+  if (demoRole()) {
+    return task === "summary"
+      ? "- Dossier en cours, à l'étape indiquée ci-dessus.\n- Un document demandé est encore manquant.\n- Le client attend une confirmation du cabinet.\n- Prochaine action : relancer pour le document manquant."
+      : "Bonjour,\n\nMerci pour votre message. Nous avons bien reçu vos documents. Il nous manque encore un élément pour terminer : pouvez-vous le déposer dans votre espace quand vous aurez un moment ?\n\nNous vous tenons au courant dès que votre dossier avance.";
+  }
+  try {
+    const { data } = await real().auth.getSession();
+    const res = await fetch("/api/assist/", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` }, body: JSON.stringify({ dossier_id: dossierId, task }) });
+    const json = res.ok ? ((await res.json()) as { text?: unknown }) : null;
+    if (typeof json?.text !== "string") throw new Error("indisponible");
+    return json.text;
+  } catch { toast(AI_OFF, "error"); return null; }
+}
+
+function AiSummary({ dossierId }: { dossierId: string }) {
+  const [text, setText] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <Card title="Assistant IA">
+      <p className="-mt-2 mb-3 text-xs text-muted">Résumé et brouillons à relire. Les fichiers et les coordonnées du client ne sont jamais transmis à l'IA.</p>
+      <div className="flex flex-wrap gap-2">
+        {([["summary", "Résumer le dossier"], ["relance", "Rédiger une relance"]] as const).map(([k, l]) => (
+          <button key={k} type="button" disabled={busy} className={smallBtn} onClick={async () => { setBusy(true); setText(await askAi(dossierId, k)); setBusy(false); }}>{l}</button>
+        ))}
+      </div>
+      {busy && <p className="mt-3 text-sm text-muted" role="status">L'assistant rédige…</p>}
+      {text && !busy && (
+        <div className="mt-3 rounded-xl bg-[#f3f7fc] px-4 py-3">
+          <p className="text-sm leading-relaxed whitespace-pre-line text-ink">{text}</p>
+          <button type="button" className="mt-2 text-sm font-semibold text-navy underline underline-offset-4" onClick={async () => { try { await navigator.clipboard.writeText(text); toast("Texte copié."); } catch { toast("Copie impossible sur cet appareil.", "error"); } }}>Copier</button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 /** Journal d'activité : écrit par la base elle-même, il ne peut être ni modifié ni effacé depuis l'application. */
 type Act = { id: number; created_at: string; actor: string; actor_role: string; kind: string; detail: string };
 const ACT: Record<string, string> = {
@@ -854,8 +893,9 @@ function DossierDetail({ d, staffName, team, railTop, onPatch, onMove, onTouch }
           <DossierInvoices dossierId={d.id} />
         </div>
         <aside ref={rail} tabIndex={-1} aria-label="Échanges et notes" className={`min-w-0 scroll-mt-28 space-y-6 @[50rem]:sticky @[50rem]:max-h-[calc(100svh-8.5rem)] @[50rem]:overflow-y-auto @[50rem]:rounded-3xl ${railTop}`}>
-          <Messages dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} />
+          <Messages dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} aiDraft={() => askAi(d.id, "reply")} />
           <Notes dossierId={d.id} staffName={staffName} />
+            <AiSummary dossierId={d.id} />
             <Journal dossierId={d.id} />
         </aside>
       </div>

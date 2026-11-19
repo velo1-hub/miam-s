@@ -68,7 +68,7 @@ const agentText = {
 
 type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string }; badge?: string; sig?: string };
 
-export function Clara({ lang }: { lang: Lang }) {
+export function Clara({ lang, context, raised = false }: { lang: Lang; context?: string; raised?: boolean }) {
   const base = dict(lang).clara;
   const t = AGENT ? { ...base, ...agentText[lang] } : { ...base, typing: "", sent: "" };
   const [open, setOpen] = useState(false);
@@ -140,7 +140,7 @@ export function Clara({ lang }: { lang: Lang }) {
       const res = await fetch("/api/clara/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lang, leadSaved: leadSaved.current, messages: history.map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text, sig: m.sig })) }),
+        body: JSON.stringify({ lang, context, leadSaved: leadSaved.current, messages: history.map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text, sig: m.sig })) }),
       });
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as { reply?: string; lead?: boolean; sig?: string };
@@ -168,7 +168,7 @@ export function Clara({ lang }: { lang: Lang }) {
           id={panelId}
           role="dialog"
           aria-label={`${t.name}, ${t.role}`}
-          className="fixed inset-x-3 bottom-24 z-[55] flex max-h-[min(36rem,calc(100dvh-8rem))] flex-col overflow-hidden rounded-3xl border border-white/80 bg-white/85 shadow-[0_30px_80px_-30px_rgba(23,23,58,.6)] backdrop-blur-2xl backdrop-saturate-150 sm:inset-x-auto sm:right-5 sm:w-[24rem]"
+          className={`fixed inset-x-3 ${raised ? "bottom-[calc(10.5rem+env(safe-area-inset-bottom))] lg:bottom-24" : "bottom-24"} z-[55] flex max-h-[min(36rem,calc(100dvh-8rem))] flex-col overflow-hidden rounded-3xl border border-white/80 bg-white/85 shadow-[0_30px_80px_-30px_rgba(23,23,58,.6)] backdrop-blur-2xl backdrop-saturate-150 sm:inset-x-auto sm:right-5 sm:w-[24rem]`}
         >
           <div className="mesh-dark flex items-center justify-between gap-3 px-5 py-4 text-white on-dark">
             <div className="flex items-center gap-3">
@@ -230,7 +230,7 @@ export function Clara({ lang }: { lang: Lang }) {
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         aria-label={open ? t.close : t.open}
-        className="clara-fab glass-dark fixed right-4 bottom-4 z-[55] flex h-14 items-center gap-2.5 rounded-full !bg-navy/80 pr-2 pl-2 text-white transition-transform hover:-translate-y-0.5 on-dark sm:right-5 sm:bottom-5 sm:pr-5"
+        className={`clara-fab glass-dark fixed right-4 ${raised ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] lg:bottom-5" : "bottom-4"} z-[55] flex h-14 items-center gap-2.5 rounded-full !bg-navy/80 pr-2 pl-2 text-white transition-transform hover:-translate-y-0.5 on-dark sm:right-5 sm:bottom-5 sm:pr-5`}
       >
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky font-display text-lg font-semibold text-navy" aria-hidden="true">
           {open ? <Icon name="close" className="h-5 w-5" /> : "C"}
