@@ -530,7 +530,7 @@ export function Messages({ dossierId, role, lang, authorName, onSent, aiDraft }:
 /* ───────────── Présentation Pilote Fiscal : 5 étapes visibles, météo fiscale, types partagés ───────────── */
 /** Les 7 étapes internes sont montrées au client en 5 étapes, comme un suivi de colis. */
 export const STEPS5 = [
-  { key: "recus", fr: "Documents reçus", en: "Documents received", of: ["ouvert", "documents_attendus"] },
+  { key: "recus", fr: "Documents", en: "Documents", of: ["ouvert", "documents_attendus"] },
   { key: "preparation", fr: "En préparation", en: "In preparation", of: ["en_preparation"] },
   { key: "revision", fr: "Révision du CPA", en: "CPA review", of: ["en_revision"] },
   { key: "signer", fr: "Prêt à signer", en: "Ready to sign", of: ["a_signer"] },
