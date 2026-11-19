@@ -43,5 +43,5 @@ export const leadSchema = z.object({
   quote: quoteInputSchema.optional(),
   meta: z.record(z.string(), z.unknown()).optional(),
   consent: z.literal(true),
-  website: z.string().max(0).optional(), // honeypot
+  website: z.string().optional(), // honeypot: any value means a bot; the route answers ok and drops it
 });
