@@ -133,6 +133,7 @@ export function AppFrame({ lang, title, subtitle, demo, wide = false, children }
   const [session, setSession] = useState<AppSession | null | undefined>(undefined);
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error" | "badcode">("idle");
   const [email, setEmail] = useState("");
+  const [mode, setMode] = useState<"email" | "code">("email");
 
   useEffect(() => {
     if (demoRole() === demo) { setSession({ email: DEMO_EMAIL[demo], demo: true }); return; }
@@ -169,7 +170,7 @@ export function AppFrame({ lang, title, subtitle, demo, wide = false, children }
 
   return (
     <div className="mesh min-h-svh">
-      <header className="glass sticky top-0 z-40 border-b border-white/70 pt-[env(safe-area-inset-top)]">
+      <header className={`glass sticky top-0 z-40 border-b border-white/70 pt-[env(safe-area-inset-top)] ${session ? "" : "hidden"}`}>
         <div className={`${wide ? "mx-auto max-w-[96rem] px-4 sm:px-6" : "container-site"} flex items-center justify-between gap-4 py-3`}>
           <a href={fr ? "/" : "/en/"} className="flex items-center gap-2.5 text-navy" aria-label={`${site.name}, ${t.back}`}>
             <LogoMark className="h-8 w-auto" />
@@ -186,39 +187,69 @@ export function AppFrame({ lang, title, subtitle, demo, wide = false, children }
         </div>
         {session?.demo && <p className="bg-navy px-4 py-1.5 text-center text-xs font-medium text-white">{fr ? "Mode démonstration : données fictives, rien n'est enregistré." : "Demo mode: fictional data, nothing is saved."}</p>}
       </header>
-      <main id="contenu" className={`${wide ? "mx-auto max-w-[96rem] px-4 sm:px-6" : "container-site"} py-6 sm:py-10`}>
+      <main id="contenu" className={`${wide ? "mx-auto max-w-[96rem] px-4 sm:px-6" : "container-site"} ${session === null ? "flex min-h-svh items-center py-6 [&>*]:w-full" : "py-6 sm:py-10"}`}>
         {session === undefined ? (
           <Skeleton label={fr ? "Chargement" : "Loading"} />
         ) : session === null ? (
-          <div className="mx-auto max-w-md pt-6">
-            <h1 className="font-display text-3xl font-bold tracking-tight text-navy">{title}</h1>
-            {state === "sent" || state === "badcode" ? (
-              <form onSubmit={verify} className="mt-6 rounded-3xl border border-white bg-white p-6 shadow-[0_24px_60px_-40px_rgba(23,23,58,.5)]">
-                <p className="leading-relaxed text-ink">{fr ? <>Nous avons envoyé un code à <strong>{email}</strong>. Entrez-le ici, ou ouvrez le lien du courriel.</> : <>We sent a code to <strong>{email}</strong>. Enter it here, or open the link in the email.</>}</p>
-                <label htmlFor="app-code" className="label mt-4">{fr ? "Code reçu par courriel" : "Code from the email"}</label>
-                <input id="app-code" name="code" inputMode="numeric" autoComplete="one-time-code" required maxLength={10} className="field text-center font-display text-2xl tracking-[0.4em]" />
-                <button type="submit" className="btn-primary mt-4 w-full">{fr ? "Entrer" : "Sign in"}</button>
-                <p className="mt-3 text-sm text-muted">{fr ? "Rien reçu ? Vérifiez vos indésirables, ou " : "Nothing received? Check your spam folder, or "}<button type="button" className="font-semibold text-navy underline underline-offset-4" onClick={() => setState("idle")}>{fr ? "recommencez" : "start over"}</button>.</p>
-                <p role="alert" className={msg ? "mt-4 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
-              </form>
-            ) : (
-              <form onSubmit={sendCode} className="mt-6 rounded-3xl border border-white bg-white p-6 shadow-[0_24px_60px_-40px_rgba(23,23,58,.5)]">
-                <label htmlFor="app-email" className="label">{fr ? "Votre courriel" : "Your email"}</label>
-                <input id="app-email" name="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} className="field" />
-                <button type="submit" disabled={state === "sending"} className="btn-primary mt-4 w-full">{state === "sending" ? t.sending : (fr ? "Continuer" : "Continue")}</button>
-                <p className="mt-3 text-sm text-muted">{fr ? "Pas de mot de passe à retenir : vous recevez un code par courriel, valide quelques minutes." : "No password to remember: you receive a code by email, valid for a few minutes."}</p>
-                <p role="alert" className={msg ? "mt-4 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
-              </form>
-            )}
-            <form onSubmit={(e) => { e.preventDefault(); if (String(new FormData(e.currentTarget).get("access") ?? "").trim() === DEMO_CODE) enterDemo(); else setState("badcode"); }} className="mt-4 rounded-3xl border border-white bg-white/80 p-5">
-              <label htmlFor="app-access" className="label">{fr ? "Code d'accès" : "Access code"}</label>
-              <div className="flex gap-2">
-                <input id="app-access" name="access" inputMode="numeric" autoComplete="off" maxLength={8} className="field min-h-11 flex-1 py-2 text-center font-display text-xl tracking-[0.4em]" />
-                <button type="submit" className="btn-secondary min-h-11 px-5">{fr ? "Entrer" : "Enter"}</button>
+          <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_120px_-50px_rgba(23,23,58,.55)] lg:grid-cols-[1.05fr_1fr]">
+            {/* Volet de marque */}
+            <div className="mesh-dark on-dark relative flex flex-col justify-between gap-10 overflow-hidden p-7 text-white sm:p-10 lg:min-h-[36rem]">
+              <img src="/images/consultation-700.webp" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-[35%_40%] opacity-25 mix-blend-luminosity" />
+              <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/70 to-navy-950/30" aria-hidden="true" />
+              <div className="relative flex items-center gap-3">
+                <LogoMark className="h-10 w-auto" light />
+                <span className="font-display text-lg font-bold tracking-tight">{site.name}</span>
               </div>
-              <p className="mt-2 text-xs text-muted">{fr ? "Le code d'accès ouvre l'application avec des données d'exemple." : "The access code opens the app with sample data."}</p>
-            </form>
-            <p className="mt-6 text-center text-sm text-ink/80">{fr ? "Besoin d'aide ? " : "Need help? "}<a className="font-semibold text-navy underline underline-offset-4" href={`tel:${site.phone.tel}`}>{site.phone.display}</a></p>
+              <div className="relative">
+                <p className="text-xs font-semibold tracking-[0.18em] text-sky uppercase">{subtitle}</p>
+                <h1 className="mt-3 font-display text-[2rem] leading-[1.08] font-semibold tracking-[-0.02em] !text-white sm:text-[2.6rem]">{title}</h1>
+                <p className="mt-4 max-w-sm leading-relaxed text-white/85">{demo === "client" ? (fr ? "Suivez votre dossier, déposez vos documents et écrivez à votre équipe, en toute confidentialité." : "Follow your file, upload your documents and message your team, in full confidentiality.") : "Demandes, dossiers, documents et honoraires du cabinet, au même endroit."}</p>
+                <ul className="mt-7 hidden space-y-3 text-sm text-white/90 sm:block">
+                  {(fr ? ["Données hébergées au Canada", "Protégé par le secret professionnel", "Connexion sans mot de passe"] : ["Data hosted in Canada", "Protected by professional secrecy", "Password-free sign-in"]).map((x) => (
+                    <li key={x} className="flex items-center gap-3"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-sky/25 text-sky" aria-hidden="true"><svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Connexion */}
+            <div className="flex flex-col justify-center p-7 sm:p-10">
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-navy">{fr ? "Connexion" : "Sign in"}</h2>
+              <div className="mt-5 grid grid-cols-2 rounded-full bg-[#eef1f7] p-1 text-sm font-semibold">
+                {([["email", fr ? "Courriel" : "Email"], ["code", fr ? "Code d'accès" : "Access code"]] as const).map(([k, l]) => (
+                  <button key={k} type="button" aria-pressed={mode === k} onClick={() => { setMode(k); setState("idle"); }} className="rounded-full px-4 py-2.5 text-ink/75 transition-colors aria-pressed:bg-navy aria-pressed:text-white">{l}</button>
+                ))}
+              </div>
+
+              {mode === "code" ? (
+                <form onSubmit={(e) => { e.preventDefault(); if (String(new FormData(e.currentTarget).get("access") ?? "").trim() === DEMO_CODE) enterDemo(); else setState("badcode"); }} className="mt-7">
+                  <label htmlFor="app-access" className="label">{fr ? "Votre code d'accès" : "Your access code"}</label>
+                  <input id="app-access" name="access" type="password" inputMode="numeric" autoComplete="off" required maxLength={8} autoFocus className="field py-4 text-center font-display text-3xl tracking-[0.6em]" />
+                  <button type="submit" className="btn-primary mt-5 w-full">{fr ? "Entrer" : "Enter"}</button>
+                </form>
+              ) : state === "sent" || state === "badcode" ? (
+                <form onSubmit={verify} className="mt-7">
+                  <p className="leading-relaxed text-ink">{fr ? <>Nous avons envoyé un code à <strong>{email}</strong>. Entrez-le ici, ou ouvrez le lien du courriel.</> : <>We sent a code to <strong>{email}</strong>. Enter it here, or open the link in the email.</>}</p>
+                  <label htmlFor="app-code" className="label mt-5">{fr ? "Code reçu par courriel" : "Code from the email"}</label>
+                  <input id="app-code" name="code" inputMode="numeric" autoComplete="one-time-code" required maxLength={10} autoFocus className="field py-4 text-center font-display text-3xl tracking-[0.4em]" />
+                  <button type="submit" className="btn-primary mt-5 w-full">{fr ? "Entrer" : "Sign in"}</button>
+                  <p className="mt-4 text-sm text-muted">{fr ? "Rien reçu ? Vérifiez vos indésirables, ou " : "Nothing received? Check your spam folder, or "}<button type="button" className="font-semibold text-navy underline underline-offset-4" onClick={() => setState("idle")}>{fr ? "recommencez" : "start over"}</button>.</p>
+                </form>
+              ) : (
+                <form onSubmit={sendCode} className="mt-7">
+                  <label htmlFor="app-email" className="label">{fr ? "Votre courriel" : "Your email"}</label>
+                  <input id="app-email" name="email" required autoComplete="email" autoCapitalize="none" spellCheck={false} placeholder={fr ? "nom@exemple.ca" : "name@example.ca"} className="field py-3.5" />
+                  <button type="submit" disabled={state === "sending"} className="btn-primary mt-5 w-full">{state === "sending" ? t.sending : (fr ? "Recevoir mon code" : "Send my code")}</button>
+                  <p className="mt-4 text-sm leading-relaxed text-muted">{fr ? "Pas de mot de passe à retenir : vous recevez un code par courriel, valide quelques minutes." : "No password to remember: you receive a code by email, valid for a few minutes."}</p>
+                </form>
+              )}
+              <p role="alert" className={msg ? "mt-5 rounded-2xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]" : "sr-only"}>{msg}</p>
+
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-sm">
+                <span className="text-ink/80">{fr ? "Besoin d'aide ? " : "Need help? "}<a className="font-semibold text-navy underline underline-offset-4" href={`tel:${site.phone.tel}`}>{site.phone.display}</a></span>
+                <a href={fr ? "/" : "/en/"} className="font-medium text-navy underline underline-offset-4">{t.back}</a>
+              </div>
+            </div>
           </div>
         ) : (
           children(session)
