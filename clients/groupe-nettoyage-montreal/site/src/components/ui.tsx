@@ -21,9 +21,9 @@ export function Heading({ eyebrow, title, sub, light = false, center = false }: 
 }
 export function PageHero({ eyebrow, title, sub, children }: { eyebrow?: string; title: string; sub?: string; children?: ReactNode }) {
   return (
-    <section className="relative overflow-hidden bg-navy-950 text-white">
-      <div className="pattern-grid absolute inset-0" aria-hidden />
-      <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-amber-500/15 blur-3xl" aria-hidden />
+    <section className="relative overflow-hidden bg-navy-950 pt-20 text-white sm:pt-24">
+      <div className="aurora" aria-hidden><div className="aurora-blob a1" /><div className="aurora-blob a2" /></div>
+      <div className="grain" aria-hidden />
       <div className="container-x relative py-16 sm:py-20">
         <div className="max-w-3xl">
           {eyebrow && <p className="eyebrow !text-amber-400">{eyebrow}</p>}
@@ -47,7 +47,7 @@ export function Breadcrumbs({ items }: { items: { name: string; href?: string }[
 export function ServiceCard({ s, locale }: { s: Service; locale: Locale }) {
   const d = t(locale); const Icon = I[s.icon as IconName];
   return (
-    <Link href={pagePath(locale, "services", s.slug[locale])} className="card group flex h-full flex-col p-6 transition-shadow hover:shadow-soft">
+    <Link href={pagePath(locale, "services", s.slug[locale])} className="card group flex h-full flex-col p-6 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lift">
       <div className="flex items-center justify-between">
         <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sand-100 text-navy-900"><Icon width={22} height={22} /></span>
         <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${s.bookable ? "bg-teal-100 text-teal-600" : "bg-sand-100 text-ink-600"}`}>{s.bookable ? (locale === "fr" ? "Réservable en ligne" : "Book online") : (locale === "fr" ? "Sur visite" : "Walkthrough")}</span>

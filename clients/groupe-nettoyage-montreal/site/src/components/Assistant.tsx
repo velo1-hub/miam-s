@@ -32,8 +32,9 @@ export function Assistant({ locale }: { locale: Locale }) {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="gnm-assistant" className="fixed bottom-20 right-4 z-40 flex h-14 items-center gap-2 rounded-full bg-navy-900 pl-4 pr-5 text-white shadow-soft hover:bg-navy-800 sm:bottom-6 sm:right-6">
-        {open ? <I.x /> : <I.chat />}<span className="text-[14px] font-semibold">{open ? t(locale).common.close : d.title}</span>
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="gnm-assistant" className="fixed bottom-20 right-4 z-40 flex h-14 items-center gap-3 rounded-full bg-navy-950 pl-2 pr-5 text-white shadow-lift ring-1 ring-white/15 transition-transform hover:scale-[1.03] sm:bottom-6 sm:right-6">
+        <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-amber-500 text-navy-950">{open ? <I.x width={20} height={20} /> : <I.chat width={20} height={20} />}<span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-navy-950 bg-leaf" /></span>
+        <span className="text-[14px] font-semibold">{open ? t(locale).common.close : (locale === "fr" ? "Assistant 24/7" : "Assistant 24/7")}</span>
       </button>
       {open && (
         <section id="gnm-assistant" role="dialog" aria-label={d.title} className="fixed inset-x-3 bottom-[9.5rem] z-40 flex max-h-[72vh] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-soft sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[400px]">

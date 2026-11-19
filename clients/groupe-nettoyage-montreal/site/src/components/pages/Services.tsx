@@ -27,7 +27,7 @@ export function ServicePage({ locale, s }: { locale: Locale; s: Service }) {
   return (
     <>
       <JsonLd data={serviceJsonLd(locale, s)} /><JsonLd data={faqJsonLd(s.faq[locale])} /><JsonLd data={breadcrumbJsonLd(locale, [{ name: d.nav.services, path: pagePath(locale, "services") }, { name: s.name[locale], path: pagePath(locale, "services", s.slug[locale]) }])} />
-      <section className="relative overflow-hidden bg-navy-950 text-white"><div className="pattern-grid absolute inset-0" aria-hidden />
+      <section className="relative overflow-hidden bg-navy-950 pt-20 text-white sm:pt-24"><div className="aurora" aria-hidden><div className="aurora-blob a1" /><div className="aurora-blob a2" /></div><div className="grain" aria-hidden />
         <div className="container-x relative grid gap-10 py-16 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-20">
           <div><p className="eyebrow !text-amber-400">{s.segment === "residential" ? d.sections.residential : d.sections.commercial}</p><h1 className="h-display mt-3 text-4xl !text-white sm:text-5xl">{s.name[locale]}</h1><p className="mt-5 text-[19px] leading-relaxed text-white/85">{s.tagline[locale]}</p>
             <div className="mt-8 flex flex-wrap gap-3"><Link href={`${pagePath(locale, "quote")}?service=${s.id}`} className="btn btn-primary">{s.bookable ? d.common.getQuote : d.common.walkthrough}<I.arrow width={18} height={18} /></Link><Link href={pagePath(locale, "contact")} className="btn btn-light">{d.nav.contact}</Link></div>
