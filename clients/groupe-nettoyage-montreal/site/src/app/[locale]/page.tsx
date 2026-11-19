@@ -18,6 +18,7 @@ import { Spotlight } from "@/components/fx/Spotlight";
 import { HeroVideo } from "@/components/fx/HeroVideo";
 import { Marquee } from "@/components/fx/Marquee";
 import { BeforeAfter } from "@/components/fx/BeforeAfter";
+import { InlineVideo } from "@/components/fx/InlineVideo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params; const fr = locale === "fr";
@@ -82,14 +83,16 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             </div>
           </Reveal>
           <Reveal index={1}>
-            <div className="flex h-full flex-col justify-between rounded-[2rem] bg-navy-950 p-8 text-white sm:p-10">
-              <div>
+            <div className="relative flex h-full min-h-[460px] flex-col justify-between overflow-hidden rounded-[2rem] bg-navy-950 p-8 text-white sm:p-10">
+              <InlineVideo webm="/media/hero-mobile.webm" mp4="/media/hero-mobile.mp4" poster="/media/hero-poster-mobile.jpg" position="center 30%" portraitAlt={{ webm: "/media/hero.webm", mp4: "/media/hero.mp4", poster: "/media/hero-poster.jpg" }} />
+              <div className="absolute inset-0 bg-gradient-to-b from-navy-950/70 via-navy-950/75 to-navy-950/95" aria-hidden />
+              <div className="relative">
                 <p className="eyebrow !text-amber-400">{fr ? "Résidentiel et Airbnb" : "Residential and Airbnb"}</p>
                 <h2 className="text-h2 mt-3 font-display font-semibold">{fr ? "Votre prix ferme en deux minutes. Pas d'appel, pas d'attente." : "Your firm price in two minutes. No call, no waiting."}</h2>
                 <p className="mt-4 text-[16.5px] text-white/80">{fr ? "Type de logement, fréquence, extras : le prix s'affiche, vous choisissez un créneau, c'est confirmé. Le même outil que nous utilisons au téléphone, rendu public." : "Home type, frequency, extras: the price appears, you pick a slot, it's confirmed. The same tool we use on the phone, made public."}</p>
               </div>
-              <div className="mt-8 grid grid-cols-3 gap-3 text-center">{[[fr ? "95 $" : "$95", fr ? "3½ régulier" : "1-bed regular"], [fr ? "115 $" : "$115", fr ? "Rotation Airbnb" : "Airbnb turnover"], [fr ? "−15 %" : "−15%", fr ? "hebdomadaire" : "weekly"]].map(([n, l]) => <div key={l} className="rounded-2xl bg-white/5 px-3 py-4"><p className="font-display text-2xl font-semibold text-amber-400">{n}</p><p className="mt-1 text-[12.5px] text-white/70">{l}</p></div>)}</div>
-              <div className="mt-6 flex flex-wrap gap-3"><Link href={pagePath(locale, "quote")} className="btn btn-primary">{d.hero.cta}<I.arrow width={18} height={18} /></Link><Link href={pagePath(locale, "pricing")} className="btn btn-light">{d.nav.pricing}</Link></div>
+              <div className="relative mt-8 grid grid-cols-3 gap-3 text-center">{[[fr ? "95 $" : "$95", fr ? "3½ régulier" : "1-bed regular"], [fr ? "115 $" : "$115", fr ? "Rotation Airbnb" : "Airbnb turnover"], [fr ? "−15 %" : "−15%", fr ? "hebdomadaire" : "weekly"]].map(([n, l]) => <div key={l} className="glass rounded-2xl px-3 py-4"><p className="font-display text-2xl font-semibold text-amber-400">{n}</p><p className="mt-1 text-[12.5px] text-white/80">{l}</p></div>)}</div>
+              <div className="relative mt-6 flex flex-wrap gap-3"><Link href={pagePath(locale, "quote")} className="btn btn-primary">{d.hero.cta}<I.arrow width={18} height={18} /></Link><Link href={pagePath(locale, "pricing")} className="btn btn-glass">{d.nav.pricing}</Link></div>
             </div>
           </Reveal>
         </div>
