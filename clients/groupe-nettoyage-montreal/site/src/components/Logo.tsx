@@ -2,7 +2,7 @@
 export function Logo({ size = 36, light = false }: { size?: number; light?: boolean }) {
   const tile = light ? "#ffffff" : "#0f1424"; const wipe = light ? "#0f1424" : "#ffffff"; const spark = "#f0a12e";
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-hidden="true" className="shrink-0" style={{ minWidth: size }}>
       <rect width="48" height="48" rx="13" fill={tile} />
       {/* haze being wiped away (left), clean surface revealed (right) */}
       <path d="M8 31c6-10 14-14 24-13" fill="none" stroke={wipe} strokeOpacity=".28" strokeWidth="3" strokeLinecap="round" />
