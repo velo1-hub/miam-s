@@ -77,7 +77,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <Section className="!pt-16">
         <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
           <Reveal>
-            <div className="photo relative flex min-h-[460px] flex-col justify-end overflow-hidden rounded-[2rem] p-8 text-white sm:p-10" style={{ backgroundImage: `linear-gradient(180deg, rgba(15,20,36,0) 30%, rgba(15,20,36,.92)), url(${PHOTO.visit}), linear-gradient(135deg,#2c3347,#1b2238)` }}>
+            <div className="photo relative flex min-h-[460px] flex-col justify-end overflow-hidden rounded-[2rem] p-8 text-white sm:p-10" style={{ backgroundImage: `linear-gradient(180deg, rgba(15,20,36,.62) 0%, rgba(15,20,36,.78) 45%, rgba(15,20,36,.97) 100%), url(${PHOTO.visit}), linear-gradient(135deg,#2c3347,#1b2238)`, textShadow: "0 1px 2px rgba(0,0,0,.45)" }}>
               <p className="eyebrow !text-amber-400">{fr ? "La visite d'évaluation" : "The walkthrough"}</p>
               <h2 className="text-h2 mt-3 font-display font-semibold">{fr ? "Pour vos bureaux ou votre immeuble, on se déplace." : "For your office or building, we come to you."}</h2>
               <p className="mt-4 max-w-xl text-[16.5px] text-white/85">{fr ? "Une visite gratuite de 20 minutes, une soumission écrite dans les 24 heures, et vous savez exactement ce qui sera fait à chaque passage avant de signer quoi que ce soit." : "A free 20-minute visit, a written quote within 24 hours, and you know exactly what gets done every visit before you sign anything."}</p>
@@ -120,7 +120,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {/* SEASONAL PROMO */}
       <Section className="!py-10">
         <Reveal>
-          <div className="photo relative overflow-hidden rounded-[2rem] text-white" style={{ backgroundImage: `linear-gradient(90deg, rgba(15,20,36,.96) 0%, rgba(15,20,36,.85) 45%, rgba(15,20,36,.2) 100%), url(${PHOTO.airbnb}), linear-gradient(135deg,#1b2238,#0f1424)` }}>
+          <div className="photo relative overflow-hidden rounded-[2rem] text-white" style={{ backgroundImage: `linear-gradient(90deg, rgba(15,20,36,.97) 0%, rgba(15,20,36,.9) 50%, rgba(15,20,36,.55) 100%), url(${PHOTO.airbnb}), linear-gradient(135deg,#1b2238,#0f1424)`, textShadow: "0 1px 2px rgba(0,0,0,.45)" }}>
             <div className="grid gap-8 p-8 sm:p-12 lg:grid-cols-[1.1fr_1fr]">
               <div>
                 <p className="eyebrow !text-amber-400">{fr ? "Cet hiver" : "This winter"}</p>
@@ -187,7 +187,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <Reveal><Heading eyebrow={d.nav.work} title={fr ? "De la cuisine de restaurant au loft Airbnb : de vrais espaces, de vrais résultats" : "From restaurant kitchen to Airbnb loft: real spaces, real results"} /></Reveal>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {[[PHOTO.restaurant, fr ? "Restaurants" : "Restaurants", fr ? "Dégraissage nocturne et registre MAPAQ" : "Night degreasing and MAPAQ log", "restaurant"], [PHOTO.airbnb, "Airbnb", fr ? "Rotations de 4 heures, rapport photo" : "4-hour turnovers, photo report", "airbnb"], [PHOTO.visit, fr ? "Gestion immobilière" : "Property management", fr ? "Un seul contact pour tous vos immeubles" : "One contact for all your buildings", "property"]].map(([img, ti, de, id], i) => { const s = SERVICES.find((x) => x.id === id)!; return (
-            <Reveal key={ti} index={i}><Link href={pagePath(locale, "services", s.slug[locale])} className="photo group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-3xl p-6 text-white" style={{ backgroundImage: `linear-gradient(180deg, rgba(15,20,36,0) 40%, rgba(15,20,36,.9)), url(${img}), linear-gradient(135deg,#2c3347,#1b2238)` }}><p className="eyebrow !text-amber-400">{ti}</p><p className="mt-2 text-[19px] font-semibold leading-snug">{de}</p><span className="mt-3 flex items-center gap-1 text-[14px] font-semibold text-white/85 transition-transform group-hover:translate-x-1">{d.common.learnMore}<I.arrow width={16} height={16} /></span></Link></Reveal>); })}
+            <Reveal key={ti} index={i}><Link href={pagePath(locale, "services", s.slug[locale])} className="photo group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-3xl p-6 text-white" style={{ backgroundImage: `linear-gradient(180deg, rgba(15,20,36,.1) 35%, rgba(15,20,36,.95)), url(${img}), linear-gradient(135deg,#2c3347,#1b2238)`, textShadow: "0 1px 2px rgba(0,0,0,.45)" }}><p className="eyebrow !text-amber-400">{ti}</p><p className="mt-2 text-[19px] font-semibold leading-snug">{de}</p><span className="mt-3 flex items-center gap-1 text-[14px] font-semibold text-white/85 transition-transform group-hover:translate-x-1">{d.common.learnMore}<I.arrow width={16} height={16} /></span></Link></Reveal>); })}
         </div>
       </Section>
 

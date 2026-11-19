@@ -24,7 +24,7 @@ export function Header({ locale }: { locale: Locale }) {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-4">
       <div className={`mx-auto flex h-[60px] max-w-7xl items-center justify-between gap-3 rounded-full px-3 pl-4 transition-colors duration-300 sm:h-16 sm:px-4 sm:pl-5 ${dark ? "glass text-white" : "glass-light text-navy-950 shadow-soft"}`}>
-        <Link href={locale === "fr" ? "/" : "/en"} className="flex items-center gap-2.5" aria-label={BIZ.name}><Logo light={dark} size={34} /><span className="hidden text-[15px] font-semibold tracking-tight md:block">Groupe Nettoyage <span className="text-amber-500">Montréal</span></span></Link>
+        <Link href={locale === "fr" ? "/" : "/en"} className="flex min-w-0 items-center gap-2.5" aria-label={BIZ.name}><Logo light={dark} size={38} /><span className="font-display text-[12.5px] font-semibold leading-[1.15] tracking-tight sm:text-[15px] sm:leading-none"><span className="block whitespace-nowrap sm:inline">Groupe Nettoyage</span> <span className="block whitespace-nowrap text-amber-500 sm:inline">Montréal</span></span></Link>
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Principale">
           {nav.map((n) => <Link key={n.href} href={n.href} className={`whitespace-nowrap rounded-full px-2.5 py-2 text-[13.5px] font-medium transition-colors ${n.xl ? "hidden xl:block" : ""} ${dark ? "text-white/85 hover:bg-white/10 hover:text-white" : "text-ink-700 hover:bg-navy-900/5"} ${pathname === n.href ? "font-semibold" : ""}`}>{n.label}</Link>)}
         </nav>

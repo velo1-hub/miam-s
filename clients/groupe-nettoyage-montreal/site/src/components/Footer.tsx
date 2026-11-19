@@ -13,7 +13,7 @@ export function Footer({ locale }: { locale: Locale }) {
     <footer className="mt-24 bg-navy-950 text-white">
       <div className="container-x grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-3"><Logo light /><span className="text-lg font-semibold">Groupe Nettoyage Montréal</span></div>
+          <div className="flex items-center gap-3"><Logo light size={40} /><span className="text-lg font-semibold">Groupe Nettoyage Montréal</span></div>
           <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-white/70">{d.footer.tagline}</p>
           <ul className="mt-5 space-y-2 text-[14px] text-white/80">
             <li className="flex items-center gap-2"><I.shield width={18} height={18} className="text-amber-400" />{locale === "fr" ? "Assurés · employés déclarés CNESST" : "Insured · CNESST-registered employees"}</li>
