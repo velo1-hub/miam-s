@@ -28,7 +28,7 @@ const TONES = [
 const NEUTRAL = { bg: "#eef0f6", bar: "#6b6f8a", ink: "#1b1d33" };
 const NOBODY = "Non attribué";
 const WEEKDAYS = [["lun.", "lundi"], ["mar.", "mardi"], ["mer.", "mercredi"], ["jeu.", "jeudi"], ["ven.", "vendredi"], ["sam.", "samedi"], ["dim.", "dimanche"]] as const;
-const HATCH = "repeating-linear-gradient(135deg, #eef0f6 0 6px, #f8f9fc 6px 12px)";
+const HATCH = "repeating-linear-gradient(135deg, #e3e6ef 0 6px, #f6f7fb 6px 12px)";
 const monthFmt = new Intl.DateTimeFormat("fr-CA", { month: "long", year: "numeric", timeZone: "UTC" });
 const monthTitle = (month: string) => monthFmt.format(new Date(`${month}-01T00:00:00Z`));
 const HOURS_TEXT = `${fmtMin(OPEN_MIN)} à ${fmtMin(CLOSE_MIN)}, du lundi au vendredi`;
@@ -39,6 +39,8 @@ const PX = ROW / SLOT;
 const iconBtn = "btn-secondary min-h-11 min-w-11 px-3 py-2 text-sm";
 const warnBox = "rounded-xl bg-[#fff4e5] px-3.5 py-2.5 text-sm text-[#6b3d00]";
 
+/** « a, b et c ». */
+const listText = (l: string[]) => (l.length < 2 ? l.join("") : `${l.slice(0, -1).join(", ")} et ${l[l.length - 1]}`);
 const wishText = (a: Appointment) => (a.wished_date ? `Souhaite le ${dayText(a.wished_date)}${a.wished_part && a.wished_part !== "indifferent" ? `, ${PART_LABEL[a.wished_part]}` : ""}` : a.wished_part && a.wished_part !== "indifferent" ? `Souhaite ${PART_LABEL[a.wished_part]}` : "Aucune date souhaitée");
 
 function useAgenda(store: Store) {
@@ -192,7 +194,7 @@ function Month({ store, agenda, ui, setUi, tone, openDossier, side, onPick, focu
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => select(sameDayInMonth(ui.day, -1))} aria-label="Mois précédent" className={iconBtn}>←</button>
           <button type="button" onClick={() => select(sameDayInMonth(ui.day, 1))} aria-label="Mois suivant" className={iconBtn}>→</button>
-          <h2 id={titleId} aria-live="polite" className="min-w-0 flex-1 px-1 font-display text-xl font-semibold text-ink first-letter:uppercase sm:text-2xl">{monthTitle(month)}</h2>
+          <h2 id={titleId} aria-live="polite" className="min-w-0 flex-1 px-1 font-display text-lg font-semibold text-ink first-letter:uppercase sm:text-2xl">{monthTitle(month)}</h2>
           <button type="button" onClick={() => select(today)} disabled={ui.day === today} className={`${smallBtn} disabled:opacity-60`}>Aujourd'hui</button>
         </div>
         <div ref={grid} role="grid" aria-labelledby={titleId} aria-describedby={`${titleId}-aide`} className="overflow-hidden rounded-xl border border-[#d5d9e6] bg-white">
@@ -215,14 +217,14 @@ function Month({ store, agenda, ui, setUi, tone, openDossier, side, onPick, focu
                     key={day} role="gridcell" data-day={day} tabIndex={chosen ? 0 : -1} aria-selected={chosen} aria-current={isToday ? "date" : undefined} aria-label={daySummary(x, day, today)}
                     onClick={() => onClick(day)} onKeyDown={(e) => onKey(e, day)}
                     style={closed ? { background: HATCH } : undefined}
-                    className={`relative min-h-[3.4rem] min-w-0 cursor-pointer border-r border-[#e6e8f2] p-1 last:border-r-0 hover:bg-sky-50 focus-visible:z-10 focus-visible:!rounded-none focus-visible:outline-[3px] focus-visible:-outline-offset-[3px] focus-visible:outline-navy sm:min-h-[7.25rem] sm:p-1.5 ${out && !closed ? "bg-[#f7f8fb]" : ""} ${chosen ? "shadow-[inset_0_0_0_2px_var(--color-navy)]" : ""}`}
+                    className={`relative min-h-[3.4rem] min-w-0 cursor-pointer border-r border-[#e6e8f2] p-1 last:border-r-0 hover:bg-sky-50 focus-visible:z-10 focus-visible:!rounded-none focus-visible:[outline:3px_solid_#2a2a5c] focus-visible:[outline-offset:-3px] sm:min-h-[7.25rem] sm:p-1.5 ${out && !closed ? "bg-[#f7f8fb]" : ""} ${chosen ? "shadow-[inset_0_0_0_2px_var(--color-navy)]" : ""}`}
                   >
                     <div className="flex items-start justify-between gap-1">
-                      <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-semibold sm:text-sm ${isToday ? "bg-navy text-white" : out ? "text-[#6b6f8a]" : closed ? "text-muted" : "text-ink"}`}>{Number(day.slice(8))}</span>
+                      <span className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-semibold sm:text-sm ${isToday ? "bg-navy text-white" : out ? "font-normal text-muted" : closed ? "text-muted" : "text-ink"}`}>{Number(day.slice(8))}</span>
                       {x.wishes.length > 0 && <span data-wishes={x.wishes.length} title="Dates souhaitées par des clients" className="rounded-full border border-[#b45309] bg-[#fff4e5] px-1.5 text-[0.68rem] leading-5 font-semibold text-[#6b3d00]"><span className="sm:hidden">{x.wishes.length}</span><span className="hidden sm:inline">{plural(x.wishes.length, "demande", "demandes")}</span></span>}
                     </div>
                     {/* Grand écran : libellés. Petit écran : points. */}
-                    <ul aria-hidden="true" className={`mt-1 hidden space-y-0.5 sm:block ${out ? "opacity-70" : ""}`}>
+                    <ul aria-hidden="true" className="mt-1 hidden space-y-0.5 sm:block">
                       {shown.map((it) => (
                         <li key={it.key} data-marker={it.kind} className="truncate rounded-[5px] border-l-[3px] px-1 py-px text-[0.7rem] leading-4 font-medium"
                           style={it.kind === "rdv" ? { background: tone(it.who).bg, borderColor: tone(it.who).bar, color: tone(it.who).ink } : it.kind === "due" ? { background: "#e9e8f7", borderColor: "#2a2a5c", color: "#2a2a5c" } : { background: "#eef0f6", borderColor: "#6b6f8a", color: "#1b1d33" }}>{it.text}</li>
@@ -230,7 +232,7 @@ function Month({ store, agenda, ui, setUi, tone, openDossier, side, onPick, focu
                       {items.length > shown.length && <li data-more className="px-1 text-[0.7rem] leading-4 font-semibold text-muted">+{items.length - shown.length}</li>}
                     </ul>
                     {items.length > 0 && (
-                      <div aria-hidden="true" className={`mt-1 flex flex-wrap items-center gap-[3px] sm:hidden ${out ? "opacity-70" : ""}`}>
+                      <div aria-hidden="true" className="mt-1 flex flex-wrap items-center gap-[3px] sm:hidden">
                         {items.slice(0, 4).map((it) => <span key={it.key} className={`h-2 w-2 border ${it.kind === "rdv" ? "rounded-full" : it.kind === "due" ? "rotate-45 rounded-[1px]" : "rounded-[2px]"}`} style={it.kind === "rdv" ? { background: tone(it.who).bar, borderColor: tone(it.who).bar } : it.kind === "due" ? { background: "#2a2a5c", borderColor: "#2a2a5c" } : { background: "#eef0f6", borderColor: "#6b6f8a" }} />)}
                         {items.length > 4 && <span className="text-[0.6rem] leading-none font-semibold text-muted">+{items.length - 4}</span>}
                       </div>
@@ -336,16 +338,17 @@ function Day({ store, agenda, ui, setUi, tone, openDossier, side }: ViewProps) {
             const mine = x.evs.filter((e) => e.who === c);
             const free = freeRanges(mine, OPEN_MIN, CLOSE_MIN).filter(([a, b]) => b - a >= SLOT);
             const count = mine.length ? `${mine.length} rendez-vous` : "aucun rendez-vous";
-            const rest = !open ? "bureau fermé" : !c ? "" : free.length === 0 ? "aucun moment libre" : free.length === 1 && free[0][0] === OPEN_MIN && free[0][1] === CLOSE_MIN ? `libre toute la journée, de ${fmtMin(OPEN_MIN)} à ${fmtMin(CLOSE_MIN)}` : `libre ${free.map(([a, b]) => `de ${fmtMin(a)} à ${fmtMin(b)}`).join(", ")}`;
+            const rest = !open ? "bureau fermé" : !c ? "" : free.length === 0 ? "aucun moment libre" : free.length === 1 && free[0][0] === OPEN_MIN && free[0][1] === CLOSE_MIN ? `libre toute la journée, de ${fmtMin(OPEN_MIN)} à ${fmtMin(CLOSE_MIN)}` : `libre ${listText(free.map(([a, b]) => `de ${fmtMin(a)} à ${fmtMin(b)}`))}`;
             return <li key={c} data-summary={c || NOBODY} className="flex items-baseline gap-2"><span aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: tone(c).bar }} /><span><strong className="font-semibold">{short(c, i)}</strong> : {count}{rest ? `, ${rest}` : ""}</span></li>;
           })}
         </ul>
 
-        {(x.dues.length > 0 || x.tasks.length > 0) && (
+        {(x.dues.length > 0 || x.tasks.length > 0 || x.wishes.length > 0) && (
           <div data-allday className="mt-3 rounded-xl border border-[#d5d9e6] bg-white p-2.5">
             <p className="pf-eyebrow mb-1.5">Toute la journée</p>
             <ul className="flex flex-wrap gap-1.5">
               {x.dues.map((d) => <li key={d.id}><button type="button" onClick={() => openDossier(d.id)} className="min-h-11 rounded-lg border-l-4 border-navy bg-[#e9e8f7] px-2.5 py-1.5 text-left text-sm font-medium text-navy hover:bg-[#dcdaf2]">Échéance · {d.client_name}, {d.title}</button></li>)}
+              {x.wishes.map((a) => <li key={a.id}><button type="button" aria-pressed={a.id === ui.request} onClick={() => setUi((u) => ({ ...u, request: a.id }))} className="min-h-11 rounded-lg border-l-4 border-[#b45309] bg-[#fff4e5] px-2.5 py-1.5 text-left text-sm font-medium text-[#6b3d00] hover:bg-[#ffe9c9]">Date souhaitée · {agenda.byId.get(a.dossier_id)?.client_name}{a.wished_part && a.wished_part !== "indifferent" ? `, ${PART_LABEL[a.wished_part]}` : ""}</button></li>)}
               {x.tasks.map((t) => <li key={t.id}><button type="button" onClick={() => openDossier(t.dossier_id)} className="min-h-11 rounded-lg border-l-4 border-[#6b6f8a] bg-[#eef0f6] px-2.5 py-1.5 text-left text-sm font-medium text-ink hover:bg-[#e2e5ee]">Tâche · {t.label}{t.assignee ? ` (${t.assignee})` : ""}</button></li>)}
             </ul>
           </div>
@@ -376,7 +379,7 @@ function Day({ store, agenda, ui, setUi, tone, openDossier, side }: ViewProps) {
                       if (busy) return <div key={s} aria-hidden="true" className={line} style={st} />;
                       return (
                         <button key={s} type="button" data-slot={fmtMin(s)} onClick={() => setPanel({ kind: "book", who: c, min: s })} aria-label={`Réserver à ${fmtMin(s)}, ${c || NOBODY}${off ? ", hors des heures d'ouverture" : ""}`}
-                          className={`${line} group block w-full cursor-pointer text-left hover:!bg-sky-100 focus-visible:z-[2] focus-visible:!rounded-none focus-visible:!bg-sky-100 focus-visible:outline-[3px] focus-visible:-outline-offset-[3px] focus-visible:outline-navy`} style={st}>
+                          className={`${line} group block w-full cursor-pointer text-left hover:!bg-sky-100 focus-visible:z-[2] focus-visible:!rounded-none focus-visible:!bg-sky-100 focus-visible:[outline:3px_solid_#2a2a5c] focus-visible:[outline-offset:-3px]`} style={st}>
                           <span aria-hidden="true" className="hidden px-2 text-xs font-semibold text-navy group-hover:inline group-focus-visible:inline">+ {fmtMin(s)}</span>
                         </button>
                       );
@@ -387,7 +390,7 @@ function Day({ store, agenda, ui, setUi, tone, openDossier, side }: ViewProps) {
                       return (
                         <button key={e.id} type="button" data-appt={e.id} data-clash={l.clash || undefined} onClick={() => setPanel({ kind: "edit", id: e.id })}
                           aria-label={`${fmtMin(e.start)} à ${fmtMin(e.end)}, ${e.d.client_name}, ${e.d.title}, ${(MODE_LABEL[e.a.mode] ?? e.a.mode).toLowerCase()}${l.clash ? ", chevauche un autre rendez-vous" : ""}. Modifier.`}
-                          className={`absolute z-[1] cursor-pointer overflow-hidden rounded-[7px] border-l-4 px-1.5 py-0.5 text-left text-xs leading-4 hover:brightness-[.97] focus-visible:z-[2] focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-navy ${l.clash ? "outline-2 -outline-offset-2 outline-[#b45309]" : ""}`}
+                          className={`absolute z-[1] cursor-pointer overflow-hidden rounded-[7px] border-l-4 px-1.5 py-0.5 text-left text-xs leading-4 hover:brightness-[.97] focus-visible:z-[2] focus-visible:[outline:3px_solid_#2a2a5c] focus-visible:[outline-offset:1px] ${l.clash ? "shadow-[inset_0_0_0_2px_#b45309]" : ""}`}
                           style={{ top: (e.start - from) * PX + 1, height: h, left: `calc(${(l.lane / l.lanes) * 100}% + 2px)`, width: `calc(${100 / l.lanes}% - 4px)`, background: t.bg, borderLeftColor: l.clash ? "#b45309" : t.bar, color: t.ink }}>
                           <span className="block truncate font-semibold">{fmtMin(e.start)} – {fmtMin(e.end)}{h < 40 ? ` · ${e.d.client_name}` : ""}</span>
                           {h >= 40 && <span className="block truncate font-semibold">{e.d.client_name}</span>}
@@ -526,7 +529,7 @@ function BookDialog({ store, agenda, day, who: who0, min: min0, cols, request, o
               <div><label htmlFor={`${id}-mode`} className="label">Mode</label><select id={`${id}-mode`} value={mode} onChange={(e) => setMode(e.target.value as Appointment["mode"])} className="field min-h-11 py-2">{MODES.map((m) => <option key={m} value={m}>{MODE_LABEL[m]}</option>)}</select></div>
             </div>
             {found.length === 0 ? <p className="mt-2 text-sm text-muted">{openDossiers.length === 0 ? "Aucun dossier ouvert." : "Aucun dossier ouvert ne correspond."}</p> : (
-              <ul role="group" aria-label="Dossiers ouverts" className="mt-2 grid gap-1.5 sm:grid-cols-2">
+              <ul aria-label="Dossiers ouverts" className="mt-2 grid gap-1.5 sm:grid-cols-2">
                 {found.map((d) => (
                   <li key={d.id}><button type="button" data-dossier={d.id} aria-pressed={d.id === dossierId} onClick={() => { setDossierId(d.id); setErr(""); }} className="min-h-11 w-full rounded-lg border border-line bg-white px-3 py-1.5 text-left text-sm hover:border-navy aria-pressed:border-navy aria-pressed:bg-sky-50 aria-pressed:shadow-[inset_0_0_0_1px_var(--color-navy)]"><span className="block truncate font-semibold text-ink">{d.client_name}</span><span className="block truncate text-xs text-muted">{d.title}</span></button></li>
                 ))}
@@ -571,7 +574,7 @@ function EditDialog({ store, agenda, ev, onMoved, openDossier, onClose }: { stor
       {(close) => (
         <div data-edit className="space-y-4">
           <div className="-mt-2 text-sm text-ink">
-            <p><span className="first-letter:uppercase">{whenText(ev.a.confirmed_at!)}</span>, {fmtDuration(ev.end - ev.start)}, {(MODE_LABEL[ev.a.mode] ?? ev.a.mode).toLowerCase()}, {ev.who ? `avec ${ev.who}` : "sans responsable"}.</p>
+            <p className="first-letter:uppercase">{whenText(ev.a.confirmed_at!)}, {fmtDuration(ev.end - ev.start)}, {(MODE_LABEL[ev.a.mode] ?? ev.a.mode).toLowerCase()}, {ev.who ? `avec ${ev.who}` : "sans responsable"}.</p>
             <p className="text-muted">Dossier : {ev.d.title}{ev.a.preference ? ` · Préférence du client : « ${ev.a.preference} »` : ""}</p>
           </div>
           <div><label htmlFor={`${id}-day`} className="label">Date</label><input id={`${id}-day`} type="date" required value={day} onChange={(e) => { if (/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) setDay(e.target.value); }} className="field min-h-11 py-2 sm:max-w-56" /></div>
