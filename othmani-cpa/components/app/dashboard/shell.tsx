@@ -2,7 +2,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { LogoMark } from "../../Logo";
 import { fmtDate } from "../shared";
-import { Avatar, Icon, SECTIONS, groupClients, money, norm, type Focus, type IconName, type Section, type Store } from "./common";
+import { Avatar, Dialog, Icon, SECTIONS, groupClients, money, norm, type Focus, type IconName, type Section, type Store } from "./common";
 
 const NAV_ICON: Record<Section, IconName> = { aujourdhui: "home", prospects: "prospect", clients: "clients", dossiers: "dossier", documents: "document", messages: "message", facturation: "invoice", calendrier: "calendar", parametres: "settings" };
 
@@ -139,12 +139,48 @@ function Search({ store, to }: { store: Store | null; to: SearchTargets }) {
 }
 
 /** Barre du haut : recherche, repère « données d'exemple », pastille de la personne connectée. La cloche et la déconnexion du cadre commun se placent à sa droite. */
-export function TopBar({ store, to, staffName, demo }: { store: Store | null; to: SearchTargets; staffName: string; demo: boolean }) {
+export function TopBar({ store, to, staffName, demo, onHelp }: { store: Store | null; to: SearchTargets; staffName: string; demo: boolean; onHelp?: () => void }) {
   return (
     <div className="z-30 flex items-center gap-3 bg-[#f4f5fa] px-4 pt-3 pb-2 sm:px-6 lg:sticky lg:top-0 lg:h-[4.25rem] lg:py-0 lg:pr-[15rem]">
       <Search store={store} to={to} />
+      {onHelp && <button type="button" onClick={onHelp} aria-label="Raccourcis clavier" title="Raccourcis clavier (touche ?)" className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#d5d8e6] bg-white font-display text-base font-bold text-navy hover:border-navy sm:flex"><span aria-hidden="true">?</span></button>}
       {demo && <span className="hidden shrink-0 rounded-full bg-[#e6e8f2] px-3 py-1.5 text-xs font-medium text-ink lg:inline" title="Mode démonstration : données fictives, rien n'est enregistré.">Données d'exemple<span className="sr-only"> : mode démonstration, rien n'est enregistré</span></span>}
       <span className="hidden lg:block" title={staffName}><Avatar name={staffName} className="h-9 w-9 text-xs" /><span className="sr-only">Connecté : {staffName}</span></span>
     </div>
+  );
+}
+
+
+/* ───────────── Raccourcis clavier ───────────── */
+/** « g » puis une lettre mène à une section. */
+export const GO_KEYS: Record<string, Section> = { a: "aujourdhui", p: "prospects", c: "clients", d: "dossiers", m: "messages" };
+const KEY_HELP: [string[], string][] = [
+  [["?"], "Afficher cette liste"],
+  [["g", "a"], "Aller à Aujourd'hui"],
+  [["g", "p"], "Aller à Prospects"],
+  [["g", "c"], "Aller à Clients"],
+  [["g", "d"], "Aller à Dossiers"],
+  [["g", "m"], "Aller à Messages"],
+  [["/"], "Rechercher (aussi Ctrl+K, ou ⌘K sur Mac)"],
+  [["Échap"], "Fermer une fenêtre ou la recherche"],
+];
+const kbd = "inline-block min-w-7 rounded-md border border-[#c9cde0] bg-[#f4f5fa] px-1.5 py-0.5 text-center font-sans text-sm font-semibold text-ink";
+export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
+  return (
+    <Dialog title="Raccourcis clavier" onClose={onClose}>
+      {() => (
+        <>
+          <dl className="divide-y divide-line">
+            {KEY_HELP.map(([keys, what]) => (
+              <div key={what} className="flex items-center justify-between gap-4 py-2.5">
+                <dt className="text-ink">{what}</dt>
+                <dd className="flex shrink-0 items-center gap-1.5">{keys.map((k, i) => <span key={k} className="flex items-center gap-1.5">{i > 0 && <span className="text-xs text-muted">puis</span>}<kbd className={kbd}>{k}</kbd></span>)}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-3 text-xs text-muted">Les raccourcis ne s'appliquent pas pendant la saisie dans un champ.</p>
+        </>
+      )}
+    </Dialog>
   );
 }

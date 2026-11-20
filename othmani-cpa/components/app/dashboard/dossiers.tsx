@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { KINDS, STATUSES, STEPS5, fmtDate, save, statusLabel, step5, type Dossier } from "../shared";
 import { DEFAULT_REQUESTS, Drawer, NO_FILTER, SOON_DAYS, chip, dueInfo, empty, isLate, isSoon, latePill, link, panel, smallBtn, warnPill, type DFilter, type DossierUi, type Focus, type Invoice, type Lead, type PatchDossier, type Store } from "./common";
 import { DossierDetail } from "./detail";
+import { RollForward } from "./rollforward";
 /* ───────────── Dossiers ───────────── */
 export function NewDossier({ draft, onCreate }: { draft: Lead | null; onCreate: (row: Record<string, unknown>) => Promise<boolean> }) {
   const [busy, setBusy] = useState(false);
@@ -88,11 +89,15 @@ export function StageBoard({ shown, waiting, hidesClosed, onOpen, onMove }: { sh
   );
 }
 
-export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move, onCreated, onTouch, focus, onFocused, onInvoices }: {
+export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch, move, onCreated, onTouch, focus, onFocused, onInvoices, onRolled, onUnrolled }: {
+  onRolled: (list: Dossier[]) => void; onUnrolled: (ids: string[]) => void;
   onFocused: () => void; onInvoices: (dossierId: string, list: Invoice[]) => void; focus: { what: Focus; n: number } | null; store: Store; ui: DossierUi; setUi: (f: (u: DossierUi) => DossierUi) => void; staffName: string; draft: Lead | null; clearDraft: () => void;
   patch: PatchDossier; move: (id: string, status: string) => void; onCreated: (d: Dossier, lead: Lead | null) => void; onTouch: () => void;
 }) {
   const { filter: f, view, current, creating } = ui;
+  // Reconduction : `one` pour un seul dossier, sinon le choix par année.
+  const [roll, setRoll] = useState<{ one: Dossier | null } | null>(null);
+  const unroll = (ids: string[]) => { setUi((u) => (u.current && ids.includes(u.current) ? { ...u, current: null } : u)); onUnrolled(ids); };
   const waiting = useMemo(() => new Set(store.waiting), [store.waiting]);
   const setFilter = (p: Partial<DFilter>) => setUi((u) => ({ ...u, filter: { ...u.filter, ...p } }));
   const owners = useMemo(() => [...new Set([...store.team, ...store.dossiers.map((d) => d.assignee ?? "")].filter(Boolean))], [store.team, store.dossiers]);
@@ -124,7 +129,7 @@ export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch
     onCreated(made, draft);
     return true;
   };
-  const detail = (x: Dossier, railTop: string) => <DossierDetail key={x.id} d={x} staffName={staffName} team={store.team} railTop={railTop} focus={focus} onFocused={onFocused} onInvoices={onInvoices} onPatch={(p, o) => patch(x.id, p, o)} onMove={(s) => move(x.id, s)} onTouch={onTouch} />;
+  const detail = (x: Dossier, railTop: string) => <DossierDetail key={x.id} d={x} staffName={staffName} team={store.team} railTop={railTop} focus={focus} onFocused={onFocused} onInvoices={onInvoices} onPatch={(p, o) => patch(x.id, p, o)} onMove={(s) => move(x.id, s)} onTouch={onTouch} onRoll={x.tax_year != null ? () => setRoll({ one: x }) : undefined} />;
 
   return (
     <div>
@@ -140,7 +145,8 @@ export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch
               <button key={k} type="button" onClick={() => setFilter({ scope: k })} aria-pressed={f.scope === k} className={chip}>{l}</button>
             ))}
           </div>
-          <button type="button" onClick={() => setUi((u) => ({ ...u, view: "liste", creating: true, current: null }))} className="btn-primary ml-auto min-h-11 px-5 py-2 text-sm">Nouveau dossier</button>
+          <button type="button" onClick={() => setRoll({ one: null })} className={`${smallBtn} ml-auto`}>Reconduction annuelle</button>
+          <button type="button" onClick={() => setUi((u) => ({ ...u, view: "liste", creating: true, current: null }))} className="btn-primary min-h-11 px-5 py-2 text-sm">Nouveau dossier</button>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_1fr_auto]">
           <div><label htmlFor="d-q" className="sr-only">Chercher un dossier</label><input id="d-q" type="search" value={f.q} onChange={(e) => setFilter({ q: e.target.value })} placeholder="Chercher un client, un dossier" className="field min-h-11 py-2 text-sm" /></div>
@@ -152,6 +158,7 @@ export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch
         <p role="status" aria-live="polite" className="mt-2 px-1 text-xs text-ink/80">{shown.length} dossier{shown.length > 1 ? "s" : ""} affiché{shown.length > 1 ? "s" : ""}, les plus urgents d'abord.</p>
       </div>
 
+      {roll && <RollForward key={roll.one?.id ?? "annee"} dossiers={store.dossiers} one={roll.one} onClose={() => setRoll(null)} onCreated={onRolled} onRemoved={unroll} />}
       {view === "tableau" ? (
         <>
           <StageBoard shown={shown} waiting={waiting} hidesClosed={f.scope === "a_faire"} onOpen={(id) => setUi((u) => ({ ...u, current: id }))} onMove={move} />

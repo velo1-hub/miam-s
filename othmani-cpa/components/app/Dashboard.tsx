@@ -7,14 +7,14 @@ import { useCallback, useEffect, useRef, useState, type SetStateAction } from "r
 import { supabase } from "@/lib/supabase";
 import { demoRole } from "@/lib/demo";
 import { AppFrame, LoadError, Skeleton, save, statusLabel, toast, type Dossier } from "./shared";
-import { NO_FILTER, SECTIONS, SECTION_ALIAS, SectionHead, link, rows, smallBtn, useLoad, type DFilter, type DossierUi, type FileDoc, type Focus, type Invoice, type LastMsg, type Lead, type PatchDossier, type PatchLead, type Section, type Store, type Task } from "./dashboard/common";
+import { NO_FILTER, SECTIONS, SECTION_ALIAS, SectionHead, isTyping, link, rows, smallBtn, useLoad, useOnline, type DFilter, type DossierUi, type FileDoc, type Focus, type Invoice, type LastMsg, type Lead, type PatchDossier, type PatchLead, type Section, type Store, type Task } from "./dashboard/common";
 import { Clients, type ClientUi } from "./dashboard/clients";
 import { Dossiers } from "./dashboard/dossiers";
 import { Fees } from "./dashboard/invoices";
 import { Leads } from "./dashboard/prospects";
 import { Calendar, DocumentsSection, MessagesSection } from "./dashboard/sections";
-import { Reminders, Team } from "./dashboard/settings";
-import { FrameStyle, SideNav, TopBar, type SearchTargets } from "./dashboard/shell";
+import { Feedback, Reminders, Team } from "./dashboard/settings";
+import { FrameStyle, GO_KEYS, ShortcutsHelp, SideNav, TopBar, type SearchTargets } from "./dashboard/shell";
 import { Today } from "./dashboard/today";
 
 /* ───────────── Espace de travail ───────────── */
@@ -34,7 +34,14 @@ async function loadStore(): Promise<Store> {
   // Dernier message de chaque dossier : la liste arrive du plus récent au plus ancien, on garde le premier vu.
   const last = new Map<string, LastMsg>();
   for (const m of msgs) if (!last.has(m.dossier_id)) last.set(m.dossier_id, m);
-  return { dossiers, leads, waiting, team: staff.map((m) => m.name || m.email), tasks, docs, clientDocs: docs.filter((f) => f.uploader_role === "client"), pendingReqs: pending.map((r) => r.id), invoices, lastMsgs: [...last.values()] };
+  // Début de l'attente : en remontant depuis le plus récent, le plus ancien message du client avant la dernière réponse du cabinet.
+  const waitSince: Record<string, string> = {};
+  const answered = new Set<string>();
+  for (const m of msgs) {
+    if (answered.has(m.dossier_id)) continue;
+    if (m.author_role === "client") waitSince[m.dossier_id] = m.created_at; else answered.add(m.dossier_id);
+  }
+  return { waitSince, dossiers, leads, waiting, team: staff.map((m) => m.name || m.email), tasks, docs, clientDocs: docs.filter((f) => f.uploader_role === "client"), pendingReqs: pending.map((r) => r.id), invoices, lastMsgs: [...last.values()] };
 }
 
 function Workspace({ email, staffName }: { email: string; staffName: string }) {
@@ -138,6 +145,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
   /** Le cabinet vient de répondre : le dossier n'attend plus de réponse, et son dernier message est le nôtre. */
   const onSent = useCallback((dossierId: string) => {
     edit("waiting", (l) => l.filter((x) => x !== dossierId));
+    edit("waitSince", (w) => Object.fromEntries(Object.entries(w).filter(([k]) => k !== dossierId)));
     edit("lastMsgs", (l) => [{ dossier_id: dossierId, created_at: new Date().toISOString(), author_role: "cabinet", author_name: staffName, body: "Réponse envoyée." }, ...l.filter((x) => x.dossier_id !== dossierId)]);
     dirty.current = true;
   }, [edit, staffName]);
@@ -153,6 +161,26 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     setUi((u) => ({ ...u, view: "liste", current: d.id, creating: false }));
   }, [edit, patchLead]);
 
+  /** Reconduction annuelle : les dossiers créés entrent dans la liste ; « Annuler » les en retire. */
+  const addDossiers = useCallback((list: Dossier[]) => edit("dossiers", (l) => [...list, ...l.filter((x) => !list.some((n) => n.id === x.id))]), [edit]);
+  const removeDossiers = useCallback((ids: string[]) => edit("dossiers", (l) => l.filter((x) => !ids.includes(x.id))), [edit]);
+
+  // Raccourcis : « ? » ouvre la liste ; « g » puis une lettre change de section. Rien pendant la saisie ni quand une fenêtre est ouverte.
+  const [help, setHelp] = useState(false);
+  const online = useOnline();
+  useEffect(() => {
+    let armed = 0;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target) || document.querySelector("dialog[open],[role=dialog]")) { armed = 0; return; }
+      const k = e.key.toLowerCase();
+      if (e.key === "?") { e.preventDefault(); armed = 0; setHelp(true); return; }
+      if (armed && Date.now() - armed < 1500 && GO_KEYS[k]) { e.preventDefault(); armed = 0; go(GO_KEYS[k]); return; }
+      armed = k === "g" ? Date.now() : 0;
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [go]);
+
   const store = load.data;
   const demo = Boolean(demoRole());
   const badges: Partial<Record<Section, [number, string]>> = store ? {
@@ -167,12 +195,14 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     <div className="min-h-svh lg:pl-56 [&_.field]:placeholder:text-muted">
       <FrameStyle />
       <SideNav section={section} go={go} badges={badges} />
-      <TopBar store={store} to={targets.current} staffName={staffName} demo={demo} />
+      <TopBar store={store} to={targets.current} staffName={staffName} demo={demo} onHelp={() => setHelp(true)} />
+      {help && <ShortcutsHelp onClose={() => setHelp(false)} />}
+      <p role="status" aria-live="polite" data-offline={online ? undefined : ""} className={online ? "sr-only" : "sticky top-0 z-40 bg-[#fff4e5] px-4 py-2.5 text-center text-sm font-semibold text-[#6b3d00] lg:top-[4.25rem]"}>{online ? "" : "Vous êtes hors ligne. Les modifications ne seront pas enregistrées tant que la connexion n'est pas rétablie."}</p>
       <div className="mx-auto max-w-[92rem] px-4 pt-3 pb-12 sm:px-6 lg:pt-2">
         {section === "parametres" ? (
           <>
-            <SectionHead title="Paramètres" sub="Équipe du cabinet et inscriptions aux rappels fiscaux." />
-            <div className="grid gap-6 xl:grid-cols-2 xl:items-start"><Team me={email.toLowerCase()} /><Reminders /></div>
+            <SectionHead title="Paramètres" sub="Équipe du cabinet, inscriptions aux rappels fiscaux et avis privés des clients." />
+            <div className="grid gap-6 xl:grid-cols-2 xl:items-start"><Team me={email.toLowerCase()} /><Reminders /><div className="xl:col-span-2"><Feedback openDossier={openDossier} /></div></div>
           </>
         ) : !store ? (
           load.error ? <LoadError lang="fr" retry={() => reload()} /> : <Skeleton label="Chargement du tableau de bord" rows={4} />
@@ -189,7 +219,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
         ) : section === "dossiers" ? (
           <>
             <div className={detailOpen ? "hidden min-[1400px]:block" : ""}><SectionHead title="Dossiers">{refresh}</SectionHead></div>
-            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} />
+            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} onRolled={addDossiers} onUnrolled={removeDossiers} />
           </>
         ) : section === "clients" ? (
           <>

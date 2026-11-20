@@ -2,7 +2,8 @@
 import { useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Messages, fmtDate, type Appointment } from "../shared";
-import { Avatar, Loadable, addDays, askAi, box, chip, clockFmt, dayOf, docsToCheck, empty, link, openFile, pill, rows, smallBtn, todayISO, useLoad, warnPill, type OpenDossier, type Store } from "./common";
+import { Avatar, Loadable, WAIT_RULE, addDays, askAi, box, chip, clockFmt, dayOf, docsToCheck, empty, link, openFile, pill, rows, smallBtn, todayISO, useLoad, waitOf, warnPill, type OpenDossier, type Store } from "./common";
+import { Templates } from "./detail";
 
 /* ───────────── Documents : tous les fichiers récents, tous dossiers confondus ───────────── */
 export function DocumentsSection({ store, openDossier, markReceived }: { store: Store; openDossier: OpenDossier; markReceived: (requestId: string) => void }) {
@@ -55,15 +56,25 @@ export function MessagesSection({ store, staffName, current, setCurrent, openDos
   const byId = useMemo(() => new Map(store.dossiers.map((d) => [d.id, d])), [store.dossiers]);
   const waiting = useMemo(() => new Set(store.waiting), [store.waiting]);
   // Un dossier qui attend une réponse figure toujours dans la liste, même si son dernier message est trop ancien pour avoir été chargé.
-  const threads = useMemo(() => [...store.lastMsgs.filter((m) => byId.has(m.dossier_id)), ...store.waiting.filter((id) => byId.has(id) && !store.lastMsgs.some((m) => m.dossier_id === id)).map((id) => ({ dossier_id: id, created_at: byId.get(id)!.updated_at, author_role: "client", author_name: "", body: "Message du client à lire." }))].sort((a, b) => Number(waiting.has(b.dossier_id)) - Number(waiting.has(a.dossier_id)) || b.created_at.localeCompare(a.created_at)), [store.lastMsgs, store.waiting, byId, waiting]);
+  const all = useMemo(() => [...store.lastMsgs.filter((m) => byId.has(m.dossier_id)), ...store.waiting.filter((id) => byId.has(id) && !store.lastMsgs.some((m) => m.dossier_id === id)).map((id) => ({ dossier_id: id, created_at: byId.get(id)!.updated_at, author_role: "client", author_name: "", body: "Message du client à lire." }))], [store.lastMsgs, store.waiting, byId]);
+  // Attente de chaque conversation qui attend le cabinet ; la plus longue d'abord, puis les autres conversations, les plus récentes d'abord.
+  const waits = useMemo(() => new Map(store.waiting.map((id) => [id, waitOf(store, id)] as const)), [store]);
+  const threads = useMemo(() => [...all].sort((a, b) => Number(waiting.has(b.dossier_id)) - Number(waiting.has(a.dossier_id)) || (waiting.has(a.dossier_id) ? (waits.get(b.dossier_id)?.hours ?? -1) - (waits.get(a.dossier_id)?.hours ?? -1) : 0) || b.created_at.localeCompare(a.created_at)), [all, waiting, waits]);
+  const overdue = threads.filter((m) => waits.get(m.dossier_id)?.late).length;
   const d = current ? byId.get(current) : undefined;
   return (
     <div className="grid gap-5 lg:grid-cols-[21rem_minmax(0,1fr)] lg:items-start">
       <div className={d ? "hidden lg:block" : ""}>
+        {waiting.size > 0 && (
+          <p className={`mb-3 rounded-2xl px-3.5 py-2.5 text-sm ${overdue ? "bg-[#fff4e5] text-[#6b3d00]" : "border border-[#e6e8f2] bg-white text-ink"}`} title={WAIT_RULE}>
+            <strong className="font-semibold">{overdue ? (overdue > 1 ? `${overdue} conversations attendent depuis plus d'un jour ouvrable.` : "1 conversation attend depuis plus d'un jour ouvrable.") : "Aucune réponse en retard."}</strong> Le cabinet promet une réponse en un jour ouvrable. La plus longue attente figure en premier.
+          </p>
+        )}
         {threads.length === 0 ? <p className={empty}>Aucune conversation pour l'instant.</p> : (
           <ul aria-label="Conversations" className="space-y-2">
             {threads.map((m) => {
               const x = byId.get(m.dossier_id)!;
+              const w = waits.get(x.id);
               return (
                 <li key={m.dossier_id}>
                   <button type="button" data-thread={x.id} onClick={() => setCurrent(x.id)} aria-current={x.id === current ? "true" : undefined} className="flex w-full items-start gap-3 rounded-2xl border border-[#e6e8f2] bg-white p-3.5 text-left hover:border-navy aria-[current=true]:border-navy aria-[current=true]:bg-sky-50">
@@ -72,7 +83,9 @@ export function MessagesSection({ store, staffName, current, setCurrent, openDos
                       <span className="flex items-center justify-between gap-2"><span className="truncate font-semibold text-ink">{x.client_name}</span><span className="shrink-0 text-xs text-muted">{fmtDate(m.created_at, "fr")}</span></span>
                       <span className="block truncate text-xs text-muted">{x.title}</span>
                       <span className="mt-1 line-clamp-2 block text-sm text-ink/80">{m.author_role === "client" ? "" : "Vous : "}{m.body}</span>
-                      {waiting.has(x.id) && <span className={`${warnPill} mt-2 inline-block`}>À répondre</span>}
+                      {waiting.has(x.id) && (w?.late
+                        ? <span data-wait="late" title={WAIT_RULE} className={`${warnPill} mt-2 inline-block`}>À répondre · attend depuis {w.text} · délai dépassé</span>
+                        : <span data-wait="ok" title={WAIT_RULE} className={`${pill} mt-2 inline-block bg-sky-100 text-navy`}>À répondre{w ? ` · attend depuis ${w.text}` : ""}</span>)}
                     </span>
                   </button>
                 </li>
@@ -80,7 +93,8 @@ export function MessagesSection({ store, staffName, current, setCurrent, openDos
             })}
           </ul>
         )}
-        <p className="mt-3 text-xs text-muted">Pour écrire à un client qui n'a pas encore de conversation, ouvrez son dossier.</p>
+        <p className="mt-3 text-xs text-muted">{WAIT_RULE}</p>
+        <p className="mt-2 text-xs text-muted">Pour écrire à un client qui n'a pas encore de conversation, ouvrez son dossier.</p>
       </div>
       <div className={`min-w-0 ${d ? "" : "hidden lg:block"}`}>
         {d ? (
@@ -91,6 +105,7 @@ export function MessagesSection({ store, staffName, current, setCurrent, openDos
               <button type="button" onClick={() => openDossier(d.id, "messages")} className={smallBtn}>Ouvrir le dossier</button>
             </div>
             <Messages key={d.id} dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} onSent={() => onSent(d.id)} aiDraft={() => askAi(d.id, "reply")} />
+            <div className="mt-3"><Templates key={d.id} d={d} /></div>
           </>
         ) : <p className={empty}>Choisissez une conversation.</p>}
       </div>

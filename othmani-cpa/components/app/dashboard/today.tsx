@@ -1,12 +1,12 @@
 "use client";
 import { useMemo, type ReactNode } from "react";
 import { STEPS5, fmtDate, step5 } from "../shared";
-import { Avatar, Box, Eyebrow, Icon, STAGE_INK, STAGE_TONE, box, daySentence, daysUntil, docsToCheck, dueInfo, isLate, isSoon, link, money, plural, smallBtn, type DFilter, type Lead, type OpenDossier, type Section, type Store, type Task } from "./common";
+import { Avatar, Box, Eyebrow, Icon, STAGE_INK, STAGE_TONE, WAIT_RULE, box, daySentence, daysUntil, docsToCheck, dueInfo, isLate, isSoon, link, money, plural, smallBtn, waitOf, type DFilter, type Lead, type OpenDossier, type Section, type Store, type Task } from "./common";
 import { paidThisMonth, sumCents } from "./invoices";
 
 type Tone = "review" | "info" | "warn" | "late";
 const TONE: Record<Tone, string> = { review: "text-[#5140b8]", info: "text-[#0d6474]", warn: "text-[#8a4b00]", late: "text-[#a3261f]" };
-type Priority = { key: string; name: string; label: string; tone: Tone; onClick: () => void; action?: ReactNode };
+type Priority = { key: string; name: string; label: string; tone: Tone; onClick: () => void; action?: ReactNode; wait?: { text: string; late: boolean } };
 
 /** Les vrais décomptes du jour : servent aux tuiles, à la phrase du jour et à l'écran du téléphone. */
 export function useCounts(store: Store) {
@@ -71,6 +71,7 @@ function PriorityList({ items, more }: { items: Priority[]; more: () => void }) 
                   <span className="block truncate font-semibold text-ink">{p.name}</span>
                   <span className={`block truncate text-sm font-medium ${TONE[p.tone]}`}><span aria-hidden="true">● </span>{p.label}</span>
                 </span>
+                {p.wait && <span data-wait={p.wait.late ? "late" : "ok"} title={WAIT_RULE} className={`hidden shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold sm:inline ${p.wait.late ? "bg-[#fff4e5] text-[#6b3d00]" : "bg-[#eef0f6] text-ink"}`}>{p.wait.late ? "Délai de réponse dépassé" : "Dans le délai de réponse"}</span>}
                 {!p.action && <span className="shrink-0 text-xl text-ink/50" aria-hidden="true">›</span>}
               </button>
               {p.action}
@@ -78,7 +79,52 @@ function PriorityList({ items, more }: { items: Priority[]; more: () => void }) 
           ))}
         </ul>
       )}
+      {items.some((p) => p.wait) && <p className="mt-2 px-1 text-xs text-muted">Réponse promise en un jour ouvrable. {WAIT_RULE}</p>}
     </section>
+  );
+}
+
+/** Charge de travail : pour chaque personne, ses dossiers en cours et ses tâches ouvertes, avec la part en retard. */
+function Workload({ store, showDossiers }: { store: Store; showDossiers: (f: Partial<DFilter>) => void }) {
+  const list = useMemo(() => {
+    const open = store.dossiers.filter((d) => d.status !== "ferme");
+    const known = new Set(store.dossiers.map((d) => d.id));
+    const tasks = store.tasks.filter((t) => !t.done && known.has(t.dossier_id));
+    const names = [...new Set([...store.team, ...open.map((d) => d.assignee ?? ""), ...tasks.map((t) => t.assignee)].filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr"));
+    const row = (name: string, owner: string, mine: (who: string | undefined) => boolean) => {
+      const ds = open.filter((d) => mine(d.assignee)), ts = tasks.filter((t) => mine(t.assignee));
+      return { name, owner, dossiers: ds.length, lateDossiers: ds.filter(isLate).length, tasks: ts.length, lateTasks: ts.filter((t) => t.due_date && daysUntil(t.due_date) < 0).length };
+    };
+    return [...names.map((n) => row(n, n, (who) => who === n)), row("Non attribué", "__aucun", (who) => !who)];
+  }, [store]);
+  const maxD = Math.max(1, ...list.map((r) => r.dossiers)), maxT = Math.max(1, ...list.map((r) => r.tasks));
+  const bar = (n: number, late: number, max: number) => (
+    <span className="mt-1 flex h-2.5 w-full overflow-hidden rounded-full bg-[#eef0f6]" aria-hidden="true">
+      <span className="h-full bg-[#a3261f]" style={{ width: `${(late / max) * 100}%` }} />
+      <span className="h-full bg-[#4a6db0]" style={{ width: `${((n - late) / max) * 100}%` }} />
+    </span>
+  );
+  return (
+    <Box title="Charge de travail" id="charge">
+      <ul className="divide-y divide-line" aria-label="Charge de travail par personne">
+        {list.map((r) => (
+          <li key={r.owner}>
+            <button type="button" data-owner={r.owner} onClick={() => showDossiers({ owner: r.owner })} aria-label={`${r.name} : ${plural(r.dossiers, "dossier en cours", "dossiers en cours")} dont ${r.lateDossiers} en retard, ${plural(r.tasks, "tâche ouverte", "tâches ouvertes")} dont ${r.lateTasks} en retard. Voir ses dossiers.`} className="grid w-full gap-x-5 gap-y-2 rounded-xl py-3 text-left hover:bg-sky-50 sm:grid-cols-[13rem_1fr_1fr] sm:items-center">
+              <span className="flex min-w-0 items-center gap-3">{r.owner === "__aucun" ? <span aria-hidden="true" className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed border-[#9aa0b8] text-xs text-muted">?</span> : <Avatar name={r.name} className="h-9 w-9 text-xs" />}<span className="truncate font-semibold text-ink">{r.name}</span></span>
+              <span className="block min-w-0 text-sm text-ink">
+                <span className="block">{plural(r.dossiers, "dossier en cours", "dossiers en cours")}{r.lateDossiers > 0 && <span className="font-semibold text-[#a3261f]"> · {r.lateDossiers} en retard</span>}</span>
+                {bar(r.dossiers, r.lateDossiers, maxD)}
+              </span>
+              <span className="block min-w-0 text-sm text-ink">
+                <span className="block">{plural(r.tasks, "tâche ouverte", "tâches ouvertes")}{r.lateTasks > 0 && <span className="font-semibold text-[#a3261f]"> · {r.lateTasks} en retard</span>}</span>
+                {bar(r.tasks, r.lateTasks, maxT)}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 border-t border-line pt-3 text-xs text-muted">Dossiers non fermés et tâches non terminées. En rouge : la part dont l'échéance est passée. Choisissez une ligne pour voir les dossiers de cette personne.</p>
+    </Box>
   );
 }
 
@@ -97,8 +143,10 @@ export function Today({ store, staffName, firstName, demo, refresh, openDossier,
   const seen = new Set<string>();
   const once = (list: Priority[]) => list.filter((p) => !seen.has(p.key) && seen.add(p.key));
   const priorities: Priority[] = [
-    ...once(c.late.map((d) => ({ key: d.id, name: d.client_name, label: `${dueInfo(d.due_date!).text} · ${d.title}`, tone: "late" as const, onClick: () => openDossier(d.id) }))),
-    ...once(c.toRead.map((d) => ({ key: d.id, name: d.client_name, label: "Message à lire", tone: "warn" as const, onClick: () => openDossier(d.id, "messages") }))),
+    // Un dossier en retard qui attend aussi une réponse garde sa ligne « en retard », avec l'attente du client en plus.
+    ...once(c.late.map((d) => { const w = waitOf(store, d.id); return { key: d.id, name: d.client_name, label: `${dueInfo(d.due_date!).text} · ${d.title}${w ? ` · message en attente depuis ${w.text}` : ""}`, tone: "late" as const, onClick: () => openDossier(d.id), wait: w ?? undefined }; })),
+    // Messages à lire : la plus longue attente d'abord ; en ambre seulement au-delà d'un jour ouvrable.
+    ...once(c.toRead.map((d) => ({ d, w: waitOf(store, d.id) })).sort((a, b) => (b.w?.hours ?? -1) - (a.w?.hours ?? -1)).map(({ d, w }) => ({ key: d.id, name: d.client_name, label: w ? `Message à lire · attend depuis ${w.text}` : "Message à lire", tone: w?.late ? ("warn" as const) : ("info" as const), onClick: () => openDossier(d.id, "messages"), wait: w ?? undefined }))),
     ...once(c.review.map((d) => ({ key: d.id, name: d.client_name, label: `À réviser · ${d.title}`, tone: "review" as const, onClick: () => openDossier(d.id) }))),
     ...toCheck.map((f) => ({ key: `f-${f.id}`, name: name(f.dossier_id), label: `Document à vérifier · ${f.name}`, tone: "info" as const, onClick: () => openDossier(f.dossier_id, "documents"), action: f.request_id ? <button type="button" onClick={() => markReceived(f.request_id!)} className={`${smallBtn} shrink-0`}>Marquer reçu</button> : undefined })),
     ...c.fresh.map((l) => ({ key: `l-${l.id}`, name: l.name, label: "Prospect à approuver", tone: "warn" as const, onClick: () => openLead(l.id) })),
@@ -187,6 +235,8 @@ export function Today({ store, staffName, firstName, demo, refresh, openDossier,
           <p className="mt-3 text-xs text-ink/80">Phrase composée à partir des décomptes réels du cabinet, sans IA.</p>
         </section>
       </div>
+
+      <div className="order-5 lg:order-none"><Workload store={store} showDossiers={showDossiers} /></div>
 
       <div className="order-2 lg:order-none"><PriorityList items={priorities} more={() => showDossiers({})} /></div>
     </div>

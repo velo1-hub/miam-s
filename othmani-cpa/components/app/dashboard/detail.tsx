@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
+import { QGROUPS, QUESTIONS } from "@/lib/questionnaire";
 import { Card, Documents, KINDS, Messages, STATUSES, STEPS5, WEATHER, fmtDate, save, statusLabel, step5, toast, type Appointment, type Dossier, type Signature } from "../shared";
-import { Loadable, SavedAt, askAi, clockFmt, daysUntil, link, mailQuery, mailto, montrealISO, newId, origin, panel, pill, removeBtn, rows, smallBtn, todayISO, useLoad, warnPill, type FileDoc, type Focus, type Invoice, type Note, type PatchOpts, type Req, type Task } from "./common";
+import { BUSINESS_KINDS, INVOICE_STATUS, Loadable, SavedAt, askAi, clockFmt, copyText, daysUntil, link, money, mailQuery, mailto, montrealISO, newId, origin, panel, pill, removeBtn, rows, smallBtn, todayISO, useLoad, warnPill, type FileDoc, type Focus, type Invoice, type Note, type PatchOpts, type Req, type Task } from "./common";
 import { DossierInvoices } from "./invoices";
 /* ───────────── Détail d'un dossier ───────────── */
-export function DossierHeader({ d }: { d: Dossier }) {
+export function DossierHeader({ d, onRoll, onPrint, printing = false }: { d: Dossier; onRoll?: () => void; onPrint?: () => void; printing?: boolean }) {
   const text = `Bonjour,\n\nVotre dossier « ${d.title} » est ouvert chez Othmani CPA. Vous pouvez suivre son avancement, déposer vos documents et nous écrire dans votre espace client :\n\n${origin()}/espace-client/\n\nConnectez-vous avec ce courriel : ${d.client_email}. Vous recevrez un code de connexion, sans mot de passe.\n\nL'équipe d'Othmani CPA`;
   const copy = async () => {
     try { await navigator.clipboard.writeText(text); toast("Invitation copiée."); } catch { toast("Copie impossible. Utilisez le lien courriel.", "error"); }
@@ -18,6 +20,13 @@ export function DossierHeader({ d }: { d: Dossier }) {
         <button type="button" onClick={copy} className={smallBtn}>Copier l'invitation à l'espace client</button>
         <a href={mailto(d.client_email, mailQuery("Votre espace client Othmani CPA", text))} className={`${link} text-sm`}>L'envoyer par courriel</a>
       </div>
+      {(onRoll || onPrint) && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+          {onRoll && d.tax_year != null && <button type="button" onClick={onRoll} className={smallBtn}>Reconduire pour {d.tax_year + 1}</button>}
+          {onPrint && <button type="button" onClick={onPrint} disabled={printing} className={smallBtn}>{printing ? "Préparation…" : "Imprimer le résumé"}</button>}
+          {onPrint && <p className="basis-full text-xs text-muted">Le résumé imprimé contient l'étape, les documents demandés, les tâches et les factures. Ni les messages ni les notes.</p>}
+        </div>
+      )}
     </header>
   );
 }
@@ -441,11 +450,215 @@ export function Appointments({ dossierId }: { dossierId: string }) {
   );
 }
 
+/* ───────────── Questionnaire du client ───────────── */
+type QRow = { dossier_id: string; submitted_at: string; answers: Record<string, string> | null; note: string | null };
+/** Réponses du client à son questionnaire annuel, par groupe, les « Oui » d'abord avec le document que chacun a ajouté à sa liste. */
+export function Questionnaire({ d, staffName }: { d: Dossier; staffName: string }) {
+  // `row` peut être absent : on l'enveloppe pour distinguer « pas encore rempli » de « en cours de chargement ».
+  const load = useLoad(async () => {
+    const { data, error } = await supabase().from("questionnaires").select("*").eq("dossier_id", d.id).maybeSingle();
+    if (error) throw error;
+    return { row: data as QRow | null };
+  }, d.id);
+  const invite = `Bonjour,\n\nPour préparer votre dossier « ${d.title} », merci de remplir le questionnaire annuel dans votre espace client. Il prend quelques minutes. Chaque réponse « Oui » ajoute à votre liste le document à nous fournir.\n\n${origin()}/espace-client/\n\nConnectez-vous avec ce courriel : ${d.client_email}.\n\nMerci,\n${staffName}\nOthmani CPA`;
+  return (
+    <Card title="Questionnaire du client">
+      <Loadable load={load} label="Chargement du questionnaire" rows={1}>
+        {({ row }) => {
+          if (!row) return (
+            <>
+              <p className="text-sm text-muted">Le client n'a pas encore rempli son questionnaire.</p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <button type="button" onClick={() => copyText(invite, "Invitation copiée. Collez-la dans votre courriel.", "Copie impossible. Utilisez le lien courriel.")} className={smallBtn}>Copier l'invitation au questionnaire</button>
+                <a href={mailto(d.client_email, mailQuery(`Questionnaire annuel : ${d.title}`, invite))} className={`${link} text-sm`}>Ouvrir dans un courriel</a>
+                <p className="basis-full text-xs text-muted">Rien n'est envoyé automatiquement.</p>
+              </div>
+            </>
+          );
+          const answers = row.answers ?? {};
+          const yes = QUESTIONS.filter((q) => answers[q.key] === "true");
+          return (
+            <>
+              <p className="-mt-2 mb-4 text-sm text-muted">Rempli le {fmtDate(row.submitted_at, "fr", true)} · {yes.length} « Oui » sur {QUESTIONS.length} questions.</p>
+              <div className="space-y-4">
+                {Object.entries(QGROUPS).map(([g, label]) => {
+                  // Les « Oui » d'abord, puis les « Non », puis les questions laissées sans réponse.
+                  const rank = (k: string) => (answers[k] === "true" ? 0 : answers[k] === "false" ? 1 : 2);
+                  const list = QUESTIONS.filter((q) => q.group === g).sort((a, b) => rank(a.key) - rank(b.key));
+                  if (!list.length) return null;
+                  return (
+                    <div key={g}>
+                      <h4 className="pf-eyebrow mb-1.5">{label.fr}</h4>
+                      <ul className="space-y-1.5">
+                        {list.map((q) => {
+                          const r = rank(q.key);
+                          return (
+                            <li key={q.key} className={`flex items-start gap-3 rounded-xl px-3 py-2 text-sm ${r === 0 ? "bg-[#f1f8f3]" : "bg-[#f5f7fb]"}`}>
+                              <span className={`${pill} shrink-0 ${r === 0 ? "bg-[#d9efe0] text-[#1e5b2e]" : "bg-white text-ink"}`}>{r === 0 ? "Oui" : r === 1 ? "Non" : "Sans réponse"}</span>
+                              <span className="min-w-0">
+                                <span className={`block ${r === 0 ? "font-medium text-ink" : "text-ink/80"}`}>{q.fr}</span>
+                                {r === 0 && <span className="block text-xs text-ink/80">Document ajouté à la liste : {q.doc}</span>}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 border-t border-line pt-3">
+                <h4 className="pf-eyebrow mb-1.5">Note du client</h4>
+                {row.note?.trim() ? <p className="rounded-xl bg-[#f5f7fb] px-3 py-2 text-sm leading-relaxed whitespace-pre-line text-ink">{row.note}</p> : <p className="text-sm text-muted">Aucune note.</p>}
+              </div>
+            </>
+          );
+        }}
+      </Loadable>
+    </Card>
+  );
+}
+
+/* ───────────── Modèles de messages ───────────── */
+/** Textes courts à relire avant l'envoi. `{prénom}` et `{dossier}` sont remplacés au moment de la copie. */
+export const MESSAGE_TEMPLATES: { key: string; label: string; text: string }[] = [
+  { key: "recus", label: "Documents reçus", text: "Bonjour {prénom},\n\nNous avons bien reçu vos documents pour le dossier « {dossier} ». Nous les vérifions. Nous vous écrirons s'il manque quelque chose.\n\nMerci." },
+  { key: "manquant", label: "Document manquant", text: "Bonjour {prénom},\n\nPour avancer dans le dossier « {dossier} », il nous manque encore un document. La liste se trouve dans votre espace client. Une photo lisible suffit.\n\nMerci." },
+  { key: "signer", label: "Dossier prêt à signer", text: "Bonjour {prénom},\n\nLe dossier « {dossier} » est prêt. Merci de relire le document à signer dans votre espace client, puis de l'approuver. Écrivez-nous si vous avez une question avant de signer." },
+  { key: "transmis", label: "Déclaration transmise", text: "Bonjour {prénom},\n\nVotre déclaration a été transmise pour le dossier « {dossier} ». Nous vous écrirons dès que nous aurons du nouveau.\n\nMerci de votre confiance." },
+  { key: "facture", label: "Facture disponible", text: "Bonjour {prénom},\n\nLa facture du dossier « {dossier} » est disponible dans votre espace client. Écrivez-nous pour toute question.\n\nMerci." },
+  { key: "rdv", label: "Rendez-vous à confirmer", text: "Bonjour {prénom},\n\nNous avons bien reçu votre demande de rendez-vous pour le dossier « {dossier} ». Pouvez-vous nous indiquer vos disponibilités ? Le rendez-vous sera confirmé une fois la date et l'heure fixées." },
+];
+/** Prénom du client, ou rien pour une entreprise : « Bonjour, » plutôt que « Bonjour Boulangerie, ». */
+export function firstNameOf(d: Pick<Dossier, "client_name" | "kind">): string {
+  if (BUSINESS_KINDS.includes(d.kind) || /\b(inc|lt[ée]e|ltd|enr|s\.?e\.?n\.?c|corp|cie)\b\.?/i.test(d.client_name) || /\d/.test(d.client_name)) return "";
+  const words = d.client_name.trim().split(/\s+/);
+  return words.length >= 2 ? words[0] : "";
+}
+export const fillTemplate = (text: string, d: Pick<Dossier, "client_name" | "kind" | "title">) => {
+  const first = firstNameOf(d);
+  return text.replaceAll("Bonjour {prénom},", first ? `Bonjour ${first},` : "Bonjour,").replaceAll("{prénom}", first || d.client_name).replaceAll("{dossier}", d.title);
+};
+/** Menu « Modèles » : le texte choisi est copié, à coller dans le message. La liste s'ouvre sur place, sans fenêtre flottante. */
+export function Templates({ d }: { d: Dossier }) {
+  const [open, setOpen] = useState(false);
+  const id = `tpl-${d.id}`;
+  return (
+    <div className="rounded-2xl border border-line bg-white px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)} className={smallBtn}>Modèles de messages<span aria-hidden="true" className="ml-1">{open ? "▴" : "▾"}</span></button>
+        <p className="text-xs text-muted">Le modèle est copié : collez-le, puis relisez.</p>
+      </div>
+      <ul id={id} hidden={!open} className="mt-2 space-y-1">
+        {MESSAGE_TEMPLATES.map((t) => (
+          <li key={t.key}>
+            <button type="button" data-template={t.key} onClick={() => copyText(fillTemplate(t.text, d), `Modèle « ${t.label} » copié. Collez-le dans le message.`)} className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-3 py-1.5 text-left text-sm font-medium text-ink hover:bg-sky-50">
+              <span>{t.label}</span><span className="shrink-0 text-xs font-semibold text-navy underline underline-offset-4">Copier</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ───────────── Résumé imprimable ───────────── */
+type Summary = { reqs: Req[]; tasks: Task[]; invoices: Invoice[]; at: Date };
+/** À l'impression, seul le résumé reste : il est placé directement sous <body> et tout le reste est masqué. */
+const PRINT_CSS = `
+.pf-print { display: none; }
+@media print {
+  @page { margin: 16mm; }
+  body > *:not(.pf-print) { display: none !important; }
+  html, body { background: #fff !important; }
+  .pf-print { display: block !important; color: #000; font-size: 11pt; line-height: 1.45; }
+  .pf-print h1 { font-size: 18pt; font-weight: 700; margin: 0 0 2mm; color: #000; }
+  .pf-print h2 { font-size: 12pt; font-weight: 700; margin: 7mm 0 2mm; padding-bottom: 1mm; border-bottom: 1px solid #000; color: #000; }
+  .pf-print table { width: 100%; border-collapse: collapse; }
+  .pf-print th, .pf-print td { text-align: left; vertical-align: top; padding: 1.5mm 3mm 1.5mm 0; border-bottom: 1px solid #bbb; }
+  .pf-print th { font-weight: 600; }
+  .pf-print tr { break-inside: avoid; }
+  .pf-print dl { display: grid; grid-template-columns: 42mm 1fr; gap: 1mm 4mm; margin: 3mm 0 0; }
+  .pf-print dt { font-weight: 600; }
+  .pf-print dd { margin: 0; }
+  .pf-print .pf-print-foot { margin-top: 9mm; font-size: 9pt; color: #333; }
+}`;
+/** Charge les listes du dossier, affiche le résumé puis ouvre l'impression. Le résumé est retiré une fois l'impression terminée. */
+export function usePrintSummary(d: Dossier) {
+  const [data, setData] = useState<Summary | null>(null);
+  const [busy, setBusy] = useState(false);
+  const print = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const db = supabase();
+      const [reqs, tasks, invoices] = await Promise.all([
+        rows<Req>(db.from("document_requests").select("*").eq("dossier_id", d.id).order("created_at")),
+        rows<Task>(db.from("tasks").select("*").eq("dossier_id", d.id).order("created_at")),
+        rows<Invoice>(db.from("invoices").select("*").eq("dossier_id", d.id).order("created_at")),
+      ]);
+      setData({ reqs, tasks, invoices, at: new Date() });
+    } catch { toast("Le résumé ne peut pas être préparé. Vérifiez votre connexion.", "error"); }
+    setBusy(false);
+  };
+  useEffect(() => {
+    if (!data) return;
+    const done = () => setData(null);
+    window.addEventListener("afterprint", done);
+    // L'impression part après l'affichage du résumé.
+    const id = window.setTimeout(() => window.print(), 80);
+    return () => { window.removeEventListener("afterprint", done); window.clearTimeout(id); };
+  }, [data]);
+  return { data, busy, print };
+}
+export function PrintSummary({ d, staffName, data }: { d: Dossier; staffName: string; data: Summary }) {
+  const { reqs, tasks, invoices } = data;
+  const received = reqs.filter((r) => r.received).length;
+  return createPortal(
+    <div className="pf-print" data-print-summary>
+      <style>{PRINT_CSS}</style>
+      <p>Othmani CPA · Résumé de dossier</p>
+      <h1>{d.title}</h1>
+      <dl>
+        <dt>Client</dt><dd>{d.client_name} · {d.client_email}</dd>
+        <dt>Type de mandat</dt><dd>{KINDS[d.kind]?.fr ?? d.kind}{d.tax_year ? ` · ${d.tax_year}` : ""}</dd>
+        <dt>Étape</dt><dd>{statusLabel[d.status]?.fr ?? d.status} (vue par le client : {STEPS5[step5(d.status)].fr}, {step5(d.status) + 1} sur 5)</dd>
+        <dt>Responsable</dt><dd>{d.assignee || "Non attribué"}</dd>
+        <dt>Échéance</dt><dd>{d.due_date ? fmtDate(d.due_date, "fr") : "Aucune"}</dd>
+      </dl>
+      <h2>Documents demandés ({received} reçu{received > 1 ? "s" : ""} sur {reqs.length})</h2>
+      {reqs.length === 0 ? <p>Aucun document demandé.</p> : (
+        <table>
+          <thead><tr><th scope="col">Document</th><th scope="col">État</th></tr></thead>
+          <tbody>{reqs.map((r) => <tr key={r.id}><td>{r.label}</td><td>{r.received ? "Reçu" : "À recevoir"}</td></tr>)}</tbody>
+        </table>
+      )}
+      <h2>Tâches</h2>
+      {tasks.length === 0 ? <p>Aucune tâche.</p> : (
+        <table>
+          <thead><tr><th scope="col">Tâche</th><th scope="col">Responsable</th><th scope="col">Échéance</th><th scope="col">État</th></tr></thead>
+          <tbody>{tasks.map((t) => <tr key={t.id}><td>{t.label}</td><td>{t.assignee || "Non attribuée"}</td><td>{t.due_date ? fmtDate(t.due_date, "fr") : "Aucune"}</td><td>{t.done ? "Terminée" : t.due_date && daysUntil(t.due_date) < 0 ? "En retard" : "À faire"}</td></tr>)}</tbody>
+        </table>
+      )}
+      <h2>Factures</h2>
+      {invoices.length === 0 ? <p>Aucune facture.</p> : (
+        <table>
+          <thead><tr><th scope="col">Description</th><th scope="col">Date</th><th scope="col">Montant</th><th scope="col">Statut</th></tr></thead>
+          <tbody>{invoices.map((x) => <tr key={x.id}><td>{x.label}</td><td>{fmtDate(x.created_at, "fr")}</td><td>{money.format(x.amount_cents / 100)}</td><td>{INVOICE_STATUS[x.status] ?? x.status}</td></tr>)}</tbody>
+        </table>
+      )}
+      <p className="pf-print-foot">Document interne du cabinet. Préparé le {fmtDate(data.at.toISOString(), "fr", true)} par {staffName}. Les messages et les notes n'y figurent pas.</p>
+    </div>,
+    document.body,
+  );
+}
+
 /** Fiche d'un dossier : le travail à gauche, les échanges à droite (colonne fixe quand la place le permet). */
-export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices }: {
-  onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
+export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices, onRoll }: {
+  onRoll?: () => void; onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
 }) {
   useEffect(() => { onTouch(); }, [onTouch]);
+  const summary = usePrintSummary(d);
   const rail = useRef<HTMLElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const done = useRef(onFocused);
@@ -465,13 +678,15 @@ export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, o
   }, [focus]);
   return (
     <div ref={root} className="@container">
-      <DossierHeader d={d} />
+      <DossierHeader d={d} onRoll={onRoll} onPrint={summary.print} printing={summary.busy} />
+      {summary.data && <PrintSummary d={d} staffName={staffName} data={summary.data} />}
       <button type="button" onClick={() => { rail.current?.scrollIntoView({ block: "start" }); rail.current?.focus(); }} className={`${smallBtn} mt-4 @[50rem]:hidden`}>Aller aux messages et aux notes</button>
       <div className="mt-6 grid gap-6 @[50rem]:grid-cols-[minmax(0,1fr)_21rem] @[50rem]:items-start">
         <div className="min-w-0 space-y-6">
           <FollowUp d={d} team={team} onPatch={onPatch} onMove={onMove} />
           <Tasks d={d} team={team} />
           <Requests d={d} staffName={staffName} />
+          <Questionnaire d={d} staffName={staffName} />
           <ClientValue d={d} onPatch={onPatch} />
           <div data-focus="documents" tabIndex={-1} className="scroll-mt-24"><Documents dossierId={d.id} role="cabinet" lang="fr" /></div>
           <Signatures dossierId={d.id} />
@@ -479,7 +694,7 @@ export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, o
           <div data-focus="facture" className="scroll-mt-24"><DossierInvoices dossierId={d.id} onList={onInvoices} /></div>
         </div>
         <aside ref={rail} tabIndex={-1} aria-label="Échanges et notes" className={`min-w-0 scroll-mt-28 space-y-6 @[50rem]:sticky @[50rem]:max-h-[calc(100svh-8.5rem)] @[50rem]:overflow-y-auto @[50rem]:rounded-3xl ${railTop}`}>
-          <div data-focus="messages" className="scroll-mt-24"><Messages dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} aiDraft={() => askAi(d.id, "reply")} /></div>
+          <div data-focus="messages" className="scroll-mt-24 space-y-3"><Messages dossierId={d.id} role="cabinet" lang="fr" authorName={staffName} aiDraft={() => askAi(d.id, "reply")} /><Templates d={d} /></div>
           <Notes dossierId={d.id} staffName={staffName} />
           <AiSummary dossierId={d.id} />
           <Journal dossierId={d.id} />

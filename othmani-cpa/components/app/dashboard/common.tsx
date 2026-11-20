@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState, type ReactNode, type SetStateAction } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type SetStateAction } from "react";
 import { real, supabase } from "@/lib/supabase";
 import { demoRole } from "@/lib/demo";
 import { LoadError, Skeleton, toast, type Doc, type DocRequest, type Dossier } from "../shared";
@@ -16,8 +16,11 @@ export type Sub = { id: string; email: string; lang: string; consent_at: string;
 export type Member = { email: string; name: string; is_admin?: boolean | null };
 export type Invoice = { id: string; dossier_id: string; created_at: string; label: string; amount_cents: number; status: string; pay_url: string | null; paid_at: string | null };
 export type LastMsg = { dossier_id: string; created_at: string; author_role: string; author_name: string; body: string };
-/** `docs` : fichiers récents des deux côtés ; `clientDocs` en est la partie déposée par les clients. `lastMsgs` : dernier message de chaque dossier. */
-export type Store = { dossiers: Dossier[]; leads: Lead[]; waiting: string[]; team: string[]; tasks: Task[]; docs: FileDoc[]; clientDocs: FileDoc[]; pendingReqs: string[]; invoices: Invoice[]; lastMsgs: LastMsg[] };
+/**
+ * `docs` : fichiers récents des deux côtés ; `clientDocs` en est la partie déposée par les clients. `lastMsgs` : dernier message de chaque dossier.
+ * `waitSince` : pour chaque dossier, date du plus ancien message du client resté sans réponse (parmi les messages chargés).
+ */
+export type Store = { dossiers: Dossier[]; leads: Lead[]; waiting: string[]; team: string[]; tasks: Task[]; docs: FileDoc[]; clientDocs: FileDoc[]; pendingReqs: string[]; invoices: Invoice[]; lastMsgs: LastMsg[]; waitSince: Record<string, string> };
 export type Focus = "messages" | "rdv" | "facture" | "documents";
 export type OpenDossier = (id: string, focus?: Focus) => void;
 export type DFilter = { scope: "a_faire" | "fermes" | "tous"; stage: string; owner: string; signal: "" | "retard" | "bientot" | "messages"; q: string };
@@ -90,6 +93,34 @@ export function dueInfo(iso: string): { text: string; late: boolean; soon: boole
   if (n < 0) return { text: `En retard de ${-n} j`, late: true, soon: false };
   return { text: n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : `Dans ${n} j`, late: false, soon: n <= SOON_DAYS };
 }
+/* Délai de réponse : le cabinet promet une réponse en un jour ouvrable. */
+export const WAIT_RULE = "Délai compté du lundi au vendredi, heure de Montréal. Les samedis et les dimanches ne comptent pas ; les jours fériés ne sont pas pris en compte. Un jour ouvrable vaut 24 heures : au-delà, le délai promis par le cabinet est dépassé.";
+const HOUR = 3600000;
+const weekdayFmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Montreal", weekday: "short" });
+/** Heures écoulées depuis `iso`, sans les samedis ni les dimanches (heure de Montréal). Le calcul s'arrête à 120 jours. */
+export function weekdayHours(iso: string, now = Date.now()): number {
+  let t = Date.parse(iso);
+  if (!Number.isFinite(t) || t >= now) return 0;
+  t = Math.max(t, now - 120 * 24 * HOUR);
+  let total = 0;
+  while (t < now) {
+    const step = Math.min(HOUR, now - t);
+    const day = weekdayFmt.format(t);
+    if (day !== "Sat" && day !== "Sun") total += step;
+    t += step;
+  }
+  return total / HOUR;
+}
+/** Attente en mots : « moins d'une heure ouvrable », « 7 h ouvrables », « 2 j ouvrables et 3 h ». `late` : plus d'un jour ouvrable. */
+export function waitInfo(iso: string, now = Date.now()): { hours: number; text: string; late: boolean } {
+  const hours = weekdayHours(iso, now);
+  const h = Math.floor(hours), days = Math.floor(h / 24), rest = h % 24;
+  const text = h < 1 ? "moins d'une heure ouvrable" : days < 1 ? `${h} h ${h > 1 ? "ouvrables" : "ouvrable"}` : `${days} j ${days > 1 ? "ouvrables" : "ouvrable"}${rest ? ` et ${rest} h` : ""}`;
+  return { hours, text, late: hours > 24 };
+}
+/** Attente d'un dossier qui attend une réponse ; rien si le début de l'attente n'est pas connu. */
+export const waitOf = (store: Store, dossierId: string) => (store.waiting.includes(dossierId) && store.waitSince[dossierId] ? waitInfo(store.waitSince[dossierId]) : null);
+
 export const isLate = (d: Dossier) => d.status !== "ferme" && !!d.due_date && daysUntil(d.due_date) < 0;
 export const isSoon = (d: Dossier) => d.status !== "ferme" && !!d.due_date && daysUntil(d.due_date) >= 0 && daysUntil(d.due_date) <= SOON_DAYS;
 
@@ -154,6 +185,8 @@ export function Drawer({ label, returnTo, onClose, children }: { label: string; 
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
+      // Une fenêtre de dialogue ouverte par-dessus gère elle-même Échap et la tabulation.
+      if (document.querySelector("dialog[open]")) return;
       if (e.key === "Escape") { close.current(); return; }
       if (e.key !== "Tab") return;
       const f = [...el.querySelectorAll<HTMLElement>("a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])")].filter((x) => x.getClientRects().length > 0);
@@ -181,6 +214,46 @@ export function Drawer({ label, returnTo, onClose, children }: { label: string; 
     </div>
   );
 }
+/**
+ * Fenêtre de dialogue modale (élément natif) : Échap ferme, le focus reste dedans et revient au point de départ.
+ * `children` reçoit `close`, à appeler pour fermer ; `onClose` est appelé une fois la fenêtre fermée.
+ */
+export function Dialog({ title, onClose, children, wide = false }: { title: string; onClose: () => void; children: (close: () => void) => ReactNode; wide?: boolean }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const id = useId();
+  useEffect(() => { const el = ref.current; if (el && !el.open) el.showModal(); }, []);
+  const close = () => { const el = ref.current; if (el?.open) el.close(); else onClose(); };
+  return (
+    <dialog ref={ref} aria-labelledby={id} onClose={onClose} onClick={(e) => { if (e.target === ref.current) close(); }} className={`m-auto max-h-[90svh] w-[calc(100vw-2rem)] overflow-y-auto rounded-3xl border border-line bg-white p-0 text-ink shadow-[0_40px_120px_-40px_rgba(23,23,58,.7)] backdrop:bg-[#17173a]/55 ${wide ? "max-w-3xl" : "max-w-xl"}`}>
+      <div className="p-5 sm:p-6">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <h2 id={id} className="font-display text-xl font-bold tracking-tight text-navy">{title}</h2>
+          <button type="button" onClick={close} className={`${link} inline-flex min-h-11 shrink-0 items-center px-2 text-sm`}>Fermer</button>
+        </div>
+        {children(close)}
+      </div>
+    </dialog>
+  );
+}
+/** Copie un texte dans le presse-papiers, avec un message de confirmation ou d'échec. */
+export async function copyText(text: string, ok: string, fail = "Copie impossible sur cet appareil.") {
+  try { await navigator.clipboard.writeText(text); toast(ok); return true; } catch { toast(fail, "error"); return false; }
+}
+/** Vrai tant que le navigateur se dit connecté. Lu après le montage : le rendu du serveur ne connaît pas l'état du réseau. */
+export function useOnline() {
+  const [online, setOnline] = useState(true);
+  useEffect(() => {
+    const read = () => setOnline(navigator.onLine);
+    read();
+    window.addEventListener("online", read);
+    window.addEventListener("offline", read);
+    return () => { window.removeEventListener("online", read); window.removeEventListener("offline", read); };
+  }, []);
+  return online;
+}
+/** Vrai si la frappe vise un champ : les raccourcis au clavier ne doivent alors rien faire. */
+export const isTyping = (t: EventTarget | null) => { const el = t as HTMLElement | null; return !!el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName)); };
+
 /** Assistant IA de l'équipe : demande un brouillon au serveur. En démonstration, renvoie un exemple local. */
 export const AI_OFF = "L'assistant IA n'est pas disponible pour l'instant.";
 export async function askAi(dossierId: string, task: "reply" | "summary" | "relance"): Promise<string | null> {

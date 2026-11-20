@@ -2,7 +2,7 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, fmtDate, save } from "../shared";
-import { Loadable, link, pill, removeBtn, rows, smallBtn, useLoad, type Member, type Sub } from "./common";
+import { Loadable, link, pill, plural, removeBtn, rows, smallBtn, useLoad, type Member, type OpenDossier, type Sub } from "./common";
 /* ───────────── Réglages : équipe et rappels ───────────── */
 export function Team({ me }: { me: string }) {
   const load = useLoad(() => rows<Member>(supabase().from("staff").select("email,name,is_admin").order("name")));
@@ -93,6 +93,59 @@ export function Reminders() {
               </li>
             ))}
           </ul>
+        ))}
+      </Loadable>
+    </Card>
+  );
+}
+
+/* ───────────── Avis des clients : privés, jamais publiés ───────────── */
+type Avis = { id: string; dossier_id: string; created_at: string; rating: number; comment: string };
+const oneDecimal = new Intl.NumberFormat("fr-CA", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+function RatingBar({ value }: { value: number }) {
+  return <span className="block h-2 w-28 overflow-hidden rounded-full bg-[#e6e8f2]" aria-hidden="true"><span className="block h-full rounded-full bg-navy" style={{ width: `${Math.max(0, Math.min(5, value)) * 20}%` }} /></span>;
+}
+/** Avis laissés par les clients à la fin d'un dossier. Lecture seule : le cabinet ne peut ni en ajouter ni les modifier. */
+export function Feedback({ openDossier }: { openDossier?: OpenDossier }) {
+  // Les noms viennent d'une lecture à part : cette page s'affiche même avant le chargement du tableau de bord.
+  const load = useLoad(async () => {
+    const db = supabase();
+    const [list, dossiers] = await Promise.all([
+      rows<Avis>(db.from("feedback").select("*").order("created_at", { ascending: false }).limit(500)),
+      rows<{ id: string; client_name: string; title: string }>(db.from("dossiers").select("id,client_name,title").limit(2000)),
+    ]);
+    return { list, names: new Map(dossiers.map((d) => [d.id, d])) };
+  });
+  const list = load.data?.list ?? [];
+  const average = list.length ? list.reduce((n, x) => n + x.rating, 0) / list.length : 0;
+  return (
+    <Card title={`Avis des clients${load.data ? ` (${list.length})` : ""}`} aside={<span className={`${pill} bg-[#eef0f6] text-ink`}>Privé</span>}>
+      <p className="mb-4 rounded-xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]">Ces avis sont privés. Ils servent à améliorer le service du cabinet. Ne les publiez pas comme témoignages, ni sur le site ni ailleurs : les règles de l'Ordre des CPA l'interdisent.</p>
+      <Loadable load={load} label="Chargement des avis" rows={1}>
+        {({ names }) => (list.length === 0 ? <p className="text-sm text-muted">Aucun avis pour l'instant. Le client peut en laisser un dans son espace, à la fin de son dossier.</p> : (
+          <>
+            <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <p className="font-display text-2xl font-bold text-ink" data-avis-moyenne>{oneDecimal.format(average)} sur 5</p>
+              <RatingBar value={average} />
+              <p className="text-sm text-muted">Moyenne de {plural(list.length, "avis", "avis")}.</p>
+            </div>
+            <ul className="divide-y divide-line">
+              {list.map((x) => {
+                const d = names.get(x.dossier_id);
+                return (
+                  <li key={x.id} className="py-3">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <p className="font-semibold text-ink">{x.rating} sur 5</p>
+                      <RatingBar value={x.rating} />
+                      <p className="text-xs text-muted">{fmtDate(x.created_at, "fr")}</p>
+                    </div>
+                    {x.comment.trim() ? <p className="mt-1.5 leading-relaxed whitespace-pre-line text-ink">{x.comment}</p> : <p className="mt-1.5 text-sm text-muted">Sans commentaire.</p>}
+                    <p className="mt-1 text-sm text-muted">{d ? <>{d.client_name} · {openDossier ? <button type="button" onClick={() => openDossier(d.id)} className={link}>{d.title}</button> : d.title}</> : "Dossier introuvable"}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
         ))}
       </Loadable>
     </Card>
