@@ -38,7 +38,7 @@ test("quote wizard returns a firm price and booking completes", async ({ page })
 });
 test("availability API respects lead time and capacity", async ({ request }) => {
   const r = await request.get("/api/availability?kind=cleaning"); const j = await r.json();
-  expect(j.days.length).toBeGreaterThan(0); const today = new Date().toISOString().slice(0, 10); expect(j.days[0].date > today).toBeTruthy();
+  expect(j.days.length).toBeGreaterThan(0); const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Toronto", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); expect(j.days[0].date > today).toBeTruthy();
 });
 test("assistant endpoint validates input", async ({ request }) => {
   const r = await request.post("/api/assistant", { data: { locale: "fr", messages: [] } }); expect([400, 503]).toContain(r.status());
