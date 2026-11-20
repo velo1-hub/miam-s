@@ -20,6 +20,8 @@ const ago = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
 /** Date du calendrier de Montréal à J+d (AAAA-MM-JJ), quel que soit le fuseau du navigateur. */
 const mtlDay = (d: number) => { const [y, m, j] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Montreal" }).format(new Date()).split("-").map(Number); return new Date(Date.UTC(y, m - 1, j + d)).toISOString().slice(0, 10); };
 const inDays = (d: number) => mtlDay(d);
+/** Décalage en jours jusqu'au n-ième prochain jour ouvrable (lundi à vendredi), pour des exemples toujours en semaine. */
+const biz = (n: number) => { let d = 0; while (n > 0) { d++; const wd = new Date(mtlDay(d) + "T12:00:00Z").getUTCDay(); if (wd !== 0 && wd !== 6) n--; } return d; };
 /** Un moment à J+d, à l'heure locale donnée (pour les rendez-vous d'exemple). */
 const at = (d: number, h: number, m: number) => {
   const day = mtlDay(d);
@@ -82,10 +84,10 @@ function seed(): Record<string, Row[]> {
       { id: 1, dossier_id: "d1", created_at: ago(9), actor: "Racha Ghazoini", actor_role: "cabinet", kind: "dossier_ouvert", detail: "Déclarations de revenus" },
     ],
     appointment_requests: [
-      { id: "ap1", dossier_id: "d3", created_at: ago(1), preference: "En fin de journée, si possible", mode: "telephone", status: "demande", confirmed_at: null, staff_note: "", assignee: "", duration_min: 30, wished_date: inDays(3), wished_part: "apres_midi" },
-      { id: "ap2", dossier_id: "d2", created_at: ago(2), preference: "", mode: "bureau", status: "confirme", confirmed_at: at(1, 10, 0), staff_note: "Apporter les relevés bancaires.", assignee: "Zouhaier Othmani", duration_min: 60, wished_date: null, wished_part: null },
-      { id: "ap3", dossier_id: "d4", created_at: ago(2), preference: "", mode: "video", status: "confirme", confirmed_at: at(1, 14, 30), staff_note: "", assignee: "Racha Ghazoini", duration_min: 30, wished_date: null, wished_part: null },
-      { id: "ap4", dossier_id: "d1", created_at: ago(3), preference: "", mode: "telephone", status: "confirme", confirmed_at: at(4, 11, 0), staff_note: "", assignee: "Racha Ghazoini", duration_min: 30, wished_date: null, wished_part: null },
+      { id: "ap1", dossier_id: "d3", created_at: ago(1), preference: "En fin de journée, si possible", mode: "telephone", status: "demande", confirmed_at: null, staff_note: "", assignee: "", duration_min: 30, wished_date: inDays(biz(3)), wished_part: "apres_midi" },
+      { id: "ap2", dossier_id: "d2", created_at: ago(2), preference: "", mode: "bureau", status: "confirme", confirmed_at: at(biz(1), 10, 0), staff_note: "Apporter les relevés bancaires.", assignee: "Zouhaier Othmani", duration_min: 60, wished_date: null, wished_part: null },
+      { id: "ap3", dossier_id: "d4", created_at: ago(2), preference: "", mode: "video", status: "confirme", confirmed_at: at(biz(1), 14, 30), staff_note: "", assignee: "Racha Ghazoini", duration_min: 30, wished_date: null, wished_part: null },
+      { id: "ap4", dossier_id: "d1", created_at: ago(3), preference: "", mode: "telephone", status: "confirme", confirmed_at: at(biz(4), 11, 0), staff_note: "", assignee: "Racha Ghazoini", duration_min: 30, wished_date: null, wished_part: null },
     ],
     signatures: [
       { id: "sg1", dossier_id: "d3", created_at: ago(1), title: "Autorisation de transmettre la réponse à Revenu Québec", body: "J'ai lu le projet de réponse préparé par Othmani CPA Inc. J'autorise le cabinet à le transmettre en mon nom à Revenu Québec.", status: "a_signer", signed_at: null, signed_name: null },
