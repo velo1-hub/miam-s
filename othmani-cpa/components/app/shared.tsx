@@ -542,7 +542,9 @@ export const WEATHER: Record<string, { fr: string; en: string }> = {
   nuageux: { fr: "nuage à l'horizon", en: "clouds ahead" },
   orage: { fr: "à régler rapidement", en: "needs attention" },
 };
-export type Appointment = { id: string; dossier_id: string; created_at: string; preference: string; mode: "bureau" | "telephone" | "video"; status: "demande" | "confirme" | "annule"; confirmed_at: string | null; staff_note: string };
+export type Appointment = { id: string; dossier_id: string; created_at: string; preference: string; mode: "bureau" | "telephone" | "video"; status: "demande" | "confirme" | "annule"; confirmed_at: string | null; staff_note: string; assignee?: string; duration_min?: number; wished_date?: string | null; wished_part?: "matin" | "apres_midi" | "indifferent" | null };
+/** Heures d'ouverture du bureau pour l'agenda (heure de Montréal). Provisoire : à confirmer par le cabinet. */
+export const OFFICE_HOURS = { days: [1, 2, 3, 4, 5], open: 9, close: 17, slotMin: 30 } as const;
 export type Signature = { id: string; dossier_id: string; created_at: string; title: string; body: string; status: "a_signer" | "signe" | "annule"; signed_at: string | null; signed_name: string | null };
 export type Invoice = { id: string; dossier_id: string; created_at: string; label: string; amount_cents: number; status: "brouillon" | "a_payer" | "payee" | "annulee"; pay_url: string | null; paid_at: string | null };
 export const cad = (cents: number, lang: Lang = "fr") => new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);

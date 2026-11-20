@@ -18,6 +18,8 @@ export const DEMO_EMAIL = { cabinet: "demo@exemple.ca", client: "marie.tremblay@
 type Row = Record<string, unknown>;
 const ago = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
 const inDays = (d: number) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+/** Un moment à J+d, à l'heure locale donnée (pour les rendez-vous d'exemple). */
+const at = (d: number, h: number, m: number) => { const x = new Date(); x.setDate(x.getDate() + d); x.setHours(h, m, 0, 0); return x.toISOString(); };
 const uid = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 
 function seed(): Record<string, Row[]> {
@@ -69,7 +71,12 @@ function seed(): Record<string, Row[]> {
       { id: 2, dossier_id: "d1", created_at: ago(3), actor: "Marie Tremblay", actor_role: "client", kind: "document_depose", detail: "T4.pdf" },
       { id: 1, dossier_id: "d1", created_at: ago(9), actor: "Racha Ghazoini", actor_role: "cabinet", kind: "dossier_ouvert", detail: "Déclarations de revenus" },
     ],
-    appointment_requests: [{ id: "ap1", dossier_id: "d3", created_at: ago(1), preference: "En fin de journée, si possible", mode: "telephone", status: "demande", confirmed_at: null, staff_note: "" }],
+    appointment_requests: [
+      { id: "ap1", dossier_id: "d3", created_at: ago(1), preference: "En fin de journée, si possible", mode: "telephone", status: "demande", confirmed_at: null, staff_note: "", assignee: "", duration_min: 30, wished_date: inDays(3), wished_part: "apres_midi" },
+      { id: "ap2", dossier_id: "d2", created_at: ago(2), preference: "", mode: "bureau", status: "confirme", confirmed_at: at(1, 10, 0), staff_note: "Apporter les relevés bancaires.", assignee: "Zouhaier Othmani", duration_min: 60, wished_date: null, wished_part: null },
+      { id: "ap3", dossier_id: "d4", created_at: ago(2), preference: "", mode: "video", status: "confirme", confirmed_at: at(1, 14, 30), staff_note: "", assignee: "Racha Ghazoini", duration_min: 30, wished_date: null, wished_part: null },
+      { id: "ap4", dossier_id: "d1", created_at: ago(3), preference: "", mode: "telephone", status: "confirme", confirmed_at: at(4, 11, 0), staff_note: "", assignee: "Racha Ghazoini", duration_min: 30, wished_date: null, wished_part: null },
+    ],
     signatures: [
       { id: "sg1", dossier_id: "d3", created_at: ago(1), title: "Autorisation de transmettre la réponse à Revenu Québec", body: "J'ai lu le projet de réponse préparé par Othmani CPA Inc. J'autorise le cabinet à le transmettre en mon nom à Revenu Québec.", status: "a_signer", signed_at: null, signed_name: null },
       { id: "sg2", dossier_id: "d1", created_at: ago(9), title: "Lettre de mission", body: "J'accepte la lettre de mission décrivant les services, les honoraires estimés et les responsabilités de chacun.", status: "signe", signed_at: ago(8), signed_name: "Marie Tremblay" },
