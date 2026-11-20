@@ -166,7 +166,7 @@ export function RollForward({ dossiers, one, onClose, onCreated, onRemoved }: { 
           </p>
           <p role="alert" className={err ? "mt-3 rounded-xl bg-[#fff4e5] px-3 py-2 text-sm text-[#6b3d00]" : "sr-only"}>{err}</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button type="button" disabled={busy || !labels.data || chosen.length === 0 || !chosen.every((l) => l.src.id in labels.data!)} onClick={() => create(close)} className="btn-primary min-h-11 px-5 py-2 text-sm">{busy ? "Création…" : chosen.length > 1 ? `Créer les ${chosen.length} dossiers` : "Créer le dossier"}</button>
+            <button type="button" disabled={busy || !labels.data || chosen.length === 0 || !chosen.every((l) => l.src.id in labels.data!)} onClick={() => create(close)} className="btn-primary min-h-11 px-5 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50">{busy ? "Création…" : chosen.length > 1 ? `Créer les ${chosen.length} dossiers` : "Créer le dossier"}</button>
             <button type="button" onClick={close} className={smallBtn}>Annuler</button>
           </div>
           <p className="mt-3 text-xs text-muted">Après la création, le message de confirmation offre « Annuler » : les dossiers créés sont alors supprimés.</p>

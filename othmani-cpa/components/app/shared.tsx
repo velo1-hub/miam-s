@@ -86,7 +86,7 @@ function Toaster({ lang }: { lang: Lang }) {
     pushToast = (t) => {
       const id = ++n;
       setList((l) => [...l.slice(-2), { ...t, id }]);
-      window.setTimeout(() => setList((l) => l.filter((x) => x.id !== id)), t.undo ? 7000 : 3500);
+      window.setTimeout(() => setList((l) => l.filter((x) => x.id !== id)), t.undo ? 15000 : 3500);
     };
     return () => { pushToast = () => {}; };
   }, []);

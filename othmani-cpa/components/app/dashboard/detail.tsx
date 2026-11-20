@@ -239,7 +239,7 @@ export type Act = { id: number; created_at: string; actor: string; actor_role: s
 export const ACT: Record<string, string> = {
   dossier_ouvert: "Dossier ouvert", etape: "Étape changée", responsable: "Responsable", echeance: "Échéance", message_suite: "Message au client sur la suite",
   courriel_client: "Courriel du client modifié", document_depose: "Document déposé", document_supprime: "Document supprimé", document_recu: "Document marqué reçu",
-  message: "Message", facture_creee: "Facture créée", facture_statut: "Facture", signature: "Document signé",
+  message: "Message", questionnaire: "Questionnaire rempli", facture_creee: "Facture créée", facture_statut: "Facture", signature: "Document signé",
 };
 export const actDetail = (a: Act) => (a.kind === "etape" || a.kind === "facture_statut" ? a.detail.replace(/\b[a-z_]+\b/g, (w) => statusLabel[w]?.fr ?? ({ brouillon: "Brouillon", a_payer: "À payer", payee: "Payée", annulee: "Annulée" } as Record<string, string>)[w] ?? w) : a.detail);
 

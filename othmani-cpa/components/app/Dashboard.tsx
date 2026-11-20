@@ -197,7 +197,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
       <SideNav section={section} go={go} badges={badges} />
       <TopBar store={store} to={targets.current} staffName={staffName} demo={demo} onHelp={() => setHelp(true)} />
       {help && <ShortcutsHelp onClose={() => setHelp(false)} />}
-      <p role="status" aria-live="polite" data-offline={online ? undefined : ""} className={online ? "sr-only" : "sticky top-0 z-40 bg-[#fff4e5] px-4 py-2.5 text-center text-sm font-semibold text-[#6b3d00] lg:top-[4.25rem]"}>{online ? "" : "Vous êtes hors ligne. Les modifications ne seront pas enregistrées tant que la connexion n'est pas rétablie."}</p>
+      <p role="status" aria-live="polite" data-offline={online ? undefined : ""} className={online ? "sr-only" : "fixed inset-x-0 bottom-0 z-[65] bg-[#fff4e5] px-4 py-2.5 text-center text-sm font-semibold text-[#6b3d00] shadow-[0_-8px_24px_-16px_rgba(23,23,58,.5)] lg:sticky lg:top-[4.25rem] lg:bottom-auto lg:z-40 lg:shadow-none"}>{online ? "" : "Vous êtes hors ligne. Les modifications ne seront pas enregistrées tant que la connexion n'est pas rétablie."}</p>
       <div className="mx-auto max-w-[92rem] px-4 pt-3 pb-12 sm:px-6 lg:pt-2">
         {section === "parametres" ? (
           <>

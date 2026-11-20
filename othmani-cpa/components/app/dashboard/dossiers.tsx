@@ -100,7 +100,8 @@ export function Dossiers({ store, ui, setUi, staffName, draft, clearDraft, patch
   const unroll = (ids: string[]) => { setUi((u) => (u.current && ids.includes(u.current) ? { ...u, current: null } : u)); onUnrolled(ids); };
   const waiting = useMemo(() => new Set(store.waiting), [store.waiting]);
   const setFilter = (p: Partial<DFilter>) => setUi((u) => ({ ...u, filter: { ...u.filter, ...p } }));
-  const owners = useMemo(() => [...new Set([...store.team, ...store.dossiers.map((d) => d.assignee ?? "")].filter(Boolean))], [store.team, store.dossiers]);
+  // Le responsable filtré figure toujours dans le menu, même s'il n'a que des tâches (ligne choisie dans « Charge de travail »).
+  const owners = useMemo(() => [...new Set([...store.team, ...store.dossiers.map((d) => d.assignee ?? ""), f.owner === "__aucun" ? "" : f.owner].filter(Boolean))], [store.team, store.dossiers, f.owner]);
 
   const shown = useMemo(() => {
     const n = f.q.trim().toLowerCase();
