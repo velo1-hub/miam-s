@@ -4,7 +4,9 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
 import { QGROUPS, QUESTIONS } from "@/lib/questionnaire";
 import { Card, Documents, KINDS, Messages, STATUSES, STEPS5, WEATHER, fmtDate, save, statusLabel, step5, toast, type Appointment, type Dossier, type Signature } from "../shared";
-import { BUSINESS_KINDS, INVOICE_STATUS, Loadable, SavedAt, askAi, clockFmt, copyText, daysUntil, link, money, mailQuery, mailto, montrealISO, newId, origin, panel, pill, removeBtn, rows, smallBtn, todayISO, useLoad, warnPill, type FileDoc, type Focus, type Invoice, type Note, type PatchOpts, type Req, type Task } from "./common";
+import { BUSINESS_KINDS, INVOICE_STATUS, Loadable, SavedAt, askAi, copyText, daysUntil, link, money, mailQuery, mailto, newId, origin, panel, pill, removeBtn, rows, smallBtn, todayISO, useLoad, warnPill, type FileDoc, type Focus, type Invoice, type Note, type PatchOpts, type Req, type Task } from "./common";
+import { DURATIONS, MODE_LABEL, OFF_HOURS_CONFIRM, PART_LABEL, bookingPatch, cancelPatch, dayText, durationOf, inOfficeHours, patchAppointment, whenText, type OpenCalendar, type SetAppointments } from "./agenda";
+import { fmtDuration, minOf, mtlParts } from "./caltime";
 import { DossierInvoices } from "./invoices";
 /* ───────────── Détail d'un dossier ───────────── */
 export function DossierHeader({ d, onRoll, onPrint, printing = false }: { d: Dossier; onRoll?: () => void; onPrint?: () => void; printing?: boolean }) {
@@ -389,58 +391,62 @@ export function Signatures({ dossierId }: { dossierId: string }) {
   );
 }
 
-const APPT_MODE: Record<string, string> = { bureau: "Au bureau", telephone: "Par téléphone", video: "En visioconférence" };
-/** Demandes de rendez-vous du client : rien n'est confirmé tant que le cabinet n'a pas choisi la date et l'heure. */
-export function Appointments({ dossierId }: { dossierId: string }) {
+/** Demandes de rendez-vous du client : rien n'est confirmé tant que le cabinet n'a pas choisi la date, l'heure, le responsable et la durée. */
+export function Appointments({ dossierId, team, owner = "", onCalendar }: { dossierId: string; team: string[]; owner?: string; onCalendar?: OpenCalendar }) {
   const load = useLoad(() => rows<Appointment>(supabase().from("appointment_requests").select("*").eq("dossier_id", dossierId).order("created_at", { ascending: false })), dossierId);
   const [err, setErr] = useState<Record<string, string>>({});
-  const patch = (a: Appointment, p: Partial<Appointment>, ok: string, undo?: () => void) => {
-    const back = Object.fromEntries(Object.keys(p).map((k) => [k, a[k as keyof Appointment]])) as Partial<Appointment>;
-    load.set((l) => l?.map((x) => (x.id === a.id ? { ...x, ...p } : x)) ?? null);
-    return save(supabase().from("appointment_requests").update(p).eq("id", a.id), { ok, undo, rollback: () => load.set((l) => l?.map((x) => (x.id === a.id ? { ...x, ...back } : x)) ?? null) });
-  };
+  const { set } = load;
+  const setList: SetAppointments = (f) => set((l) => (l ? f(l) : l));
+  const people = (a: Appointment) => [...new Set([...team, owner, a.assignee ?? ""].filter(Boolean))];
   const confirm = (a: Appointment) => (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const at = montrealISO(String(f.get("date") ?? ""), String(f.get("time") ?? ""));
-    if (!at) { setErr((x) => ({ ...x, [a.id]: "Choisissez une date et une heure." })); return; }
+    const day = String(f.get("date") ?? ""), min = minOf(String(f.get("time") ?? "")), duration = Number(f.get("duration")) || 30;
+    const p = bookingPatch({ day, min, assignee: String(f.get("assignee") ?? ""), duration, note: String(f.get("note") ?? "") });
+    if (!p) { setErr((x) => ({ ...x, [a.id]: "Choisissez une date et une heure." })); return; }
     setErr((x) => ({ ...x, [a.id]: "" }));
-    const p = { status: "confirme" as const, confirmed_at: at, staff_note: String(f.get("note") ?? "").trim().slice(0, 300) };
-    patch(a, p, `Rendez-vous confirmé : ${fmtDate(at, "fr")} à ${clockFmt.format(new Date(at))}.`, () => { patch({ ...a, ...p }, { status: a.status, confirmed_at: a.confirmed_at, staff_note: a.staff_note }, "Confirmation annulée."); });
+    if (!inOfficeHours(day, min, duration) && !window.confirm(OFF_HOURS_CONFIRM)) return;
+    void patchAppointment(setList, a, p, `Rendez-vous confirmé : ${whenText(p.confirmed_at!)}.`, "Confirmation annulée.");
   };
-  const cancel = (a: Appointment, note: string) => {
-    const p = { status: "annule" as const, confirmed_at: null, staff_note: note.trim().slice(0, 300) || a.staff_note };
-    patch(a, p, "Rendez-vous annulé.", () => { patch({ ...a, ...p }, { status: a.status, confirmed_at: a.confirmed_at, staff_note: a.staff_note }, "Rendez-vous rétabli."); });
-  };
+  const cancel = (a: Appointment, note: string) => { void patchAppointment(setList, a, cancelPatch(a, note), a.status === "confirme" ? "Rendez-vous annulé." : "Demande annulée.", a.status === "confirme" ? "Rendez-vous rétabli." : "Demande rétablie."); };
   return (
     <Card title="Rendez-vous">
-      <p className="-mt-2 mb-3 text-xs text-muted">Le client propose une préférence ; le rendez-vous n'existe que lorsque vous le confirmez avec une date et une heure (heure de Montréal).</p>
+      <p className="-mt-2 mb-3 text-xs text-muted">Le client propose une préférence ; le rendez-vous n'existe que lorsque vous le confirmez avec une date, une heure, un responsable et une durée (heure de Montréal).</p>
       <Loadable load={load} label="Chargement des rendez-vous" rows={1}>
-        {(list) => (list.length === 0 ? <p className="text-sm text-muted">Aucune demande de rendez-vous pour ce dossier. Le client peut en faire une depuis son espace.</p> : (
+        {(list) => (list.length === 0 ? <p className="text-sm text-muted">Aucune demande de rendez-vous pour ce dossier. Le client peut en faire une depuis son espace.{onCalendar ? " Vous pouvez aussi réserver un moment dans le calendrier." : ""}</p> : (
           <ul className="space-y-3">
             {list.map((a) => (
-              <li key={a.id} className="rounded-xl border border-line p-3">
+              <li key={a.id} data-appt-card={a.id} className="rounded-xl border border-line p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-semibold text-ink">{APPT_MODE[a.mode] ?? a.mode}</p>
+                  <p className="font-semibold text-ink">{MODE_LABEL[a.mode] ?? a.mode}</p>
                   {a.status === "confirme" ? <span className={`${pill} bg-[#e6f4ea] text-[#1e5b2e]`}>Confirmé</span> : a.status === "demande" ? <span className={warnPill}>À confirmer</span> : <span className={`${pill} bg-[#eef0f6] text-ink`}>Annulé</span>}
                 </div>
                 <p className="mt-1 text-sm text-ink/80">Préférence du client : {a.preference || "non précisée"}</p>
+                {a.wished_date && <p className="text-sm text-ink/80">Date souhaitée : {dayText(a.wished_date)}{a.wished_part && a.wished_part !== "indifferent" ? `, ${PART_LABEL[a.wished_part]}` : ""}</p>}
                 <p className="text-xs text-muted">Demandé le {fmtDate(a.created_at, "fr", true)}</p>
-                {a.status === "confirme" && a.confirmed_at && <p className="mt-2 text-sm font-semibold text-navy">Le {fmtDate(a.confirmed_at, "fr")} à {clockFmt.format(new Date(a.confirmed_at))}</p>}
+                {a.status === "confirme" && a.confirmed_at && <p className="mt-2 text-sm font-semibold text-navy first-letter:uppercase">{whenText(a.confirmed_at)} · {fmtDuration(durationOf(a))} · {a.assignee ? `avec ${a.assignee}` : "sans responsable"}</p>}
                 {a.status !== "demande" && a.staff_note && <p className="mt-1 text-sm text-ink/80">Note au client : {a.staff_note}</p>}
                 {a.status === "demande" && (
                   <form onSubmit={confirm(a)} className="mt-3 grid gap-2 sm:grid-cols-2">
-                    <div><label htmlFor={`ap-d-${a.id}`} className="label">Date</label><input id={`ap-d-${a.id}`} name="date" type="date" required min={todayISO()} className="field min-h-11 py-2" /></div>
+                    <div><label htmlFor={`ap-d-${a.id}`} className="label">Date</label><input id={`ap-d-${a.id}`} name="date" type="date" required min={todayISO()} defaultValue={a.wished_date && a.wished_date >= todayISO() ? a.wished_date : undefined} className="field min-h-11 py-2" /></div>
                     <div><label htmlFor={`ap-t-${a.id}`} className="label">Heure</label><input id={`ap-t-${a.id}`} name="time" type="time" required step={300} className="field min-h-11 py-2" /></div>
+                    <div><label htmlFor={`ap-w-${a.id}`} className="label">Responsable</label><select id={`ap-w-${a.id}`} name="assignee" defaultValue={a.assignee || owner} className="field min-h-11 py-2"><option value="">Non attribué</option>{people(a).map((n) => <option key={n} value={n}>{n}</option>)}</select></div>
+                    <div><label htmlFor={`ap-l-${a.id}`} className="label">Durée</label><select id={`ap-l-${a.id}`} name="duration" defaultValue={durationOf(a)} className="field min-h-11 py-2">{DURATIONS.map((m) => <option key={m} value={m}>{fmtDuration(m)}</option>)}</select></div>
                     <div className="sm:col-span-2"><label htmlFor={`ap-n-${a.id}`} className="label">Note au client (facultatif)</label><input id={`ap-n-${a.id}`} name="note" maxLength={300} placeholder="Ex. Nous vous appellerons au numéro du dossier." className="field min-h-11 py-2" /></div>
                     <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
                       <button type="submit" className="btn-primary min-h-11 px-5 py-2 text-sm">Confirmer le rendez-vous</button>
+                      {onCalendar && <button type="button" className={smallBtn} onClick={() => onCalendar(a.wished_date && a.wished_date >= todayISO() ? a.wished_date : todayISO(), a.id)}>Choisir dans le calendrier</button>}
                       <button type="button" className={removeBtn} onClick={(e) => cancel(a, (e.currentTarget.form?.elements.namedItem("note") as HTMLInputElement | null)?.value ?? "")}>Annuler la demande</button>
                     </div>
                     <p role="alert" className={err[a.id] ? "rounded-xl bg-[#fff4e5] px-3 py-2 text-sm text-[#6b3d00] sm:col-span-2" : "sr-only"}>{err[a.id] ?? ""}</p>
                   </form>
                 )}
-                {a.status === "confirme" && <button type="button" className={`${removeBtn} mt-1`} aria-label="Annuler ce rendez-vous confirmé" onClick={() => cancel(a, "")}>Annuler le rendez-vous</button>}
+                {a.status === "confirme" && (
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    {onCalendar && a.confirmed_at && <button type="button" className={smallBtn} onClick={() => onCalendar(mtlParts(a.confirmed_at!).day)}>Voir la journée dans le calendrier</button>}
+                    <button type="button" className={removeBtn} aria-label="Annuler ce rendez-vous confirmé" onClick={() => cancel(a, "")}>Annuler le rendez-vous</button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -654,8 +660,8 @@ export function PrintSummary({ d, staffName, data }: { d: Dossier; staffName: st
 }
 
 /** Fiche d'un dossier : le travail à gauche, les échanges à droite (colonne fixe quand la place le permet). */
-export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices, onRoll }: {
-  onRoll?: () => void; onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
+export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices, onRoll, onCalendar }: {
+  onRoll?: () => void; onCalendar?: OpenCalendar; onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
 }) {
   useEffect(() => { onTouch(); }, [onTouch]);
   const summary = usePrintSummary(d);
@@ -690,7 +696,7 @@ export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, o
           <ClientValue d={d} onPatch={onPatch} />
           <div data-focus="documents" tabIndex={-1} className="scroll-mt-24"><Documents dossierId={d.id} role="cabinet" lang="fr" /></div>
           <Signatures dossierId={d.id} />
-          <div data-focus="rdv" tabIndex={-1} className="scroll-mt-24"><Appointments dossierId={d.id} /></div>
+          <div data-focus="rdv" tabIndex={-1} className="scroll-mt-24"><Appointments dossierId={d.id} team={team} owner={d.assignee ?? ""} onCalendar={onCalendar} /></div>
           <div data-focus="facture" className="scroll-mt-24"><DossierInvoices dossierId={d.id} onList={onInvoices} /></div>
         </div>
         <aside ref={rail} tabIndex={-1} aria-label="Échanges et notes" className={`min-w-0 scroll-mt-28 space-y-6 @[50rem]:sticky @[50rem]:max-h-[calc(100svh-8.5rem)] @[50rem]:overflow-y-auto @[50rem]:rounded-3xl ${railTop}`}>

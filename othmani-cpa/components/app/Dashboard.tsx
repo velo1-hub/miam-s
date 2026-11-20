@@ -7,12 +7,14 @@ import { useCallback, useEffect, useRef, useState, type SetStateAction } from "r
 import { supabase } from "@/lib/supabase";
 import { demoRole } from "@/lib/demo";
 import { AppFrame, LoadError, Skeleton, save, statusLabel, toast, type Dossier } from "./shared";
-import { NO_FILTER, SECTIONS, SECTION_ALIAS, SectionHead, isTyping, link, rows, smallBtn, useLoad, useOnline, type DFilter, type DossierUi, type FileDoc, type Focus, type Invoice, type LastMsg, type Lead, type PatchDossier, type PatchLead, type Section, type Store, type Task } from "./dashboard/common";
+import { NO_FILTER, SECTIONS, SECTION_ALIAS, SectionHead, isTyping, link, rows, smallBtn, todayISO, useLoad, useOnline, type DFilter, type DossierUi, type FileDoc, type Focus, type Invoice, type LastMsg, type Lead, type PatchDossier, type PatchLead, type Section, type Store, type Task } from "./dashboard/common";
 import { Clients, type ClientUi } from "./dashboard/clients";
 import { Dossiers } from "./dashboard/dossiers";
 import { Fees } from "./dashboard/invoices";
 import { Leads } from "./dashboard/prospects";
-import { Calendar, DocumentsSection, MessagesSection } from "./dashboard/sections";
+import type { CalUi, OpenCalendar } from "./dashboard/agenda";
+import { Calendar } from "./dashboard/calendar";
+import { DocumentsSection, MessagesSection } from "./dashboard/sections";
 import { Feedback, Reminders, Team } from "./dashboard/settings";
 import { FrameStyle, GO_KEYS, ShortcutsHelp, SideNav, TopBar, type SearchTargets } from "./dashboard/shell";
 import { Today } from "./dashboard/today";
@@ -58,6 +60,8 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
   const [clientUi, setClientUi] = useState<ClientUi>({ email: null, tab: "apercu" });
   const [thread, setThread] = useState<string | null>(null);
   const [focus, setFocus] = useState<{ what: Focus; n: number } | null>(null);
+  // Calendrier : la vue, le jour et la demande à placer sont gardés ici, pour retrouver le même jour en revenant d'un dossier.
+  const [cal, setCal] = useState<CalUi>(() => ({ view: "mois", day: todayISO(), request: null }));
 
   const go = useCallback((k: Section) => {
     setSection(k);
@@ -129,6 +133,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     go("dossiers");
   }, [go]);
   const clearFocus = useCallback(() => setFocus(null), []);
+  const openCalendar: OpenCalendar = useCallback((day, requestId = null) => { setCal({ view: "jour", day, request: requestId }); go("calendrier"); }, [go]);
   const openLead = useCallback((id: string) => { setLeadFilter("ouverts"); setFocusLead(id); go("prospects"); }, [go]);
   const openClient = useCallback((email: string) => { setClientUi({ email, tab: "apercu" }); go("clients"); }, [go]);
   /** Accepter un prospect : on passe par la création du dossier, où le courriel est relu ; le prospect devient client une fois le dossier créé. */
@@ -219,7 +224,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
         ) : section === "dossiers" ? (
           <>
             <div className={detailOpen ? "hidden min-[1400px]:block" : ""}><SectionHead title="Dossiers">{refresh}</SectionHead></div>
-            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} onRolled={addDossiers} onUnrolled={removeDossiers} />
+            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} onRolled={addDossiers} onUnrolled={removeDossiers} onCalendar={openCalendar} />
           </>
         ) : section === "clients" ? (
           <>
@@ -238,8 +243,8 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
           </>
         ) : section === "calendrier" ? (
           <>
-            <SectionHead title="Calendrier" sub="Échéances, tâches datées et rendez-vous confirmés, jour par jour." />
-            <Calendar store={store} openDossier={openDossier} />
+            <SectionHead title="Calendrier" sub="Le mois d'un coup d'œil. Ouvrez un jour pour voir qui est libre, heure par heure." />
+            <Calendar store={store} ui={cal} setUi={setCal} openDossier={openDossier} />
           </>
         ) : (
           <>

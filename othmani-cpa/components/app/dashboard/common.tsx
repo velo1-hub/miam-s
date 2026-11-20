@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type S
 import { real, supabase } from "@/lib/supabase";
 import { demoRole } from "@/lib/demo";
 import { LoadError, Skeleton, toast, type Doc, type DocRequest, type Dossier } from "../shared";
+import { minOf, mtlISO } from "./caltime";
 /* ───────────── Types ───────────── */
 export type Lead = {
   id: string; created_at: string; source: string; lang: string; name: string; email: string | null; phone: string | null;
@@ -322,12 +323,8 @@ export async function openFile(path: string) {
 
 /** Date et heure saisies au cabinet, lues comme l'heure de Montréal quel que soit le fuseau de l'appareil. */
 export function montrealISO(date: string, time: string): string | null {
-  const guess = Date.parse(`${date}T${time}:00Z`);
-  if (!Number.isFinite(guess)) return null;
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Montreal", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(guess));
-  const v = (t: string) => Number(parts.find((x) => x.type === t)?.value);
-  const shown = Date.UTC(v("year"), v("month") - 1, v("day"), v("hour"), v("minute"));
-  return new Date(guess - (shown - guess)).toISOString();
+  const min = minOf(time);
+  return Number.isFinite(min) ? mtlISO(date, min) : null;
 }
 export const clockFmt = new Intl.DateTimeFormat("fr-CA", { timeZone: "America/Montreal", hour: "numeric", minute: "2-digit" });
 /** Jour (AAAA-MM-JJ) d'un instant, à l'heure de Montréal. */

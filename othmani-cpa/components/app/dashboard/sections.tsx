@@ -1,8 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Messages, fmtDate, type Appointment } from "../shared";
-import { Avatar, Loadable, WAIT_RULE, addDays, askAi, box, chip, clockFmt, dayOf, docsToCheck, empty, link, openFile, pill, rows, smallBtn, todayISO, useLoad, waitOf, warnPill, type OpenDossier, type Store } from "./common";
+import { Messages, fmtDate } from "../shared";
+import { Avatar, WAIT_RULE, askAi, box, chip, docsToCheck, empty, link, openFile, pill, smallBtn, waitOf, warnPill, type OpenDossier, type Store } from "./common";
 import { Templates } from "./detail";
 
 /* ───────────── Documents : tous les fichiers récents, tous dossiers confondus ───────────── */
@@ -109,70 +108,6 @@ export function MessagesSection({ store, staffName, current, setCurrent, openDos
           </>
         ) : <p className={empty}>Choisissez une conversation.</p>}
       </div>
-    </div>
-  );
-}
-
-/* ───────────── Calendrier : échéances, tâches et rendez-vous confirmés du mois ───────────── */
-type Item = { key: string; day: string; time?: string; kind: "Échéance" | "Tâche" | "Rendez-vous"; title: string; sub: string; dossierId: string; focus?: "rdv" };
-const monthFmt = new Intl.DateTimeFormat("fr-CA", { month: "long", year: "numeric", timeZone: "UTC" });
-const dayLong = new Intl.DateTimeFormat("fr-CA", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
-const KIND_PILL: Record<Item["kind"], string> = { "Échéance": "bg-[#e9e8f7] text-navy", "Tâche": "bg-[#eef0f6] text-ink", "Rendez-vous": "bg-sky-100 text-navy" };
-const APPT_MODE: Record<string, string> = { bureau: "au bureau", telephone: "par téléphone", video: "en visioconférence" };
-
-export function Calendar({ store, openDossier }: { store: Store; openDossier: OpenDossier }) {
-  const today = todayISO();
-  const [month, setMonth] = useState(today.slice(0, 7));
-  // Si les rendez-vous ne se chargent pas, les échéances et les tâches restent affichées, avec un avis.
-  const appts = useLoad(async () => {
-    try { return { list: await rows<Appointment>(supabase().from("appointment_requests").select("*").eq("status", "confirme").order("confirmed_at").limit(500)), failed: false }; }
-    catch { return { list: [] as Appointment[], failed: true }; }
-  });
-  const byId = useMemo(() => new Map(store.dossiers.map((d) => [d.id, d])), [store.dossiers]);
-  const shift = (n: number) => { const [y, m] = month.split("-").map(Number); setMonth(new Date(Date.UTC(y, m - 1 + n, 1)).toISOString().slice(0, 7)); };
-  const build = (list: Appointment[]): Item[] => [
-    ...store.dossiers.filter((d) => d.status !== "ferme" && d.due_date).map((d): Item => ({ key: `d-${d.id}`, day: d.due_date!, kind: "Échéance", title: d.client_name, sub: d.title, dossierId: d.id })),
-    ...store.tasks.filter((t) => !t.done && t.due_date && byId.has(t.dossier_id)).map((t): Item => ({ key: `t-${t.id}`, day: t.due_date!, kind: "Tâche", title: t.label, sub: `${byId.get(t.dossier_id)!.client_name}${t.assignee ? ` · ${t.assignee}` : ""}`, dossierId: t.dossier_id })),
-    ...list.filter((a) => a.confirmed_at && byId.has(a.dossier_id)).map((a): Item => ({ key: `a-${a.id}`, day: dayOf(a.confirmed_at!), time: clockFmt.format(new Date(a.confirmed_at!)), kind: "Rendez-vous", title: byId.get(a.dossier_id)!.client_name, sub: `Rendez-vous ${APPT_MODE[a.mode] ?? a.mode}`, dossierId: a.dossier_id, focus: "rdv" })),
-  ].filter((x) => x.day.startsWith(month)).sort((a, b) => a.day.localeCompare(b.day) || (a.time ?? "").localeCompare(b.time ?? ""));
-  const nav = "btn-secondary min-h-11 px-4 py-2 text-sm";
-  return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => shift(-1)} className={nav}>← Mois précédent</button>
-        <h2 aria-live="polite" className="min-w-40 px-2 text-center font-display text-lg font-semibold text-ink first-letter:uppercase">{monthFmt.format(new Date(`${month}-01T00:00:00Z`))}</h2>
-        <button type="button" onClick={() => shift(1)} className={nav}>Mois suivant →</button>
-        {month !== today.slice(0, 7) && <button type="button" onClick={() => setMonth(today.slice(0, 7))} className={`${link} min-h-11 px-2 text-sm`}>Revenir à ce mois-ci</button>}
-      </div>
-      <Loadable load={appts} label="Chargement du calendrier">
-        {({ list, failed }) => {
-          const items = build(list);
-          const days = [...new Set(items.map((x) => x.day))];
-          return <>{failed && <p role="alert" className="mb-3 rounded-xl bg-[#fff4e5] px-4 py-3 text-sm text-[#6b3d00]">Les rendez-vous n'ont pas pu être chargés. <button type="button" className="font-semibold underline underline-offset-4" onClick={() => appts.reload()}>Réessayer</button></p>}{items.length === 0 ? <p className={empty}>Rien de prévu ce mois-ci : aucune échéance, aucune tâche datée, aucun rendez-vous confirmé.</p> : (
-            <ol className="space-y-3">
-              {days.map((day) => (
-                <li key={day} className={`${box} sm:grid sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-4`}>
-                  <h3 className="mb-2 text-sm font-semibold text-ink first-letter:uppercase sm:mb-0 sm:pt-2.5">
-                    {dayLong.format(new Date(`${day}T00:00:00Z`))}
-                    {day === today ? <span className={`${pill} ml-2 bg-navy text-white`}>Aujourd'hui</span> : day < today ? <span className="mt-0.5 block text-xs font-medium text-[#a3261f]">Passé</span> : day === addDays(today, 1) ? <span className="mt-0.5 block text-xs font-medium text-muted">Demain</span> : null}
-                  </h3>
-                  <ul className="divide-y divide-line">
-                    {items.filter((x) => x.day === day).map((x) => (
-                      <li key={x.key}>
-                        <button type="button" onClick={() => openDossier(x.dossierId, x.focus)} className="flex min-h-12 w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-1 py-2 text-left hover:bg-sky-50">
-                          <span className={`${pill} shrink-0 ${KIND_PILL[x.kind]}`}>{x.kind}{x.time ? ` · ${x.time}` : ""}</span>
-                          <span className="min-w-0 flex-1 basis-48"><span className="block truncate text-sm font-semibold text-ink">{x.title}</span><span className="block truncate text-xs text-muted">{x.sub}</span></span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
-          )}</>;
-        }}
-      </Loadable>
-      <p className="mt-3 text-xs text-muted">Échéances des dossiers en cours, tâches ouvertes datées et rendez-vous confirmés par le cabinet. Aucun calendrier externe n'est relié.</p>
     </div>
   );
 }
