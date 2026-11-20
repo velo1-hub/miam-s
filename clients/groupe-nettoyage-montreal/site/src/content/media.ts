@@ -6,7 +6,7 @@ export const SERVICE_PHOTO: Record<ServiceId, string> = {
   move: "/media/move.webp",
   postconstruction: "/media/postcon.webp",
   airbnb: "/media/airbnb.webp",
-  office: "/media/office.webp",
+  office: "/media/office.webp", // temporary crop of the lobby entrance until the office photo is generated
   restaurant: "/media/restaurant.webp",
   property: "/media/lobby.webp",
 };
