@@ -19,10 +19,10 @@ export function Heading({ eyebrow, title, sub, light = false, center = false }: 
     </div>
   );
 }
-export function PageHero({ eyebrow, title, sub, children }: { eyebrow?: string; title: string; sub?: string; children?: ReactNode }) {
+export function PageHero({ eyebrow, title, sub, children, photo }: { eyebrow?: string; title: string; sub?: string; children?: ReactNode; photo?: string | null }) {
   return (
     <section className="relative overflow-hidden bg-navy-950 pt-20 text-white sm:pt-24">
-      <div className="aurora" aria-hidden><div className="aurora-blob a1" /><div className="aurora-blob a2" /></div>
+      {photo ? <><div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${photo})` }} aria-hidden /><div className="absolute inset-0 bg-gradient-to-r from-navy-950/95 via-navy-950/80 to-navy-950/40" aria-hidden /><div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 to-transparent" aria-hidden /></> : <div className="aurora" aria-hidden><div className="aurora-blob a1" /><div className="aurora-blob a2" /></div>}
       <div className="grain" aria-hidden />
       <div className="container-x relative py-16 sm:py-20">
         <div className="max-w-3xl">
@@ -44,17 +44,20 @@ export function Breadcrumbs({ items }: { items: { name: string; href?: string }[
     </nav>
   );
 }
-export function ServiceCard({ s, locale }: { s: Service; locale: Locale }) {
+export function ServiceCard({ s, locale, photo }: { s: Service; locale: Locale; photo?: string | null }) {
   const d = t(locale); const Icon = I[s.icon as IconName];
   return (
-    <Link href={pagePath(locale, "services", s.slug[locale])} className="card group flex h-full flex-col p-6 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lift">
-      <div className="flex items-center justify-between">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sand-100 text-navy-900"><Icon width={22} height={22} /></span>
-        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${s.bookable ? "bg-teal-100 text-teal-600" : "bg-sand-100 text-ink-600"}`}>{s.bookable ? (locale === "fr" ? "Réservable en ligne" : "Book online") : (locale === "fr" ? "Sur visite" : "Walkthrough")}</span>
+    <Link href={pagePath(locale, "services", s.slug[locale])} className="card group flex h-full flex-col overflow-hidden transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lift">
+      {photo !== undefined && <div className="relative aspect-[16/10] overflow-hidden bg-navy-950">{photo ? <img src={photo} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /> : <div className="relative h-full w-full"><div className="pattern-grid absolute inset-0" aria-hidden /><div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-amber-500/25 blur-2xl" aria-hidden /><Icon width={56} height={56} className="absolute bottom-5 right-5 text-amber-400" /></div>}<span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${s.bookable ? "bg-white/90 text-teal-600" : "bg-navy-950/80 text-white ring-1 ring-white/20"}`}>{s.bookable ? (locale === "fr" ? "Réservable en ligne" : "Book online") : (locale === "fr" ? "Sur visite" : "Walkthrough")}</span></div>}
+      <div className="flex flex-1 flex-col p-6">
+        <div className="flex items-center justify-between">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-950 text-amber-400"><Icon width={22} height={22} /></span>
+          {photo === undefined && <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${s.bookable ? "bg-teal-100 text-teal-600" : "bg-sand-100 text-ink-600"}`}>{s.bookable ? (locale === "fr" ? "Réservable en ligne" : "Book online") : (locale === "fr" ? "Sur visite" : "Walkthrough")}</span>}
+        </div>
+        <h3 className="mt-5 text-[19px] font-semibold text-navy-950">{s.name[locale]}</h3>
+        <p className="mt-2 flex-1 text-[15px] leading-relaxed text-ink-600">{s.short[locale]}</p>
+        <div className="mt-5 flex items-center justify-between text-[14px]"><span className="font-semibold text-navy-900">{s.priceHint[locale]}</span><span className="flex items-center gap-1 font-semibold text-amber-ink transition-[gap] group-hover:gap-2">{d.common.learnMore}<I.arrow width={16} height={16} /></span></div>
       </div>
-      <h3 className="mt-5 text-[19px] font-semibold text-navy-950">{s.name[locale]}</h3>
-      <p className="mt-2 flex-1 text-[15px] leading-relaxed text-ink-600">{s.short[locale]}</p>
-      <div className="mt-5 flex items-center justify-between text-[14px]"><span className="font-semibold text-navy-900">{s.priceHint[locale]}</span><span className="flex items-center gap-1 font-medium text-amber-600 group-hover:gap-2 transition-all">{d.common.learnMore}<I.arrow width={16} height={16} /></span></div>
     </Link>
   );
 }

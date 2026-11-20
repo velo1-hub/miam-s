@@ -7,6 +7,8 @@ import { Section, Heading, ServiceCard, CtaBand, PageHero, Breadcrumbs, Faq } fr
 import { JsonLd, breadcrumbJsonLd } from "@/components/JsonLd";
 import { I } from "@/components/Icons";
 import { BIZ } from "@/content/business";
+import { SERVICE_PHOTO } from "@/content/media";
+import { mediaExists } from "@/lib/media-exists";
 
 export function ZonesIndex({ locale }: { locale: Locale }) {
   const d = t(locale);
@@ -41,7 +43,7 @@ export function ZonePage({ locale, z }: { locale: Locale; z: Zone }) {
           <div className="prose-gnm"><h2 className="!mt-0">{locale === "fr" ? `Ce que nous savons de ${z.name.fr}` : `What we know about ${z.name.en}`}</h2><p>{z.local[locale]}</p>
             <h2>{locale === "fr" ? "Secteurs desservis" : "Sectors served"}</h2><div className="flex flex-wrap gap-2">{z.sectors.map((s) => <span key={s} className="chip cursor-default">{s}</span>)}</div>
             <h2>{d.common.faq}</h2><Faq items={faq} /></div>
-          <aside className="space-y-4"><h3 className="text-[13px] font-semibold uppercase tracking-wider text-ink-500">{locale === "fr" ? "Services populaires ici" : "Popular services here"}</h3>{services.map((s) => <ServiceCard key={s.id} s={s} locale={locale} />)}</aside>
+          <aside className="space-y-4"><h3 className="text-[13px] font-semibold uppercase tracking-wider text-ink-500">{locale === "fr" ? "Services populaires ici" : "Popular services here"}</h3>{services.map((s) => <ServiceCard key={s.id} s={s} locale={locale} photo={mediaExists(SERVICE_PHOTO[s.id]) ? SERVICE_PHOTO[s.id] : null} />)}</aside>
         </div>
       </Section>
       <Section tone="sand"><Heading title={locale === "fr" ? "Autres zones" : "Other areas"} /><div className="mt-6 flex flex-wrap gap-2">{ZONES.filter((x) => x.id !== z.id).map((x) => <Link key={x.id} href={pagePath(locale, "zones", x.slug[locale])} className="chip">{x.name[locale]}</Link>)}</div></Section>

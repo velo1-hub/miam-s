@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 /** Draggable before/after comparison. Photos only: no gradients, badges or icons over the images; a thin divider and two small text labels. */
-export function BeforeAfter({ before, after, labels = ["Avant", "Après"] }: { before: string; after: string; labels?: [string, string] }) {
+export function BeforeAfter({ before, after, labels = ["Avant", "Après"], ratioClass = "aspect-[4/3]" }: { before: string; after: string; labels?: [string, string]; ratioClass?: string }) {
   const [v, setV] = useState(50);
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-sand-100 select-none">
+    <div className={`relative ${ratioClass} overflow-hidden rounded-3xl bg-sand-100 select-none`}>
       <img src={after} alt={labels[1]} className="absolute inset-0 h-full w-full object-cover" draggable={false} />
       <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${v}%` }}>
         <img src={before} alt={labels[0]} className="absolute inset-y-0 left-0 h-full max-w-none object-cover" style={{ width: `${10000 / v}%` }} draggable={false} />

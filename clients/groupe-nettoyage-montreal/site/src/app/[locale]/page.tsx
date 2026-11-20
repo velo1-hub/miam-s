@@ -8,9 +8,9 @@ import { ZONES } from "@/content/zones";
 import { FAQ } from "@/content/faq";
 import { POSTS } from "@/content/posts";
 import { BIZ } from "@/content/business";
-import { Section, Heading, Faq } from "@/components/ui";
+import { Section, Heading, Faq, ServiceCard } from "@/components/ui";
 import { JsonLd, faqJsonLd } from "@/components/JsonLd";
-import { I, type IconName } from "@/components/Icons";
+import { I } from "@/components/Icons";
 import { AssistantOpen } from "@/components/AssistantOpen";
 import { Reviews } from "@/components/Reviews";
 import { Reveal } from "@/components/fx/Reveal";
@@ -19,6 +19,8 @@ import { HeroVideo } from "@/components/fx/HeroVideo";
 import { Marquee } from "@/components/fx/Marquee";
 import { BeforeAfter } from "@/components/fx/BeforeAfter";
 import { InlineVideo } from "@/components/fx/InlineVideo";
+import { SERVICE_PHOTO, PHOTO as MEDIA } from "@/content/media";
+import { mediaExists } from "@/lib/media-exists";
 import { preload } from "react-dom";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -29,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 const PHOTO = { visit: "/media/visit.webp", airbnb: "/media/airbnb.webp", restaurant: "/media/restaurant.webp" };
+const pic = (p: string) => (mediaExists(p) ? p : null);
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params; if (!isLocale(raw)) notFound(); const locale: Locale = raw; const d = t(locale); const fr = locale === "fr";
@@ -107,14 +110,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <Section tone="sand" className="!pt-16">
         <Reveal><Heading eyebrow={d.nav.services} title={fr ? "Quatre réalités, une seule façon de travailler : la bonne." : "Four realities, one way of working: the right one."} sub={d.sections.servicesSub} /></Reveal>
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {expertise.map((s, i) => { const Icon = I[s.icon as IconName]; return (
-            <Reveal key={s.id} index={i}><Spotlight className="h-full rounded-3xl"><Link href={pagePath(locale, "services", s.slug[locale])} className="card flex h-full flex-col p-6 transition-transform hover:-translate-y-0.5">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-950 text-amber-400"><Icon width={24} height={24} /></span>
-              <h3 className="mt-5 text-[19px] font-semibold text-navy-950">{s.name[locale]}</h3>
-              <p className="mt-2 flex-1 text-[15px] leading-relaxed text-ink-600">{s.short[locale]}</p>
-              <p className="mt-5 text-[14px] font-semibold text-navy-900">{s.priceHint[locale]}</p>
-              <span className="mt-3 flex items-center gap-1 text-[14px] font-semibold text-amber-ink">{d.common.learnMore}<I.arrow width={16} height={16} /></span>
-            </Link></Spotlight></Reveal>); })}
+          {expertise.map((s, i) => <Reveal key={s.id} index={i} className="h-full"><Spotlight className="h-full rounded-3xl"><ServiceCard s={s} locale={locale} photo={pic(SERVICE_PHOTO[s.id])} /></Spotlight></Reveal>)}
         </div>
         <Reveal index={2}><div className="mt-6 flex flex-wrap gap-2">{SERVICES.filter((s) => !expertise.includes(s)).map((s) => <Link key={s.id} href={pagePath(locale, "services", s.slug[locale])} className="chip">{s.name[locale]}</Link>)}<Link href={pagePath(locale, "services")} className="chip chip-on">{d.common.seeAll} →</Link></div></Reveal>
       </Section>
@@ -147,9 +143,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {/* PROOF */}
       <Section tone="navy">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-          <Reveal>{hasBeforeAfter ? <BeforeAfter before="/media/before.webp" after="/media/after.webp" labels={fr ? ["Avant", "Après"] : ["Before", "After"]} /> : <img src="/media/after.webp" alt={fr ? "Cuisine après notre passage" : "Kitchen after our visit"} className="aspect-[4/3] w-full rounded-3xl object-cover" />}</Reveal>
+          <Reveal>{hasBeforeAfter ? <BeforeAfter before="/media/before.webp" after="/media/after.webp" ratioClass="aspect-[4/5] max-w-md mx-auto lg:mx-0" labels={fr ? ["Avant", "Après"] : ["Before", "After"]} /> : <img src={pic(MEDIA.report) ?? "/media/after.webp"} alt={fr ? "Rapport photo envoyé après la visite" : "Photo report sent after the visit"} className="aspect-[4/3] w-full rounded-3xl object-cover" />}</Reveal>
           <Reveal index={1}>
-            <Heading light eyebrow={fr ? "Des preuves, pas des promesses" : "Proof, not promises"} title={fr ? "Vous voyez ce qui a été fait. À chaque visite." : "You see what was done. Every visit."} sub={fr ? "Un rapport photo horodaté, la liste cochée et signée, l'heure d'arrivée et de départ. Envoyé par courriel ou texto dès que l'équipe quitte. Les photos avant / après de vrais chantiers seront publiées ici avec l'accord des clients." : "A time-stamped photo report, the signed checklist, arrival and departure times. Sent by email or text as soon as the team leaves. Before / after photos of real jobs will be published here with client consent."} />
+            <Heading light eyebrow={fr ? "Des preuves, pas des promesses" : "Proof, not promises"} title={fr ? "Vous voyez ce qui a été fait. À chaque visite." : "You see what was done. Every visit."} sub={fr ? "Un rapport photo horodaté, la liste cochée et signée, l'heure d'arrivée et de départ. Envoyé par courriel ou texto dès que l'équipe quitte. Glissez le curseur : le même comptoir, avant et après notre passage." : "A time-stamped photo report, the signed checklist, arrival and departure times. Sent by email or text as soon as the team leaves. Drag the handle: the same counter, before and after our visit."} />
             <ul className="mt-8 grid gap-3 sm:grid-cols-2">{(fr ? ["Photos horodatées des pièces clés", "Liste de vérification signée", "Heures d'arrivée et de départ", "Bouton « un oubli? » dans le rapport"] : ["Time-stamped photos of key rooms", "Signed checklist", "Arrival and departure times", "\"Something missed?\" button in the report"]).map((x) => <li key={x} className="flex items-start gap-3 text-[15.5px] text-white/85"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500 text-navy-950"><I.check width={13} height={13} strokeWidth={2.5} /></span>{x}</li>)}</ul>
             <Link href={pagePath(locale, "work")} className="btn btn-primary mt-8">{d.nav.work}<I.arrow width={18} height={18} /></Link>
           </Reveal>
@@ -188,7 +184,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <Section>
         <Reveal><Heading eyebrow={d.nav.work} title={fr ? "De la cuisine de restaurant au loft Airbnb : de vrais espaces, de vrais résultats" : "From restaurant kitchen to Airbnb loft: real spaces, real results"} /></Reveal>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {[[PHOTO.restaurant, fr ? "Restaurants" : "Restaurants", fr ? "Dégraissage nocturne et registre MAPAQ" : "Night degreasing and MAPAQ log", "restaurant"], [PHOTO.airbnb, "Airbnb", fr ? "Rotations de 4 heures, rapport photo" : "4-hour turnovers, photo report", "airbnb"], [PHOTO.visit, fr ? "Gestion immobilière" : "Property management", fr ? "Un seul contact pour tous vos immeubles" : "One contact for all your buildings", "property"]].map(([img, ti, de, id], i) => { const s = SERVICES.find((x) => x.id === id)!; return (
+          {[[PHOTO.restaurant, fr ? "Restaurants" : "Restaurants", fr ? "Dégraissage nocturne et registre MAPAQ" : "Night degreasing and MAPAQ log", "restaurant"], [PHOTO.airbnb, "Airbnb", fr ? "Rotations de 4 heures, rapport photo" : "4-hour turnovers, photo report", "airbnb"], [pic(SERVICE_PHOTO.property) ?? PHOTO.visit, fr ? "Gestion immobilière" : "Property management", fr ? "Un seul contact pour tous vos immeubles" : "One contact for all your buildings", "property"]].map(([img, ti, de, id], i) => { const s = SERVICES.find((x) => x.id === id)!; return (
             <Reveal key={ti} index={i}><Link href={pagePath(locale, "services", s.slug[locale])} className="photo group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-3xl p-6 text-white" style={{ backgroundImage: `linear-gradient(180deg, rgba(15,20,36,.1) 35%, rgba(15,20,36,.95)), url(${img}), linear-gradient(135deg,#2c3347,#1b2238)`, textShadow: "0 1px 2px rgba(0,0,0,.45)" }}><p className="eyebrow !text-amber-400">{ti}</p><p className="mt-2 text-[19px] font-semibold leading-snug">{de}</p><span className="mt-3 flex items-center gap-1 text-[14px] font-semibold text-white/85 transition-transform group-hover:translate-x-1">{d.common.learnMore}<I.arrow width={16} height={16} /></span></Link></Reveal>); })}
         </div>
       </Section>
