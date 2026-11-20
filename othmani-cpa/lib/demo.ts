@@ -17,9 +17,19 @@ export const DEMO_EMAIL = { cabinet: "demo@exemple.ca", client: "marie.tremblay@
 
 type Row = Record<string, unknown>;
 const ago = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
-const inDays = (d: number) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+/** Date du calendrier de Montréal à J+d (AAAA-MM-JJ), quel que soit le fuseau du navigateur. */
+const mtlDay = (d: number) => { const [y, m, j] = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Montreal" }).format(new Date()).split("-").map(Number); return new Date(Date.UTC(y, m - 1, j + d)).toISOString().slice(0, 10); };
+const inDays = (d: number) => mtlDay(d);
 /** Un moment à J+d, à l'heure locale donnée (pour les rendez-vous d'exemple). */
-const at = (d: number, h: number, m: number) => { const x = new Date(); x.setDate(x.getDate() + d); x.setHours(h, m, 0, 0); return x.toISOString(); };
+const at = (d: number, h: number, m: number) => {
+  const day = mtlDay(d);
+  // Montréal est à UTC-5 ou UTC-4 : on garde le décalage qui redonne bien l'heure voulue.
+  for (const off of [5, 4]) {
+    const t = new Date(`${day}T${String(h + off).padStart(2, "0")}:${String(m).padStart(2, "0")}:00Z`);
+    if (Number(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Montreal", hour: "2-digit", hourCycle: "h23" }).format(t)) === h) return t.toISOString();
+  }
+  return new Date(`${day}T${String(h + 5).padStart(2, "0")}:${String(m).padStart(2, "0")}:00Z`).toISOString();
+};
 const uid = () => (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 
 function seed(): Record<string, Row[]> {

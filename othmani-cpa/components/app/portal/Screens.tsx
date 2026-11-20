@@ -2,8 +2,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { site, type Lang } from "@/lib/site";
-import { KINDS, STEPS5, cad, fmtDate, save, step5, type Appointment, type Dossier, type Invoice, type Message, type Signature } from "../shared";
-import { Deadlines } from "./Deadlines";
+import { KINDS, STEPS5, cad, fmtDate, save, step5, type Dossier, type Invoice, type Message, type Signature } from "../shared";
 import { MyData } from "./Extras";
 import { Ico } from "./icons";
 import type { T } from "./text";
@@ -124,96 +123,6 @@ export function PayScreen({ invoices, dossiers, lang, t, go }: { invoices: Invoi
                       <p className="mt-2 text-sm text-muted">{t.payHow}</p>
                     </div>
                   ) : <p className="mt-4 border-t border-line pt-3.5 text-[0.95rem] text-muted">{t.payLater}</p>)}
-                </Box>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-/* ───────────── Rendez-vous : une demande, jamais une réservation ───────────── */
-const MODES = ["bureau", "telephone", "video"] as const;
-const MODE_ICON = { bureau: "home", telephone: "phone", video: "camera" } as const;
-
-export function ApptScreen({ appts, dossiers, current, reload, lang, t, go }: { appts: Appointment[]; dossiers: Dossier[]; current: string; reload: () => void; lang: Lang; t: T; go: Go }) {
-  const [mode, setMode] = useState<(typeof MODES)[number]>("bureau");
-  const [pref, setPref] = useState("");
-  const [dossier, setDossier] = useState(current);
-  const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(0); // remonte le champ après un envoi, pour ne pas le montrer en erreur une fois vidé
-  useEffect(() => { setDossier(current); }, [current]);
-  const many = dossiers.length > 1;
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    const text = pref.trim();
-    if (!text || busy) return;
-    setBusy(true);
-    const ok = await save(supabase().from("appointment_requests").insert({ dossier_id: dossier, preference: text.slice(0, 300), mode }), { ok: t.apptOk, lang });
-    setBusy(false);
-    if (ok) { setPref(""); setSent((n) => n + 1); reload(); }
-  };
-  const sorted = [...appts].sort((a, b) => b.created_at.localeCompare(a.created_at));
-  return (
-    <div className="max-w-2xl">
-      <PageTitle back={t.back} go={go} sub={t.agendaIntro}>{t.apptTitle}</PageTitle>
-      <Deadlines d={dossiers.find((x) => x.id === current) ?? dossiers[0]} appts={appts} lang={lang} t={t} />
-      <form onSubmit={submit} className="mt-4 rounded-3xl border border-line bg-white p-5">
-        <h2 className="font-display text-lg font-semibold text-ink">{t.apptNew}</h2>
-        <p className="mt-1 leading-relaxed text-muted">{t.apptIntro}</p>
-        <fieldset className="mt-3">
-          <legend className="label">{t.apptMode}</legend>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {MODES.map((m) => (
-              <label key={m} className={`flex min-h-12 cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 font-medium has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-navy ${mode === m ? "border-navy bg-[#eef0f7] text-navy" : "border-[#8a8ea3] bg-white text-ink"}`}>
-                <input type="radio" name="appt-mode" value={m} checked={mode === m} onChange={() => setMode(m)} className="sr-only" />
-                <Ico name={MODE_ICON[m]} />
-                <span className="flex-1">{t.modes[m]}</span>
-                {mode === m && <Ico name="check" className="h-4 w-4" strokeWidth={2.6} />}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        {many && (
-          <div className="mt-4">
-            <label htmlFor="appt-file" className="label">{t.apptFile}</label>
-            <select id="appt-file" value={dossier} onChange={(e) => setDossier(e.target.value)} className="field">
-              {dossiers.map((x) => <option key={x.id} value={x.id}>{dossierLabel(x)}</option>)}
-            </select>
-          </div>
-        )}
-        <div className="mt-4">
-          <label htmlFor="appt-pref" className="label">{t.apptPref}</label>
-          <textarea key={sent} id="appt-pref" value={pref} onChange={(e) => setPref(e.target.value)} required rows={3} maxLength={300} aria-describedby="appt-help" className="field resize-y" />
-          <p id="appt-help" className="mt-1.5 text-sm text-muted">{t.apptPrefHelp}</p>
-        </div>
-        <button type="submit" disabled={busy || !pref.trim()} className="btn-primary mt-4 w-full disabled:cursor-not-allowed disabled:!bg-none disabled:!bg-[#5d6079] sm:w-auto">{busy ? t.apptBusy : t.apptSend}</button>
-        <p className="mt-3 text-sm leading-relaxed text-muted">{t.apptNote}</p>
-      </form>
-
-      <h2 className="mt-6 mb-3 px-1 font-display text-lg font-semibold text-ink">{t.apptList}</h2>
-      {sorted.length === 0 ? <p className="px-1 text-[0.95rem] text-muted">{t.apptEmpty}</p> : (
-        <ul className="space-y-3">
-          {sorted.map((a) => {
-            const st = a.status ?? "demande";
-            const m = (MODES as readonly string[]).includes(a.mode) ? a.mode : "bureau";
-            return (
-              <li key={a.id}>
-                <Box className="!py-4">
-                  <div className="flex items-start gap-3.5">
-                    <Tile icon={MODE_ICON[m]} tone={st === "confirme" ? "green" : st === "annule" ? "slate" : "sky"} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-display font-semibold text-ink">{t.modes[m]}</p>
-                        {st === "confirme" ? <Pill tone="green" icon="check">{a.confirmed_at ? t.apptConfirmedOn(fmtDate(a.confirmed_at, lang, true)) : t.apptConfirmed}</Pill> : st === "annule" ? <Pill tone="slate">{t.apptCancelled}</Pill> : <Pill tone="sky">{t.apptSent}</Pill>}
-                      </div>
-                      {a.preference && <p className="mt-1 leading-relaxed break-words whitespace-pre-line text-ink">{a.preference}</p>}
-                      <p className="mt-1 text-sm text-muted">{t.apptAsked} {fmtDate(a.created_at, lang)}{many && titleOf(dossiers, a.dossier_id) ? ` · ${titleOf(dossiers, a.dossier_id)}` : ""}</p>
-                      {a.staff_note && <p className="mt-2.5 rounded-xl bg-[#f4f5fa] px-3.5 py-2.5 text-[0.95rem] leading-relaxed text-ink"><span className="font-semibold">{t.apptStaff} : </span>{a.staff_note}</p>}
-                    </div>
-                  </div>
                 </Box>
               </li>
             );
