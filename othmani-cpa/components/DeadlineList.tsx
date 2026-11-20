@@ -1,0 +1,87 @@
+"use client";
+import { useEffect, useState } from "react";
+import type { Deadline } from "@/content/deadlines";
+import { formatDate, upcoming } from "@/lib/dates";
+import { AddAllToCalendar, AddToCalendar } from "./AddToCalendar";
+import { dict } from "@/content/ui";
+import type { Lang } from "@/lib/site";
+
+/**
+ * Liste des prochaines échéances. Le HTML statique contient les dates calculées au moment
+ * de la génération ; le navigateur les recalcule ensuite selon la date du jour.
+ */
+export function DeadlineList({ lang, buildDate, limit = 3, audience, variant = "cards" }: { lang: Lang; buildDate: string; limit?: number; audience?: Deadline["audience"]; variant?: "cards" | "rows" | "ledger" }) {
+  const t = dict(lang).dates;
+  const [today, setToday] = useState(buildDate);
+  useEffect(() => {
+    const d = new Date();
+    setToday(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+  }, []);
+  const items = upcoming(today, audience).slice(0, limit);
+  const aud = (a: Deadline["audience"]) => (a === "both" ? t.both : a === "individuals" ? t.individuals : t.businesses);
+
+  if (variant === "ledger") {
+    return (
+      <ol className="border-t-2 border-navy">
+        {items.map((d) => (
+          <li key={d.date + d.fr.title} className="reveal grid gap-x-8 gap-y-2 border-b border-navy/15 py-6 md:grid-cols-[11rem_1fr_auto] md:items-baseline">
+            <time dateTime={d.date} className="flex items-baseline gap-2 font-display text-navy">
+              <span className="text-5xl leading-none font-semibold tabular-nums">{formatDate(d.date, lang, { day: "2-digit" })}</span>
+              <span className="text-sm font-semibold tracking-[0.12em] uppercase">{formatDate(d.date, lang, { month: "short", year: "numeric" })}</span>
+            </time>
+            <div>
+              <h3 className="font-display text-xl font-semibold">{d[lang].title}</h3>
+              <p className="mt-1 max-w-2xl leading-relaxed text-muted">{d[lang].detail}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 md:flex-col md:items-end">
+              <p className="text-xs font-semibold tracking-[0.12em] text-navy/80 uppercase">{aud(d.audience)}</p>
+              <AddToCalendar lang={lang} date={d.date} title={d[lang].title} small />
+            </div>
+          </li>
+        ))}
+      </ol>
+    );
+  }
+
+  if (variant === "rows") {
+    return (
+      <>
+      <div className="mb-5 flex justify-end"><AddAllToCalendar lang={lang} today={today} /></div>
+      <ol className="glass divide-y divide-navy/10 overflow-hidden rounded-[1.5rem]">
+        {items.map((d) => (
+          <li key={d.date + d.fr.title} className="grid gap-2 p-5 sm:grid-cols-[11rem_1fr] sm:gap-6 sm:p-6">
+            <time dateTime={d.date} className="font-display text-lg font-semibold text-navy">{formatDate(d.date, lang)}</time>
+            <div>
+              <h3 className="font-display text-lg font-semibold">{d[lang].title}</h3>
+              <p className="mt-1 leading-relaxed text-muted">{d[lang].detail}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <p className="text-xs font-semibold tracking-wide text-navy/80 uppercase">{aud(d.audience)}</p>
+                <AddToCalendar lang={lang} date={d.date} title={d[lang].title} small />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+      </>
+    );
+  }
+
+  return (
+    <ol className="grid gap-4 md:grid-cols-3">
+      {items.map((d, i) => (
+        <li key={d.date + d.fr.title} className="glass reveal flex flex-col rounded-[1.5rem] p-6" data-delay={String(i + 1)}>
+          <time dateTime={d.date} className="flex items-baseline gap-2">
+            <span className="font-display text-5xl font-semibold text-navy">{formatDate(d.date, lang, { day: "numeric" })}</span>
+            <span className="font-display text-lg font-medium text-navy">{formatDate(d.date, lang, { month: "long", year: "numeric" })}</span>
+          </time>
+          <h3 className="mt-4 font-display text-lg font-semibold leading-snug">{d[lang].title}</h3>
+          <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-muted">{d[lang].detail}</p>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="inline-flex w-fit rounded-full border border-navy/10 bg-white/70 px-3 py-1 text-xs font-semibold text-navy">{aud(d.audience)}</p>
+            <AddToCalendar lang={lang} date={d.date} title={d[lang].title} small />
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}

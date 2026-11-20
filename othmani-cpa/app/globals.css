@@ -1,0 +1,289 @@
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/space-grotesk/wght.css";
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #2a2a5c;
+  --color-navy-700: #3a3a74;
+  --color-navy-950: #17173a;
+  --color-sky: #6fc1d8;
+  --color-sky-100: #e4f4f9;
+  --color-sky-50: #f2fafc;
+  --color-ink: #1b1d33;
+  --color-muted: #4a4e66;
+  --color-line: #e2e5ee;
+  --color-paper: #fafbfd;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { @apply bg-white font-sans text-ink antialiased; font-feature-settings: "cv11", "ss01"; }
+  h1, h2, h3, h4 { @apply font-display text-navy; letter-spacing: -0.02em; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--color-sky-100); color: var(--color-navy); }
+  /* Focus visible bien contrasté, partout */
+  :focus-visible { outline: 3px solid var(--color-navy); outline-offset: 3px; border-radius: 6px; }
+  .on-dark :focus-visible, .on-dark:focus-visible { outline-color: #fff; }
+  .on-dark .on-light :focus-visible { outline-color: var(--color-navy); }
+  [id] { scroll-margin-top: 6.5rem; }
+}
+
+@utility btn { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-[0.95rem] font-semibold transition-colors duration-200; }
+
+@layer components {
+  .container-site { @apply mx-auto w-full max-w-6xl px-5 sm:px-8; }
+  .btn-primary { @apply btn bg-navy text-white hover:bg-navy-700; }
+  .btn-secondary { @apply btn border border-navy/25 bg-white text-navy hover:border-navy hover:bg-sky-50; }
+  .btn-light { @apply btn bg-white text-navy hover:bg-sky-100; }
+  .btn-ghost-light { @apply btn border border-white/60 text-white hover:bg-white/10; }
+  .card { @apply rounded-[var(--radius-card)] border border-line bg-white; }
+  .eyebrow { @apply mb-3 inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-navy uppercase; }
+  .eyebrow::before { content: ""; @apply inline-block h-0.5 w-6 rounded bg-sky; }
+  .section { @apply py-20 sm:py-28; }
+  .h2 { @apply text-3xl leading-tight font-semibold sm:text-4xl; }
+  .lead { @apply text-lg leading-relaxed text-muted; }
+  .prose-site p { @apply mb-4 leading-relaxed text-ink/90; }
+  .prose-site ul { @apply mb-4 space-y-2.5; }
+  .prose-site li { @apply relative pl-6 leading-relaxed text-ink/90; }
+  .prose-site li::before { content: ""; @apply absolute top-[0.6em] left-0 h-2 w-2 rounded-full bg-sky; }
+  .field { @apply block w-full rounded-xl border border-[#8a8ea3] bg-white px-4 py-3 text-base text-ink placeholder:text-muted focus:border-navy; }
+  .label { @apply mb-1.5 block text-sm font-semibold text-ink; }
+}
+
+/* Animations douces au défilement : le contenu reste visible sans JavaScript. */
+.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.js .reveal.is-visible { opacity: 1; transform: none; }
+.js .reveal[data-delay="1"] { transition-delay: .08s; }
+.js .reveal[data-delay="2"] { transition-delay: .16s; }
+.js .reveal[data-delay="3"] { transition-delay: .24s; }
+
+/* Titre du héros écrit lettre par lettre */
+.typing .ch { opacity: .14; transition: opacity .25s ease; }
+.typing .ch.on { opacity: 1; }
+.typing .ch.cur { position: relative; }
+.typing .ch.cur::after { content: ""; position: absolute; right: -0.08em; top: .12em; width: .06em; height: .82em; background: var(--color-sky); animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .typing .ch { opacity: 1; }
+  .typing .ch.cur::after { display: none; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+
+/* Clara se fait discrète pendant que la bannière de témoins est ouverte (mobile) */
+@media (max-width: 639px) { [data-cookie-open] .clara-fab { display: none; } }
+
+/* Le héros n'est « long » que si le JavaScript et les animations sont actifs */
+.hero-track { min-height: 100svh; }
+@media (min-width: 1024px) { .hero-track { height: 100svh; } .js .hero-track { height: 130svh; } }
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) { .js .hero-track { height: 100svh; } }
+
+@media print { .reveal { opacity: 1 !important; transform: none !important; } .clara-root, [role="region"] { display: none !important; } }
+
+/* ───────────── Verre dépoli (glassmorphism) ───────────── */
+@utility glass {
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 20px 50px -30px rgba(42, 42, 92, 0.35);
+}
+@utility glass-dark {
+  background: rgba(23, 23, 58, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 24px 60px -30px rgba(0, 0, 0, 0.6);
+}
+/* Fond en dégradé « mesh » très doux, pour que le verre se lise */
+@utility mesh {
+  background:
+    radial-gradient(40rem 28rem at 8% 10%, rgba(111, 193, 216, 0.22), transparent 60%),
+    radial-gradient(36rem 26rem at 92% 30%, rgba(42, 42, 92, 0.10), transparent 60%),
+    radial-gradient(34rem 24rem at 50% 100%, rgba(111, 193, 216, 0.16), transparent 60%),
+    #f7fbfd;
+}
+@utility mesh-dark {
+  background:
+    radial-gradient(42rem 30rem at 85% 0%, rgba(111, 193, 216, 0.28), transparent 60%),
+    radial-gradient(36rem 26rem at 0% 100%, rgba(98, 98, 190, 0.35), transparent 60%),
+    #1d1d48;
+}
+/* Repli si le navigateur ne gère pas backdrop-filter : fonds plus opaques */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: rgba(255, 255, 255, 0.94); }
+  .glass-dark { background: rgba(23, 23, 58, 0.92); }
+}
+/* En-tête : transparent sur le héros, vitré dès qu'on défile */
+/* Léger flottement de la carte vitrée du héros */
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.floaty { animation: floaty 7s ease-in-out infinite; }
+
+/* Impression : seulement le contenu utile */
+@media print {
+  header, footer, .clara-root, nav[aria-label], .no-print { display: none !important; }
+  .glass, .glass-dark { background: #fff !important; box-shadow: none !important; backdrop-filter: none !important; border-color: #ccc !important; }
+  body { color: #000; }
+}
+
+/* Validation des formulaires : seulement après interaction */
+.field:user-invalid { border-color: #a3261f; box-shadow: 0 0 0 3px rgba(163, 38, 31, .12); }
+.field-error { display: none; margin-top: .375rem; font-size: .85rem; color: #a3261f; }
+.field:user-invalid + .field-error { display: block; }
+.field:focus { outline: none; border-color: var(--color-navy); box-shadow: 0 0 0 4px rgba(111, 193, 216, .35); }
+html:has(#mobile-menu[open]) .clara-fab { display: none; }
+html:has(#mobile-menu[open]) { overflow: hidden; }
+
+/* Panneaux de navigation : éléments en cascade */
+@keyframes navIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.nav-in { animation: navIn .45s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 45ms + 60ms); }
+@media (prefers-reduced-motion: reduce) { .nav-in { animation: none; } }
+
+/* ───────────── En-tête flottant ───────────── */
+.hdr-shell {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 80rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0;
+  transition: margin .5s cubic-bezier(.2,.8,.2,1), width .5s cubic-bezier(.2,.8,.2,1), padding .5s cubic-bezier(.2,.8,.2,1), border-radius .5s;
+}
+@media (min-width: 640px) { .hdr-shell { padding: 1.1rem 2rem; } }
+/* Le verre est sur un pseudo-élément : un backdrop-filter sur .hdr-shell casserait le panneau du menu (position fixe) */
+.hdr-shell::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,.88) 0%, rgba(231,234,243,.78) 100%);
+  border: 1px solid rgba(255,255,255,.95);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(42,42,92,.06), 0 24px 50px -28px rgba(23,23,58,.45);
+  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+  opacity: 0; transition: opacity .45s ease;
+}
+.site-header[data-scrolled] .hdr-shell { margin-top: .6rem; width: calc(100% - 1.25rem); max-width: 76rem; padding: .6rem .75rem .6rem 1rem; border-radius: 1.4rem; }
+@media (min-width: 640px) { .site-header[data-scrolled] .hdr-shell { margin-top: .75rem; padding: .7rem .9rem .7rem 1.25rem; } }
+.site-header[data-scrolled] .hdr-shell::before, html:has(#mobile-menu[open]) .hdr-shell::before { opacity: 1; }
+
+/* Boutons ronds brillants */
+.gbtn {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  border-radius: 9999px; color: var(--color-ink);
+  background: linear-gradient(180deg, #ffffff 0%, #eef1f7 100%);
+  border: 1px solid rgba(255,255,255,.95);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(42,42,92,.06), 0 6px 16px -8px rgba(23,23,58,.35), 0 0 0 1px rgba(42,42,92,.06);
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease;
+  list-style: none;
+}
+.gbtn:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 #fff, inset 0 -2px 4px rgba(42,42,92,.06), 0 10px 22px -10px rgba(23,23,58,.45), 0 0 0 1px rgba(42,42,92,.1); }
+.gbtn:active { transform: translateY(0) scale(.97); }
+
+/* Icône de la pastille : anneau bleu ciel qui pulse */
+.ring-ico {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 2.35rem; height: 2.35rem; border-radius: 9999px; color: var(--color-navy);
+  background: radial-gradient(circle at 50% 35%, #fff, #e8f5f9);
+  border: 2px solid rgba(111,193,216,.75);
+}
+@media (min-width: 640px) { .ring-ico { width: 2.5rem; height: 2.5rem; } }
+.ring-ico::after {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(111,193,216,.55);
+  animation: ringPulse 2.4s cubic-bezier(.2,.8,.2,1) infinite;
+}
+@keyframes ringPulse { 0% { box-shadow: 0 0 0 0 rgba(111,193,216,.55); } 70%,100% { box-shadow: 0 0 0 12px rgba(111,193,216,0); } }
+.phone-pill:hover .ring-ico { box-shadow: 0 0 0 4px rgba(111,193,216,.25), 0 0 22px 4px rgba(111,193,216,.55); }
+@media (prefers-reduced-motion: reduce) { .ring-ico::after { animation: none; } }
+
+/* Panneau du menu */
+.menu-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,.94) 0%, rgba(240,243,249,.92) 100%);
+  border: 1px solid rgba(255,255,255,.95);
+  box-shadow: inset 0 1px 0 #fff, 0 40px 90px -40px rgba(23,23,58,.55);
+  -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%);
+  animation: panelIn .45s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes panelIn { from { opacity: 0; transform: translateY(-10px) scale(.985); } to { opacity: 1; transform: none; } }
+html:has(#mobile-menu[open]) { overflow: hidden; }
+
+/* Liens de l'en-tête : soulignement qui s'étire depuis le centre */
+.hdr-link::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: .2rem; height: 2px; border-radius: 2px; background: var(--color-sky); transition: left .3s cubic-bezier(.2,.8,.2,1), right .3s cubic-bezier(.2,.8,.2,1); }
+.hdr-link:hover::after, .hdr-link[aria-current="page"]::after { left: .75rem; right: .75rem; }
+
+/* Bandeau défilant */
+.ticker { animation: ticker 40s linear infinite; }
+.ticker:hover { animation-play-state: paused; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ticker { animation: none; flex-wrap: wrap; width: auto; } .ticker-row[aria-hidden] { display: none; } }
+
+/* ═════════════ Accueil cinématique ═════════════ */
+/* Diaporama du héros : fondu enchaîné + lent zoom (effet « Ken Burns ») */
+.kb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: kb 16s linear infinite; will-change: opacity, transform; }
+.kb img:nth-child(1) { animation-delay: -1.1s; }
+.kb img:nth-child(2) { animation-delay: 6.9s; }
+@keyframes kb {
+  0% { opacity: 0; transform: scale(1.04); }
+  7% { opacity: 1; }
+  50% { opacity: 1; }
+  59% { opacity: 0; transform: scale(1.16); }
+  100% { opacity: 0; transform: scale(1.16); }
+}
+@media (prefers-reduced-motion: reduce) { .kb img { animation: none; } .kb img:nth-child(1) { opacity: 1; } }
+/* Barres de progression du diaporama */
+.kb-bar > span { display: block; height: 100%; background: #fff; transform-origin: left; animation: kbBar 16s linear infinite; }
+.kb-bar:nth-child(1) > span { animation-delay: 0s; } .kb-bar:nth-child(2) > span { animation-delay: 8s; }
+@keyframes kbBar { 0% { transform: scaleX(0); } 50% { transform: scaleX(1); } 50.1%, 100% { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .kb-bar > span { animation: none; transform: scaleX(0); } }
+/* En-tête en blanc tant qu'il survole le héros sombre */
+html:not(:has(#mobile-menu[open])) .site-header[data-dark-top]:not([data-scrolled]) .hdr-ink { color: #fff; }
+html:not(:has(#mobile-menu[open])) .site-header[data-dark-top]:not([data-scrolled]) .hdr-ink-soft { color: rgba(255,255,255,.82); }
+/* Cartes photo : zoom doux au survol */
+.media-card img { transition: transform 1.2s cubic-bezier(.2,.8,.2,1); }
+.media-card:hover img { transform: scale(1.05); }
+/* Image fixe derrière le bandeau de chiffres (grand écran) */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) { .bg-fixed-lg { background-attachment: fixed; } }
+
+/* En-tête : ce qui s'affiche selon la largeur (évite tout retour à la ligne) */
+.hdr-num { display: none; padding: 0 1rem 0 .65rem; }
+.hdr-tag { display: none; }
+@media (min-width: 768px) { .hdr-num { display: inline; } .hdr-tag { display: block; } }
+@media (min-width: 1280px) { .hdr-num, .hdr-tag { display: none; } }
+@media (min-width: 1400px) { .hdr-num { display: inline; } }
+@media (min-width: 1700px) { .hdr-tag { display: block; } }
+@media (min-width: 1700px) { .hdr-shell { max-width: 90rem; } .site-header[data-scrolled] .hdr-shell { max-width: 88rem; } }
+
+/* ───────────── Application Pilote Fiscal : le style de la présentation ─────────────
+   Fond clair uni, cartes blanches nettes, marine profond, accents ciel et violet doux. */
+.app-fx { position: relative; isolation: isolate; background: #f4f5fa; }
+.app-fx::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(50% 40% at 100% 0%, rgba(125, 120, 230, .10), transparent 70%), radial-gradient(45% 40% at 0% 100%, rgba(111, 193, 216, .12), transparent 70%);
+}
+@keyframes fx-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fx-sheen { to { background-position: 200% 0; } }
+@keyframes fx-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(111, 193, 216, .55); } 50% { box-shadow: 0 0 0 7px rgba(111, 193, 216, 0); } }
+.app-fx[data-auth] main :is(section, article, form).rounded-3xl:is(.bg-white, .border) { animation: fx-rise .4s cubic-bezier(.2, .7, .2, 1) both; }
+.app-fx[data-auth] main :is(section, article, form, li, div, button, a).rounded-3xl:is(.bg-white, .border),
+.app-fx[data-auth] main :is(li, div, button, a).rounded-2xl.bg-white { border-color: #e6e8f2; box-shadow: 0 1px 2px rgba(23, 23, 58, .04), 0 18px 40px -34px rgba(23, 23, 58, .35); }
+.app-fx[data-auth] main :is(button, a):is(.rounded-3xl, .rounded-2xl).bg-white { transition: transform .2s, box-shadow .2s, border-color .2s; }
+.app-fx[data-auth] main :is(button, a):is(.rounded-3xl, .rounded-2xl).bg-white:hover { transform: translateY(-1px); border-color: #b9dfeb; box-shadow: 0 22px 44px -30px rgba(23, 23, 58, .5); }
+.app-fx .btn-primary { background: linear-gradient(120deg, #23234f, #2f3070); box-shadow: 0 10px 22px -14px rgba(23, 23, 58, .9); transition: box-shadow .2s, transform .2s; }
+.app-fx .btn-primary:hover { box-shadow: 0 14px 28px -12px rgba(23, 23, 58, .9); transform: translateY(-1px); }
+.app-fx .field:focus { border-color: #3fa9c9; box-shadow: 0 0 0 4px rgba(111, 193, 216, .25); outline: none; }
+.app-fx header.glass { background: rgba(255, 255, 255, .86); box-shadow: 0 1px 0 #e6e8f2; }
+.app-fx .fx-dot { animation: fx-pulse 2.2s ease-out infinite; }
+.app-fx .animate-pulse { background: linear-gradient(90deg, #eceff6, #dfe9f3, #eceff6); background-size: 200% 100%; animation: fx-sheen 1.4s linear infinite; }
+/* Dégradé de marque de la présentation (Clara, compteur d'économies, pastilles) */
+.pf-clara { background: linear-gradient(135deg, #6fc1d8, #8b7cf0); color: #fff; }
+.pf-navy { background: linear-gradient(140deg, #23234f 0%, #2f3070 55%, #3f5fa0 120%); color: #fff; }
+.pf-eyebrow { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: #6b6f8a; }
+@media (prefers-reduced-motion: reduce) {
+  .app-fx .fx-dot, .app-fx .animate-pulse, .app-fx[data-auth] main :is(section, article, form).rounded-3xl { animation: none; }
+  .app-fx .btn-primary, .app-fx[data-auth] main :is(button, a) { transition: none; }
+}
