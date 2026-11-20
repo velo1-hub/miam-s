@@ -19,7 +19,7 @@ export function Consent({ locale }: { locale: Locale }) {
   ) : null;
   if (choice === undefined || choice) return gtm;
   return (
-    <div role="dialog" aria-labelledby="consent-title" aria-live="polite" className="fixed inset-x-3 bottom-20 z-50 mx-auto max-w-xl rounded-2xl border border-line bg-white p-5 shadow-soft sm:bottom-5 sm:inset-x-auto sm:right-5">
+    <div role="dialog" aria-labelledby="consent-title" aria-live="polite" id="gnm-consent" className="fixed inset-x-3 bottom-20 z-50 mx-auto max-w-xl rounded-2xl border border-line bg-white p-5 shadow-soft sm:bottom-5 sm:inset-x-auto sm:left-5 sm:mx-0">
       <h2 id="consent-title" className="text-[15px] font-semibold text-navy-950">{d.consent.title}</h2>
       <p className="mt-2 text-[13.5px] leading-relaxed text-ink-600">{d.consent.body} <Link href={pagePath(locale, "privacy")} className="underline">{d.consent.policy}</Link></p>
       {custom && <label className="mt-3 flex items-center gap-2 text-[14px] text-ink-700"><input type="checkbox" checked={analytics} onChange={(e) => setAnalytics(e.target.checked)} className="h-4 w-4 accent-navy-900" />{d.consent.analytics}</label>}

@@ -47,3 +47,41 @@ test("consent banner blocks until a choice is made", async ({ page }) => {
   await page.goto("/"); await expect(page.getByRole("dialog", { name: /confidentialité/i })).toBeVisible();
   await page.getByRole("button", { name: /Refuser/ }).click(); await expect(page.getByRole("dialog", { name: /confidentialité/i })).toHaveCount(0);
 });
+
+test("assistant streams a reply, shows quick replies and the booking card", async ({ page }) => {
+  // The model is scripted at the network edge: the widget must render the NDJSON protocol correctly.
+  const turns = [
+    [{ t: "status", key: "pricing" }, { t: "status", key: "availability" }, { t: "delta", text: "Pour un 4½ aux deux semaines, c'est 125 $ par visite. " }, { t: "delta", text: "Mardi 10:30 ou mercredi 08:00?" }, { t: "done", reply: "Pour un 4½ aux deux semaines, c'est 125 $ par visite. Mardi 10:30 ou mercredi 08:00?", chips: ["Mardi 10:30", "Mercredi 08:00"], state: { quote: { service: "residential" } }, booking: null }],
+    [{ t: "status", key: "booking" }, { t: "delta", text: "C'est confirmé pour mardi 10:30." }, { t: "done", reply: "C'est confirmé pour mardi 10:30.", chips: [], state: { email: "m@example.com" }, booking: { ref: "GNM-TEST1", date: "2026-11-24", slot_start: "10:30", slot_end: "13:00", service: "residential", address: "123 rue Saint-Denis" } }],
+  ];
+  let n = 0; const bodies: unknown[] = [];
+  await page.route("**/api/assistant", async (route) => { bodies.push(route.request().postDataJSON()); const t = turns[Math.min(n++, turns.length - 1)]; await route.fulfill({ status: 200, contentType: "application/x-ndjson", body: t.map((e) => JSON.stringify(e)).join("\n") + "\n" }); });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Refuser" }).click();
+  await page.getByRole("button", { name: /Assistant 24\/7/ }).click();
+  const dialog = page.getByRole("dialog", { name: /Assistant GNM/ });
+  await dialog.getByRole("button", { name: "Prix pour un 4½ aux deux semaines" }).click();
+  await expect(dialog.getByText(/125 \$ par visite/)).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Mardi 10:30" })).toBeVisible();
+  await dialog.getByRole("button", { name: "Mardi 10:30" }).click();
+  await expect(dialog.getByText(/Réservation confirmée · GNM-TEST1/)).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Mardi 10:30" })).toHaveCount(0);
+  const second = bodies[1] as { messages: { role: string; content: string }[]; state: Record<string, unknown>; context: { page: string } };
+  expect(second.messages.map((m) => m.role)).toEqual(["user", "assistant", "user"]);
+  expect(second.state).toEqual({ quote: { service: "residential" } });
+  expect(second.context.page).toBe("/");
+  // Reset clears the thread.
+  await dialog.getByRole("button", { name: "Nouvelle conversation" }).click();
+  await expect(dialog.getByText(/GNM-TEST1/)).toHaveCount(0);
+});
+
+test("assistant degrades gracefully when the model is not configured", async ({ page }) => {
+  await page.route("**/api/assistant", (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "assistant_not_configured" }) }));
+  await page.goto("/en");
+  await page.getByRole("button", { name: "Decline" }).click();
+  await page.getByRole("button", { name: /Assistant 24\/7/ }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Availability this week" }).click();
+  await expect(dialog.getByText(/temporarily unavailable/)).toBeVisible();
+  await expect(dialog.getByRole("textbox")).toBeDisabled();
+});

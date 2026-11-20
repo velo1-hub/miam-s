@@ -95,7 +95,7 @@ export function QuoteWizard({ locale, initialService }: { locale: Locale; initia
             <p className="mt-4 text-[13.5px] text-ink-600">{s.included}</p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link href={`${pagePath(locale, "book")}?service=${svc.id}`} className="btn btn-primary">{svc.bookable && result.quote.kind !== "quote" ? s.book : s.walk}<I.calendar width={18} height={18} /></Link>
-              <button type="button" className="btn btn-ghost" onClick={() => window.dispatchEvent(new CustomEvent("gnm:assistant", { detail: { open: true } }))}>{s.ask}<I.chat width={18} height={18} /></button>
+              <button type="button" className="btn btn-ghost" onClick={() => window.dispatchEvent(new CustomEvent("gnm:assistant", { detail: { open: true, context: { quote: input() } } }))}>{s.ask}<I.chat width={18} height={18} /></button>
             </div>
           </div>
         )}

@@ -111,3 +111,6 @@ h1, h2, h3, .font-display { font-family: var(--font-display); }
   .aurora-blob, .marquee-track, .scroll-cue::after { animation: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* While the consent banner is open on a phone it covers the corner where the assistant button lives: hide the button until the visitor decides. */
+@media (max-width: 639px) { body:has(#gnm-consent) .gnm-fab { display: none; } }
