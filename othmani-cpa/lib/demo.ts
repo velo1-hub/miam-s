@@ -1,4 +1,5 @@
 "use client";
+import { QUESTIONS } from "./questionnaire";
 /**
  * Mode démonstration (code 0000) : un faux client de base de données, en mémoire, avec des
  * données fictives. Rien n'est lu ni écrit dans la vraie base, et tout s'efface à la fermeture
@@ -73,6 +74,8 @@ function seed(): Record<string, Row[]> {
       { id: "sg1", dossier_id: "d3", created_at: ago(1), title: "Autorisation de transmettre la réponse à Revenu Québec", body: "J'ai lu le projet de réponse préparé par Othmani CPA Inc. J'autorise le cabinet à le transmettre en mon nom à Revenu Québec.", status: "a_signer", signed_at: null, signed_name: null },
       { id: "sg2", dossier_id: "d1", created_at: ago(9), title: "Lettre de mission", body: "J'accepte la lettre de mission décrivant les services, les honoraires estimés et les responsabilités de chacun.", status: "signe", signed_at: ago(8), signed_name: "Marie Tremblay" },
     ],
+    questionnaires: [],
+    feedback: [{ id: "fb1", dossier_id: "d5", created_at: ago(3), rating: 5, comment: "Tout a été clair et rapide. Merci !" }],
     reminder_subscribers: [
       { id: "s1", email: "abonne@exemple.ca", lang: "fr", consent_at: ago(12), unsubscribed_at: null },
       { id: "s2", email: "subscriber@example.ca", lang: "en", consent_at: ago(30), unsubscribed_at: null },
@@ -141,6 +144,20 @@ export function demoClient(role: DemoRole) {
         if (!row) return { data: null, error: { message: "not_allowed" } };
         Object.assign(row, { status: "signe", signed_at: new Date().toISOString(), signed_name: String(args?.p_name ?? "") });
         return { data: null, error: null };
+      }
+      if (fn === "submit_questionnaire") {
+        const dossier = String(args?.p_dossier ?? "");
+        const answers = (args?.p_answers ?? {}) as Record<string, string>;
+        const reqs = (data().document_requests ??= []);
+        let added = 0;
+        for (const q of QUESTIONS) {
+          if (answers[q.key] === "true" && !reqs.some((r) => r.dossier_id === dossier && r.label === q.doc)) { reqs.push({ id: uid(), dossier_id: dossier, created_at: new Date().toISOString(), label: q.doc, received: false }); added++; }
+        }
+        const list = (data().questionnaires ??= []);
+        const old = list.find((x) => x.dossier_id === dossier);
+        const row = { dossier_id: dossier, answers, note: String(args?.p_note ?? ""), submitted_at: new Date().toISOString() };
+        if (old) Object.assign(old, row); else list.push({ id: uid(), ...row });
+        return { data: added, error: null };
       }
       if (fn !== "dossiers_a_repondre") return { data: null, error: null };
       const last = new Map<string, Row>();
