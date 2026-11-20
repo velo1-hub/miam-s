@@ -1,7 +1,7 @@
 "use client";
 import { useState, type DragEvent, type ReactNode } from "react";
 import { Ico } from "./icons";
-import { ACCEPT, type Go } from "./util";
+import { ACCEPT, type Go, type Tab } from "./util";
 
 export const TONES = {
   sky: "bg-[#e4f4f9] text-[#175f77]",
@@ -31,11 +31,11 @@ export function Eyebrow({ children, className = "" }: { children: ReactNode; cla
 }
 
 /** Titre d'écran. Sur téléphone, les écrans secondaires offrent un retour à l'accueil. */
-export function PageTitle({ children, back, go, aside, sub }: { children: ReactNode; back?: string; go?: Go; aside?: ReactNode; sub?: ReactNode }) {
+export function PageTitle({ children, back, go, to = "home", aside, sub }: { children: ReactNode; back?: string; go?: Go; to?: Tab; aside?: ReactNode; sub?: ReactNode }) {
   return (
     <header className="mb-5">
       {back && go && (
-        <button type="button" onClick={() => go("home")} className="-ml-2 mb-1 inline-flex min-h-11 items-center gap-0.5 rounded-full px-2 text-[0.95rem] font-semibold text-[#175f77] lg:hidden">
+        <button type="button" onClick={() => go(to)} className={`-ml-2 mb-1 inline-flex min-h-11 items-center gap-0.5 rounded-full px-2 text-[0.95rem] font-semibold text-[#175f77] ${to === "home" ? "lg:hidden" : ""}`}>
           <Ico name="back" className="h-5 w-5" strokeWidth={2} />{back}
         </button>
       )}

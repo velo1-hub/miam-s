@@ -3,9 +3,10 @@ import { supabase } from "@/lib/supabase";
 import type { Lang } from "@/lib/site";
 import { fmtDate, toast, type Doc, type DocRequest, type Dossier } from "../shared";
 import { Ico } from "./icons";
+import { QuestEntry } from "./Situation";
 import type { T } from "./text";
 import { Box, Eyebrow, FilePick, PageTitle, Pill, Tile, useDrop } from "./ui";
-import { fmtSize, type Upload, type UploadFn } from "./util";
+import { fmtSize, hasQuest, type Go, type Questionnaire, type Upload, type UploadFn } from "./util";
 
 /** Une ligne de la liste : reçue (cochée) ou à fournir (avec les boutons d'envoi). On peut y déposer un fichier. */
 function Row({ r, busy, onUpload, t, compact }: { r: DocRequest; busy: boolean; onUpload: UploadFn; t: T; compact: boolean }) {
@@ -125,12 +126,13 @@ function Vault({ title, docs, dossiers, empty, lang, t }: { title: string; docs:
   );
 }
 
-export function DocsScreen({ reqs, docs, dossiers, uploads, busy, onUpload, lang, t, sub }: { reqs: DocRequest[]; docs: Doc[]; dossiers: Dossier[]; uploads: Upload[]; busy: boolean; onUpload: UploadFn; lang: Lang; t: T; sub?: string }) {
+export function DocsScreen({ d, quests, reqs, docs, dossiers, uploads, busy, onUpload, lang, t, sub, go }: { d: Dossier; quests: Questionnaire[] | null; reqs: DocRequest[]; docs: Doc[]; dossiers: Dossier[]; uploads: Upload[]; busy: boolean; onUpload: UploadFn; lang: Lang; t: T; sub?: string; go: Go }) {
   const got = reqs.filter((r) => r.received).length;
   return (
     <div className="space-y-4">
       <PageTitle sub={sub} aside={reqs.length > 0 ? <p className="pb-1 text-[0.95rem] font-semibold whitespace-nowrap text-[#175f77]">{t.count(got, reqs.length)}</p> : undefined}>{t.myDocs}</PageTitle>
       <UploadStatus uploads={uploads} t={t} />
+      {hasQuest(d) && <QuestEntry quest={quests?.find((q) => q.dossier_id === d.id)} lang={lang} t={t} go={go} />}
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr] lg:items-start">
         <Box className="!py-3">
           <Checklist reqs={reqs} busy={busy} onUpload={onUpload} t={t} />

@@ -7,10 +7,12 @@ import { AppFrame, LoadError, STEPS5, Skeleton, step5, toast, type Appointment, 
 import { DocsScreen } from "./portal/Docs";
 import { Home, Track } from "./portal/Home";
 import { Ico } from "./portal/icons";
+import { OfflineBanner } from "./portal/Extras";
 import { ApptScreen, ChatScreen, PayScreen, ProfileScreen, SignScreen } from "./portal/Screens";
+import { QuestScreen } from "./portal/Situation";
 import { tx } from "./portal/text";
 import { PageTitle, SectionError } from "./portal/ui";
-import { CURRENT, MAX_BYTES, SEEN, dossierLabel, mailHref, safeName, store, telHref, time, uuid, type PortalData, type Tab, type Upload } from "./portal/util";
+import { CURRENT, MAX_BYTES, SEEN, dossierLabel, mailHref, safeName, store, telHref, time, uuid, type Feedback, type PortalData, type Questionnaire, type Tab, type Upload } from "./portal/util";
 
 /** Lit une liste ; `null` si la lecture a échoué (jamais confondu avec une liste vide). */
 async function rows<R>(q: PromiseLike<{ data: unknown; error: unknown }>): Promise<R[] | null> {
@@ -29,6 +31,7 @@ function View({ lang, email }: { lang: Lang; email: string }) {
   const [busy, setBusy] = useState(false);
   const [seenMap, setSeenMap] = useState<Record<string, string>>({});
   const [claraOpen, setClaraOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const seq = useRef(0);
   const firstTab = useRef(true);
   const claraBox = useRef<HTMLDivElement>(null);
@@ -48,20 +51,23 @@ function View({ lang, email }: { lang: Lang; email: string }) {
    * les documents, les signatures, les factures et les demandes de rendez-vous.
    * `quiet` : rafraîchissement discret, qui ne remplace jamais des données affichées par une erreur.
    */
-  const loadData = useCallback(async (id: string, quiet = false) => {
+  const loadData = useCallback(async (id: string, quiet = false): Promise<boolean> => {
     const mine = ++seq.current;
     if (!quiet) setDataFailed(false);
     const db = supabase();
-    const [reqs, msgs, docs, sigs, invoices, appts] = await Promise.all([
+    const [reqs, msgs, docs, sigs, invoices, appts, quests, feedback] = await Promise.all([
       rows<DocRequest>(db.from("document_requests").select("*").eq("dossier_id", id).order("created_at")),
       rows<Message>(db.from("messages").select("*").eq("dossier_id", id).order("created_at")),
       rows<Doc>(db.from("documents").select("*").order("created_at", { ascending: false })),
       rows<Signature>(db.from("signatures").select("*").order("created_at", { ascending: false })),
       rows<Invoice>(db.from("invoices").select("*").order("created_at", { ascending: false })),
       rows<Appointment>(db.from("appointment_requests").select("*").order("created_at", { ascending: false })),
+      rows<Questionnaire>(db.from("questionnaires").select("*")),
+      // Avis de fin de dossier : on ne lit que son existence, jamais la note ni le commentaire.
+      rows<Feedback>(db.from("feedback").select("id, dossier_id, created_at")),
     ]);
-    if (mine !== seq.current) return;
-    if (!reqs || !msgs || !docs) { if (!quiet) setDataFailed(true); return; }
+    if (mine !== seq.current) return true;
+    if (!reqs || !msgs || !docs) { if (!quiet) setDataFailed(true); return false; }
     setData((prev) => {
       const keep = prev && prev.id === id ? prev : null;
       return {
@@ -69,8 +75,11 @@ function View({ lang, email }: { lang: Lang; email: string }) {
         sigs: sigs ? sigs.filter((s) => s.status === "a_signer" || s.status === "signe") : keep?.sigs ?? null,
         invoices: invoices ? invoices.filter((i) => i.status === "a_payer" || i.status === "payee") : keep?.invoices ?? null,
         appts: appts ?? keep?.appts ?? null,
+        quests: quests ?? keep?.quests ?? null,
+        feedback: feedback ?? keep?.feedback ?? null,
       };
     });
+    return true;
   }, []);
   useEffect(() => {
     if (!current) return;
@@ -182,20 +191,29 @@ function View({ lang, email }: { lang: Lang; email: string }) {
   const many = dossiers.length > 1;
   const sub = many ? dossierLabel(d) : undefined;
   const reload = () => loadData(d.id, true);
+  /** « Actualiser » : relit les dossiers (étape, échéance) et le contenu affiché, puis dit si cela a réussi. */
+  const refresh = async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    const [list, ok] = await Promise.all([rows<Dossier>(supabase().from("dossiers").select("*").order("updated_at", { ascending: false })), loadData(d.id, true)]);
+    if (list && list.length) setDossiers(list);
+    setRefreshing(false);
+    if (list && ok) toast(t.refreshed); else toast(t.refreshErr, "error");
+  };
   const retry = () => loadData(d.id);
   const counts = {
     docs: ready ? ready.reqs.filter((r) => !r.received).length : 0,
     messages: unreadCount,
     sign: (ready?.sigs ?? []).filter((s) => s.status === "a_signer").length,
     pay: (ready?.invoices ?? []).filter((i) => i.status === "a_payer").length,
-    appt: 0, home: 0, profile: 0,
+    appt: 0, home: 0, profile: 0, quest: 0,
   };
   const claraContext = [`Dossier : ${d.title}`, `Étape : ${STEPS5[step5(d.status)].fr}`, d.next_step ? `Message du cabinet sur la suite : ${d.next_step}` : "", d.due_date ? `Échéance : ${d.due_date}` : ""].filter(Boolean).join(". ");
 
   const SIDE: { id: "home" | "docs" | "messages" | "sign" | "pay" | "appt"; icon: string }[] = [
     { id: "home", icon: "grid" }, { id: "docs", icon: "docs" }, { id: "messages", icon: "chat" }, { id: "sign", icon: "sign" }, { id: "pay", icon: "card" }, { id: "appt", icon: "calendar" },
   ];
-  const sideOn = (id: Tab) => tab === id || (id === "home" && tab === "track");
+  const sideOn = (id: Tab) => tab === id || (id === "home" && tab === "track") || (id === "docs" && tab === "quest");
   const sideBtn = (id: Tab, icon: string, label: string, n: number, badge?: string) => (
     <li key={id}>
       <button type="button" onClick={() => setTab(id)} aria-current={sideOn(id) ? "page" : undefined} className={`flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[0.95rem] ${sideOn(id) ? "bg-[#e4f4f9] font-semibold text-[#175f77]" : "font-medium text-ink hover:bg-[#f4f5fa]"}`}>
@@ -211,13 +229,14 @@ function View({ lang, email }: { lang: Lang; email: string }) {
   if (tab === "profile") screen = <ProfileScreen d={d} dossiers={dossiers} email={email} pick={pick} counts={counts} lang={lang} t={t} go={setTab} />;
   else if (dataFailed && !ready) screen = <LoadError lang={lang} retry={retry} />;
   else if (!ready) screen = <div className="max-w-2xl"><Skeleton rows={4} label={t.loading} /></div>;
-  else if (tab === "home") screen = <Home d={d} data={ready} uploads={uploads} busy={busy} onUpload={upload} openClara={openClara} claraOpen={claraOpen} lang={lang} t={t} go={setTab} />;
+  else if (tab === "home") screen = <Home d={d} dossiers={dossiers} data={ready} refresh={refresh} refreshing={refreshing} reload={reload} uploads={uploads} busy={busy} onUpload={upload} openClara={openClara} claraOpen={claraOpen} lang={lang} t={t} go={setTab} />;
   else if (tab === "track") screen = <Track d={d} reqs={ready.reqs} lang={lang} t={t} go={setTab} />;
-  else if (tab === "docs") screen = <DocsScreen reqs={ready.reqs} docs={ready.docs} dossiers={dossiers} uploads={uploads} busy={busy} onUpload={upload} lang={lang} t={t} sub={sub} />;
+  else if (tab === "docs") screen = <DocsScreen d={d} quests={ready.quests} go={setTab} reqs={ready.reqs} docs={ready.docs} dossiers={dossiers} uploads={uploads} busy={busy} onUpload={upload} lang={lang} t={t} sub={sub} />;
+  else if (tab === "quest") screen = <QuestScreen key={d.id} d={d} quests={ready.quests} reqs={ready.reqs} reload={reload} retry={retry} lang={lang} t={t} go={setTab} />;
   else if (tab === "messages") screen = <ChatScreen d={d} msgs={ready.msgs} author={d.client_name || email} reload={reload} lang={lang} t={t} sub={sub} />;
   else {
     const title = tab === "sign" ? t.signTitle : tab === "pay" ? t.payTitle : t.apptTitle;
-    const broken = <div className="max-w-2xl"><PageTitle back={t.back} go={setTab}>{title}</PageTitle><SectionError text={t.sectionErr} retryLabel={lang === "fr" ? "Réessayer" : "Try again"} retry={retry} /></div>;
+    const broken = <div className="max-w-2xl"><PageTitle back={t.back} go={setTab}>{title}</PageTitle><SectionError text={t.sectionErr} retryLabel={t.retry} retry={retry} /></div>;
     if (tab === "sign") screen = ready.sigs ? <SignScreen sigs={ready.sigs} dossiers={dossiers} reload={reload} lang={lang} t={t} go={setTab} /> : broken;
     else if (tab === "pay") screen = ready.invoices ? <PayScreen invoices={ready.invoices} dossiers={dossiers} lang={lang} t={t} go={setTab} /> : broken;
     else screen = ready.appts ? <ApptScreen appts={ready.appts} dossiers={dossiers} current={d.id} reload={reload} lang={lang} t={t} go={setTab} /> : broken;
@@ -238,7 +257,7 @@ function View({ lang, email }: { lang: Lang; email: string }) {
         </button>
       </div>
 
-      <div className={`mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-none ${tab === "messages" ? "pb-48 lg:pb-0" : "pb-28 lg:pb-4"}`}>{screen}</div>
+      <div className={`mx-auto w-full max-w-2xl min-w-0 lg:mx-0 lg:max-w-none ${tab === "messages" ? "pb-48 lg:pb-0" : "pb-28 lg:pb-4"}`}><OfflineBanner t={t} />{screen}</div>
 
       {/* Téléphone : barre du bas à cinq éléments, Clara au centre */}
       <nav aria-label={t.navMobile} className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_-24px_rgba(23,23,58,.5)] lg:hidden">
@@ -253,7 +272,7 @@ function View({ lang, email }: { lang: Lang; email: string }) {
                   </button>
                 </li>
               );
-            const on = tab === x.id || (x.id === "home" && tab === "track");
+            const on = tab === x.id || (x.id === "home" && tab === "track") || (x.id === "docs" && tab === "quest");
             const dot = x.id === "messages" && unreadCount > 0;
             return (
               <li key={x.id}>

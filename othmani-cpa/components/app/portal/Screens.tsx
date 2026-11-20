@@ -3,6 +3,8 @@ import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { site, type Lang } from "@/lib/site";
 import { KINDS, STEPS5, cad, fmtDate, save, step5, type Appointment, type Dossier, type Invoice, type Message, type Signature } from "../shared";
+import { Deadlines } from "./Deadlines";
+import { MyData } from "./Extras";
 import { Ico } from "./icons";
 import type { T } from "./text";
 import { Box, Empty, PageTitle, Pill, Tile } from "./ui";
@@ -156,9 +158,11 @@ export function ApptScreen({ appts, dossiers, current, reload, lang, t, go }: { 
   const sorted = [...appts].sort((a, b) => b.created_at.localeCompare(a.created_at));
   return (
     <div className="max-w-2xl">
-      <PageTitle back={t.back} go={go} sub={t.apptIntro}>{t.apptTitle}</PageTitle>
-      <form onSubmit={submit} className="rounded-3xl border border-line bg-white p-5">
+      <PageTitle back={t.back} go={go} sub={t.agendaIntro}>{t.apptTitle}</PageTitle>
+      <Deadlines d={dossiers.find((x) => x.id === current) ?? dossiers[0]} appts={appts} lang={lang} t={t} />
+      <form onSubmit={submit} className="mt-4 rounded-3xl border border-line bg-white p-5">
         <h2 className="font-display text-lg font-semibold text-ink">{t.apptNew}</h2>
+        <p className="mt-1 leading-relaxed text-muted">{t.apptIntro}</p>
         <fieldset className="mt-3">
           <legend className="label">{t.apptMode}</legend>
           <div className="grid gap-2 sm:grid-cols-3">
@@ -328,14 +332,10 @@ export function ProfileScreen({ d, dossiers, email, pick, counts, lang, t, go }:
         <ul className="divide-y divide-line">
           <li className={row}><Ico name="user" className="h-5 w-5 shrink-0 text-navy" /><span className="min-w-0"><span className="block text-sm text-muted">{t.emailL}</span><span className="block font-medium break-all">{email}</span></span></li>
           <li><a href={lang === "fr" ? "/en/client-portal/" : "/espace-client/"} lang={lang === "fr" ? "en" : "fr"} hrefLang={lang === "fr" ? "en" : "fr"} className={row}><Ico name="globe" className="h-5 w-5 shrink-0 text-navy" /><span className="flex-1 font-semibold text-navy">{t.otherLang}</span><Ico name="chevron" className="h-4 w-4 shrink-0 text-muted" strokeWidth={2} /></a></li>
-          {site.email && (
-            <li>
-              <a href={mailHref(site.email, t.delSubject, t.delBody(email))} className={row}><Ico name="close" className="h-5 w-5 shrink-0 text-[#8a1f18]" /><span className="flex-1 font-semibold text-[#8a1f18]">{t.del}</span></a>
-              <p className="px-5 pb-4 text-sm leading-relaxed text-muted">{t.delNote}</p>
-            </li>
-          )}
         </ul>
       </section>
+
+      <MyData email={email} lang={lang} t={t} />
     </div>
   );
 }

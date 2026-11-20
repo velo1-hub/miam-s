@@ -1,12 +1,15 @@
 "use client";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Lang } from "@/lib/site";
 import { STEPS5, WEATHER, cad, fmtDate, step5, type DocRequest, type Dossier } from "../shared";
+import { Deadlines } from "./Deadlines";
 import { Checklist, DropZone, UploadStatus } from "./Docs";
+import { FeedbackCard } from "./Extras";
 import { Ico } from "./icons";
+import { QuestEntry } from "./Situation";
 import type { T } from "./text";
 import { Box, Eyebrow, FilePick, PageTitle, Pill, Tile, type Tone } from "./ui";
-import { dossierLabel, firstName, hasSavings, initials, safePayUrl, type Go, type PortalData, type Upload, type UploadFn } from "./util";
+import { dossierLabel, feedbackTarget, firstName, hasQuest, hasSavings, initials, isClosed, safePayUrl, type Go, type PortalData, type Upload, type UploadFn } from "./util";
 
 /** Où en est le dossier, sur les 5 étapes visibles. `complete` : tout est fait (transmis ou fermé). */
 export const stepState = (d: Dossier) => ({ idx: step5(d.status), complete: d.status === "transmis" || d.status === "ferme" });
@@ -100,7 +103,7 @@ function MiniCard({ eyebrow, icon, tone, text, children }: { eyebrow: string; ic
 const miniBtn = "inline-flex min-h-11 shrink-0 items-center rounded-xl border border-navy/25 bg-white px-4 text-sm font-semibold text-navy hover:border-navy";
 const miniBtnDark = "btn-primary min-h-11 shrink-0 !rounded-xl px-4 text-sm";
 
-export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, lang, t, go }: { d: Dossier; data: PortalData; uploads: Upload[]; busy: boolean; onUpload: UploadFn; openClara: (el: HTMLElement) => void; claraOpen: boolean; lang: Lang; t: T; go: Go }) {
+export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, claraOpen, refresh, refreshing, reload, lang, t, go }: { d: Dossier; dossiers: Dossier[]; data: PortalData; uploads: Upload[]; busy: boolean; onUpload: UploadFn; openClara: (el: HTMLElement) => void; claraOpen: boolean; refresh: () => void; refreshing: boolean; reload: () => void; lang: Lang; t: T; go: Go }) {
   const name = firstName(d.client_name);
   const missing = data.reqs.filter((r) => !r.received);
   const got = data.reqs.length - missing.length;
@@ -108,6 +111,10 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
   const pending = (data.sigs ?? []).filter((s) => s.status === "a_signer");
   const dueInv = (data.invoices ?? []).filter((i) => i.status === "a_payer");
   const { idx, complete } = stepState(d);
+  // Questionnaire : proposé tant qu'il n'est pas rempli. Lecture échouée (`null`) : on ne propose rien.
+  const askQuest = hasQuest(d) && !isClosed(d) && data.quests !== null && !data.quests.some((q) => q.dossier_id === d.id);
+  const fbTarget = feedbackTarget(dossiers, d, data.feedback);
+  const [fbSent, setFbSent] = useState(false);
 
   return (
     <div>
@@ -116,7 +123,12 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
           <span className="block text-[0.95rem] font-normal tracking-normal text-muted lg:inline lg:text-[1.6rem] lg:font-bold lg:tracking-tight lg:text-ink">{t.hello}<span className="lg:hidden">,</span> </span>
           <span className="text-[1.9rem] lg:text-[1.6rem]">{name}</span>
         </h1>
-        <button type="button" onClick={() => go("profile")} aria-label={t.myProfile} className="order-2 flex h-11 w-11 items-center justify-center rounded-full bg-[#fbe3d2] text-sm font-bold text-[#7a3a12] lg:hidden">{initials(d.client_name) || <Ico name="user" />}</button>
+        <div className="order-2 flex items-center gap-2">
+          <button type="button" onClick={refresh} disabled={refreshing} aria-busy={refreshing} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-navy/25 bg-white px-3.5 text-sm font-semibold text-navy hover:border-navy disabled:text-[#565a75]">
+            <Ico name="refresh" className={`h-4 w-4 ${refreshing ? "animate-spin motion-reduce:animate-none" : ""}`} strokeWidth={2} />{refreshing ? t.refreshing : t.refresh}
+          </button>
+          <button type="button" onClick={() => go("profile")} aria-label={t.myProfile} className="flex h-11 w-11 items-center justify-center rounded-full bg-[#fbe3d2] text-sm font-bold text-[#7a3a12] lg:hidden">{initials(d.client_name) || <Ico name="user" />}</button>
+        </div>
         <WeatherPill d={d} lang={lang} t={t} />
       </header>
 
@@ -142,6 +154,8 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
           </Box>
         ) : null}
 
+        {askQuest && <QuestEntry quest={undefined} card lang={lang} t={t} go={go} />}
+
         <nav aria-label={t.quickTitle}>
           <ul className="grid grid-cols-4 gap-1">
             <Quick icon="camera" tone="slate" label={t.quick.send} onClick={() => go("docs")} />
@@ -161,6 +175,7 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
             <button type="button" onClick={() => go("sign")} className={miniBtnDark}>{t.signCta}</button>
           </MiniCard>
         )}
+        <Deadlines d={d} appts={data.appts} compact lang={lang} t={t} go={go} />
         <Savings d={d} lang={lang} t={t} />
       </div>
 
@@ -193,7 +208,9 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
         </Box>
 
         <UploadStatus uploads={uploads} t={t} />
+        {askQuest && <QuestEntry quest={undefined} card lang={lang} t={t} go={go} />}
         <div className="grid grid-cols-[1.2fr_1fr] items-start gap-4">
+          <div className="space-y-4">
           <Box>
             <div className="flex items-center justify-between gap-3">
               <Eyebrow>{t.myDocs}{d.tax_year ? ` ${d.tax_year}` : ""}</Eyebrow>
@@ -202,6 +219,8 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
             <div className="mt-1"><Checklist reqs={data.reqs} busy={busy} onUpload={onUpload} t={t} compact /></div>
             <div className="mt-3"><DropZone busy={busy} onUpload={onUpload} t={t} hint={missing.length > 0} /></div>
           </Box>
+          <Deadlines d={d} appts={data.appts} compact lang={lang} t={t} go={go} />
+          </div>
           <div className="space-y-4">
             <Savings d={d} lang={lang} t={t} navy />
             {data.sigs && (
@@ -209,7 +228,7 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
                 {pending.length > 0 && <button type="button" onClick={() => go("sign")} className={miniBtnDark}>{t.signCta}</button>}
               </MiniCard>
             )}
-            <MiniCard eyebrow={t.side.appt} icon="calendar" tone="sky" text={t.apptWith}>
+            <MiniCard eyebrow={t.apptCard} icon="calendar" tone="sky" text={t.apptWith}>
               <button type="button" onClick={() => go("appt")} className={miniBtn}>{t.apptCta}</button>
             </MiniCard>
             {dueInv.length > 0 && (
@@ -222,6 +241,9 @@ export function Home({ d, data, uploads, busy, onUpload, openClara, claraOpen, l
           </div>
         </div>
       </div>
+
+      {/* Une seule fois pour les deux mises en page : le formulaire garde son état. */}
+      {(fbTarget || fbSent) && <div className="mt-4 max-w-2xl"><FeedbackCard target={fbTarget} many={dossiers.length > 1} onSent={() => setFbSent(true)} reload={reload} lang={lang} t={t} /></div>}
     </div>
   );
 }
