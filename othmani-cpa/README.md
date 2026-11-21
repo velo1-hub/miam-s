@@ -121,6 +121,7 @@ Connexion sans mot de passe (lien envoyé par courriel). Ces pages ne sont ni in
 | `LEADS_NOTIFY_EMAIL` | facultatif | courriel d'avis au cabinet à chaque nouvelle demande |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` | compte Twilio, numéro d'envoi | texto de confirmation au client (formulaire de contact, Canada et États-Unis seulement) |
 | `STRIPE_SECRET_KEY` | clé secrète Stripe | liens de paiement des factures (carte, Apple Pay, Google Pay) |
+| `NEXT_PUBLIC_AI_RECEIPTS` | `off` pour couper | lecture automatique des reçus photographiés (active par défaut avec la clé Anthropic) |
 | `CLARA_DAILY_MAX` | facultatif (1500 par défaut) | plafond quotidien de messages de Clara |
 
 5. **Lancement de l'espace client** : passer `portalEnabled` à `true` dans `lib/site.ts`. Le bouton et la section « Pilote Fiscal » apparaissent alors sur le site.

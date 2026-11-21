@@ -548,3 +548,15 @@ export const OFFICE_HOURS = { days: [1, 2, 3, 4, 5], open: 9, close: 17, slotMin
 export type Signature = { id: string; dossier_id: string; created_at: string; title: string; body: string; status: "a_signer" | "signe" | "annule"; signed_at: string | null; signed_name: string | null };
 export type Invoice = { id: string; dossier_id: string; created_at: string; label: string; amount_cents: number; status: "brouillon" | "a_payer" | "payee" | "annulee"; pay_url: string | null; paid_at: string | null };
 export const cad = (cents: number, lang: Lang = "fr") => new Intl.NumberFormat(lang === "fr" ? "fr-CA" : "en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
+
+/** Reçu photographié par le client. L'indication de l'IA n'est qu'un premier avis : le cabinet valide. */
+export type Receipt = {
+  id: string; dossier_id: string; created_at: string; path: string; question: string; vendor: string | null; receipt_date: string | null;
+  total_cents: number | null; gst_cents: number | null; qst_cents: number | null; category: string | null;
+  ai_verdict: "probable" | "peu_probable" | "a_verifier" | null; ai_note: string; status: "a_verifier" | "valide" | "refuse"; staff_note: string;
+};
+export const VERDICT: Record<string, { fr: string; en: string }> = {
+  probable: { fr: "Semble déductible", en: "Looks deductible" },
+  peu_probable: { fr: "Probablement pas déductible", en: "Probably not deductible" },
+  a_verifier: { fr: "À vérifier par le cabinet", en: "To be checked by the firm" },
+};

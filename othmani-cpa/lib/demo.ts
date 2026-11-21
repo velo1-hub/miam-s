@@ -94,6 +94,10 @@ function seed(): Record<string, Row[]> {
       { id: "sg2", dossier_id: "d1", created_at: ago(9), title: "Lettre de mission", body: "J'accepte la lettre de mission décrivant les services, les honoraires estimés et les responsabilités de chacun.", status: "signe", signed_at: ago(8), signed_name: "Marie Tremblay" },
     ],
     questionnaires: [],
+    receipts: [
+      { id: "rc1", dossier_id: "d1", created_at: ago(2), path: "d1/recu-papeterie.jpg", question: "J'ai acheté du papier et de l'encre pour mon bureau à la maison. Est-ce déductible ?", vendor: "Papeterie Centrale", receipt_date: inDays(-2), total_cents: 8500, gst_cents: 370, qst_cents: 737, category: "Fournitures de bureau", ai_verdict: "a_verifier", ai_note: "Les fournitures de bureau peuvent être déductibles si elles servent à gagner un revenu, sous certaines conditions pour un salarié. Le cabinet confirmera selon votre situation.", status: "a_verifier", staff_note: "" },
+      { id: "rc2", dossier_id: "d1", created_at: ago(6), path: "d1/recu-pharmacie.jpg", question: "", vendor: "Pharmacie du quartier", receipt_date: inDays(-6), total_cents: 4250, gst_cents: null, qst_cents: null, category: "Frais médicaux", ai_verdict: "probable", ai_note: "Les médicaments sur ordonnance comptent habituellement dans les frais médicaux. Le cabinet confirmera.", status: "valide", staff_note: "Ajouté à vos frais médicaux de l'année." },
+    ],
     feedback: [{ id: "fb1", dossier_id: "d5", created_at: ago(3), rating: 5, comment: "Tout a été clair et rapide. Merci !" }],
     reminder_subscribers: [
       { id: "s1", email: "abonne@exemple.ca", lang: "fr", consent_at: ago(12), unsubscribed_at: null },
