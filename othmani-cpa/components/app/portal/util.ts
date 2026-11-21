@@ -1,7 +1,7 @@
 import type { Lang } from "@/lib/site";
 import type { Appointment, Doc, DocRequest, Dossier, Invoice, Message, Signature } from "../shared";
 
-export type Tab = "home" | "track" | "docs" | "quest" | "messages" | "sign" | "pay" | "appt" | "profile";
+export type Tab = "home" | "track" | "docs" | "quest" | "messages" | "sign" | "pay" | "appt" | "profile" | "receipts";
 /** Questionnaire annuel (réponses « true » / « false » par clé) et avis privé de fin de dossier. */
 export type Questionnaire = { id: string; dossier_id: string; submitted_at: string; answers: Record<string, string>; note: string };
 /** On ne lit jamais la note ni le commentaire : seule l'existence de l'avis compte ici. */
@@ -15,6 +15,8 @@ export type PortalData = {
 };
 export type Go = (tab: Tab) => void;
 export type UploadFn = (files: File[], requestId: string | null) => void;
+/** Ouvre le numériseur ; `requestId` lie les pages à une ligne de la liste (elle se coche à l'envoi). */
+export type ScanFn = (requestId: string | null, label?: string) => void;
 export type { Dossier };
 
 export const MAX_BYTES = 25 * 1024 * 1024;

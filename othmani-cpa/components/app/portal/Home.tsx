@@ -3,13 +3,13 @@ import { useState, type ReactNode } from "react";
 import type { Lang } from "@/lib/site";
 import { STEPS5, WEATHER, cad, fmtDate, step5, type DocRequest, type Dossier } from "../shared";
 import { Deadlines } from "./Deadlines";
-import { Checklist, DropZone, UploadStatus } from "./Docs";
+import { Checklist, DropZone, ReceiptsEntry, UploadStatus } from "./Docs";
 import { FeedbackCard } from "./Extras";
 import { Ico } from "./icons";
 import { QuestEntry } from "./Situation";
 import type { T } from "./text";
-import { Box, Eyebrow, FilePick, PageTitle, Pill, Tile, type Tone } from "./ui";
-import { dossierLabel, feedbackTarget, firstName, hasQuest, hasSavings, initials, isClosed, safePayUrl, type Go, type PortalData, type Upload, type UploadFn } from "./util";
+import { Box, Eyebrow, PageTitle, Pill, Tile, type Tone } from "./ui";
+import { dossierLabel, feedbackTarget, firstName, hasQuest, hasSavings, initials, isClosed, safePayUrl, type Go, type PortalData, type ScanFn, type Upload, type UploadFn } from "./util";
 
 /** Où en est le dossier, sur les 5 étapes visibles. `complete` : tout est fait (transmis ou fermé). */
 export const stepState = (d: Dossier) => ({ idx: step5(d.status), complete: d.status === "transmis" || d.status === "ferme" });
@@ -103,7 +103,7 @@ function MiniCard({ eyebrow, icon, tone, text, children }: { eyebrow: string; ic
 const miniBtn = "inline-flex min-h-11 shrink-0 items-center rounded-xl border border-navy/25 bg-white px-4 text-sm font-semibold text-navy hover:border-navy";
 const miniBtnDark = "btn-primary min-h-11 shrink-0 !rounded-xl px-4 text-sm";
 
-export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, claraOpen, refresh, refreshing, reload, lang, t, go }: { d: Dossier; dossiers: Dossier[]; data: PortalData; uploads: Upload[]; busy: boolean; onUpload: UploadFn; openClara: (el: HTMLElement) => void; claraOpen: boolean; refresh: () => void; refreshing: boolean; reload: () => void; lang: Lang; t: T; go: Go }) {
+export function Home({ d, dossiers, data, uploads, busy, onUpload, onScan, openClara, claraOpen, refresh, refreshing, reload, lang, t, go }: { d: Dossier; dossiers: Dossier[]; data: PortalData; uploads: Upload[]; busy: boolean; onUpload: UploadFn; onScan: ScanFn; openClara: (el: HTMLElement) => void; claraOpen: boolean; refresh: () => void; refreshing: boolean; reload: () => void; lang: Lang; t: T; go: Go }) {
   const name = firstName(d.client_name);
   const missing = data.reqs.filter((r) => !r.received);
   const got = data.reqs.length - missing.length;
@@ -143,9 +143,9 @@ export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, cl
               <span className="block font-display font-semibold break-words text-ink">{next.label}</span>
               <span className="block text-sm text-muted">{t.toProvide}{missing.length > 1 ? ` · ${t.count(got, data.reqs.length)}` : ""}</span>
             </button>
-            <FilePick camera aria={t.photoFor(next.label)} disabled={busy} onFiles={(f) => onUpload(f, next.id)} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#8fd3e6] text-navy-950">
+            <button type="button" aria-label={t.photoFor(next.label)} disabled={busy} onClick={() => onScan(next.id, next.label)} className="flex h-12 w-12 shrink-0 items-center justify-center !rounded-full bg-[#8fd3e6] text-navy-950 disabled:opacity-60">
               <Ico name="camera" />
-            </FilePick>
+            </button>
           </Box>
         ) : data.reqs.length > 0 ? (
           <Box className="flex items-center gap-3.5 !py-4">
@@ -157,7 +157,7 @@ export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, cl
         {askQuest && <QuestEntry quest={undefined} card lang={lang} t={t} go={go} />}
 
         <nav aria-label={t.quickTitle}>
-          <ul className="grid grid-cols-4 gap-1">
+          <ul className="grid grid-cols-5 gap-0.5">
             <Quick icon="camera" tone="slate" label={t.quick.send} onClick={() => go("docs")} />
             <li>
               <button type="button" onClick={(e) => openClara(e.currentTarget)} aria-expanded={claraOpen} className="flex w-full flex-col items-center gap-1.5 rounded-2xl py-1">
@@ -166,6 +166,7 @@ export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, cl
               </button>
             </li>
             <Quick icon="calendar" tone="sky" label={t.quick.agenda} onClick={() => go("appt")} />
+            <Quick icon="receipt" tone="amber" label={t.quick.receipts} onClick={() => go("receipts")} />
             <Quick icon="card" tone="green" label={t.quick.pay} onClick={() => go("pay")} />
           </ul>
         </nav>
@@ -216,8 +217,8 @@ export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, cl
               <Eyebrow>{t.myDocs}{d.tax_year ? ` ${d.tax_year}` : ""}</Eyebrow>
               {data.reqs.length > 0 && <p className="text-sm font-semibold text-[#175f77]">{t.count(got, data.reqs.length)}</p>}
             </div>
-            <div className="mt-1"><Checklist reqs={data.reqs} busy={busy} onUpload={onUpload} t={t} compact /></div>
-            <div className="mt-3"><DropZone busy={busy} onUpload={onUpload} t={t} hint={missing.length > 0} /></div>
+            <div className="mt-1"><Checklist reqs={data.reqs} busy={busy} onUpload={onUpload} onScan={onScan} t={t} compact /></div>
+            <div className="mt-3"><DropZone busy={busy} onUpload={onUpload} onScan={onScan} t={t} hint={missing.length > 0} /></div>
           </Box>
           <Deadlines d={d} appts={data.appts} compact lang={lang} t={t} go={go} />
           </div>
@@ -228,6 +229,7 @@ export function Home({ d, dossiers, data, uploads, busy, onUpload, openClara, cl
                 {pending.length > 0 && <button type="button" onClick={() => go("sign")} className={miniBtnDark}>{t.signCta}</button>}
               </MiniCard>
             )}
+            <ReceiptsEntry lang={lang} go={go} />
             <MiniCard eyebrow={t.apptCard} icon="calendar" tone="sky" text={t.apptWith}>
               <button type="button" onClick={() => go("appt")} className={miniBtn}>{t.apptCta}</button>
             </MiniCard>

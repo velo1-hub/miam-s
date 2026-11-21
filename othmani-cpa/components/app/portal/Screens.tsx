@@ -189,7 +189,7 @@ export function ProfileScreen({ d, dossiers, email, pick, counts, lang, t, go }:
   const row = "flex min-h-14 w-full items-center gap-3 px-5 py-3 text-left text-ink";
   const group = "overflow-hidden rounded-3xl border border-line bg-white";
   const h = "px-5 pt-5 pb-1 font-display text-lg font-semibold text-ink";
-  const links = [["sign", "sign", t.side.sign, counts.sign], ["pay", "card", t.side.pay, counts.pay], ["appt", "calendar", t.side.appt, 0]] as const;
+  const links = [["sign", "sign", t.side.sign, counts.sign], ["pay", "card", t.side.pay, counts.pay], ["appt", "calendar", t.side.appt, 0], ["receipts", "receipt", t.side.receipts, 0]] as const;
   return (
     <div className="max-w-2xl space-y-4">
       <PageTitle sub={<span className="break-all">{d.client_name}</span>}>{t.profile}</PageTitle>

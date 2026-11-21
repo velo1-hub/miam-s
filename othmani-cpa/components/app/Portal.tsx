@@ -10,10 +10,13 @@ import { Home, Track } from "./portal/Home";
 import { Ico } from "./portal/icons";
 import { OfflineBanner } from "./portal/Extras";
 import { ChatScreen, PayScreen, ProfileScreen, SignScreen } from "./portal/Screens";
+import { ReceiptsScreen } from "./portal/Receipts";
+import { Scanner } from "./portal/Scanner";
+import { scanTx } from "./portal/scantext";
 import { QuestScreen } from "./portal/Situation";
 import { tx } from "./portal/text";
 import { PageTitle, SectionError } from "./portal/ui";
-import { CURRENT, MAX_BYTES, SEEN, dossierLabel, mailHref, safeName, store, telHref, time, uuid, type Feedback, type PortalData, type Questionnaire, type Tab, type Upload } from "./portal/util";
+import { CURRENT, MAX_BYTES, SEEN, dossierLabel, mailHref, safeName, store, telHref, time, uuid, type Feedback, type PortalData, type Questionnaire, type ScanFn, type Tab, type Upload } from "./portal/util";
 
 /** Lit une liste ; `null` si la lecture a échoué (jamais confondu avec une liste vide). */
 async function rows<R>(q: PromiseLike<{ data: unknown; error: unknown }>): Promise<R[] | null> {
@@ -33,6 +36,8 @@ function View({ lang, email }: { lang: Lang; email: string }) {
   const [seenMap, setSeenMap] = useState<Record<string, string>>({});
   const [claraOpen, setClaraOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  /** Numériseur ouvert : le dossier et la ligne visés sont figés à l'ouverture. */
+  const [scan, setScan] = useState<{ dossierId: string; requestId: string | null; label?: string } | null>(null);
   const seq = useRef(0);
   const firstTab = useRef(true);
   const claraBox = useRef<HTMLDivElement>(null);
@@ -146,6 +151,28 @@ function View({ lang, email }: { lang: Lang; email: string }) {
     setTab("home");
   };
 
+  /** Envoie un fichier : dépôt dans le stockage, puis ligne dans `documents`. Renvoie true si les deux ont réussi. */
+  const sendOne = async (f: File, dossierId: string, requestId: string | null): Promise<boolean> => {
+    try {
+      const path = `${dossierId}/${uuid()}-${safeName(f.name) || "document"}`;
+      const up = await supabase().storage.from("documents").upload(path, f, { contentType: f.type || undefined });
+      if (up.error) return false;
+      // La base coche elle-même la ligne de la liste quand `request_id` est fourni.
+      const ins = await supabase().from("documents").insert({ dossier_id: dossierId, uploader_role: "client", path, name: f.name.slice(0, 200), size: f.size, ...(requestId ? { request_id: requestId } : {}) });
+      return !ins.error;
+    } catch { return false; }
+  };
+
+  const openScan: ScanFn = (requestId, label) => { if (current && !busy) setScan({ dossierId: current, requestId, label }); };
+  /** Fermeture du numériseur : `sent` pages sont parties ; la liste se met à jour (la ligne se coche). */
+  const closeScan = (sent: number) => {
+    const id = scan?.dossierId;
+    setScan(null);
+    if (!sent || !id) return;
+    toast(scanTx[lang].sentPages(sent));
+    if (id === current) loadData(id, true);
+  };
+
   const upload = async (files: File[], requestId: string | null) => {
     if (!current || busy) return;
     const dossierId = current;
@@ -156,16 +183,7 @@ function View({ lang, email }: { lang: Lang; email: string }) {
     let sent = 0;
     for (const { f, key } of items) {
       if (f.size > MAX_BYTES) { mark(key, "error", t.tooBig(f.name)); toast(t.tooBig(f.name), "error"); continue; }
-      let ok = false;
-      try {
-        const path = `${dossierId}/${uuid()}-${safeName(f.name) || "document"}`;
-        const up = await supabase().storage.from("documents").upload(path, f, { contentType: f.type || undefined });
-        if (!up.error) {
-          // La base coche elle-même la ligne de la liste quand `request_id` est fourni.
-          const ins = await supabase().from("documents").insert({ dossier_id: dossierId, uploader_role: "client", path, name: f.name.slice(0, 200), size: f.size, ...(requestId ? { request_id: requestId } : {}) });
-          ok = !ins.error;
-        }
-      } catch { ok = false; }
+      const ok = await sendOne(f, dossierId, requestId);
       if (ok) { sent++; mark(key, "ok"); } else { mark(key, "error", t.upErr(f.name)); toast(t.upErr(f.name), "error"); }
     }
     setBusy(false);
@@ -207,12 +225,12 @@ function View({ lang, email }: { lang: Lang; email: string }) {
     messages: unreadCount,
     sign: (ready?.sigs ?? []).filter((s) => s.status === "a_signer").length,
     pay: (ready?.invoices ?? []).filter((i) => i.status === "a_payer").length,
-    appt: 0, home: 0, profile: 0, quest: 0,
+    appt: 0, home: 0, profile: 0, quest: 0, receipts: 0,
   };
   const claraContext = [`Dossier : ${d.title}`, `Étape : ${STEPS5[step5(d.status)].fr}`, d.next_step ? `Message du cabinet sur la suite : ${d.next_step}` : "", d.due_date ? `Échéance : ${d.due_date}` : ""].filter(Boolean).join(". ");
 
-  const SIDE: { id: "home" | "docs" | "messages" | "sign" | "pay" | "appt"; icon: string }[] = [
-    { id: "home", icon: "grid" }, { id: "docs", icon: "docs" }, { id: "messages", icon: "chat" }, { id: "sign", icon: "sign" }, { id: "pay", icon: "card" }, { id: "appt", icon: "calendar" },
+  const SIDE: { id: "home" | "docs" | "messages" | "sign" | "pay" | "appt" | "receipts"; icon: string }[] = [
+    { id: "home", icon: "grid" }, { id: "docs", icon: "docs" }, { id: "receipts", icon: "receipt" }, { id: "messages", icon: "chat" }, { id: "sign", icon: "sign" }, { id: "pay", icon: "card" }, { id: "appt", icon: "calendar" },
   ];
   const sideOn = (id: Tab) => tab === id || (id === "home" && tab === "track") || (id === "docs" && tab === "quest");
   const sideBtn = (id: Tab, icon: string, label: string, n: number, badge?: string) => (
@@ -230,9 +248,10 @@ function View({ lang, email }: { lang: Lang; email: string }) {
   if (tab === "profile") screen = <ProfileScreen d={d} dossiers={dossiers} email={email} pick={pick} counts={counts} lang={lang} t={t} go={setTab} />;
   else if (dataFailed && !ready) screen = <LoadError lang={lang} retry={retry} />;
   else if (!ready) screen = <div className="max-w-2xl"><Skeleton rows={4} label={t.loading} /></div>;
-  else if (tab === "home") screen = <Home d={d} dossiers={dossiers} data={ready} refresh={refresh} refreshing={refreshing} reload={reload} uploads={uploads} busy={busy} onUpload={upload} openClara={openClara} claraOpen={claraOpen} lang={lang} t={t} go={setTab} />;
+  else if (tab === "home") screen = <Home d={d} dossiers={dossiers} data={ready} refresh={refresh} refreshing={refreshing} reload={reload} uploads={uploads} busy={busy} onUpload={upload} onScan={openScan} openClara={openClara} claraOpen={claraOpen} lang={lang} t={t} go={setTab} />;
   else if (tab === "track") screen = <Track d={d} reqs={ready.reqs} lang={lang} t={t} go={setTab} />;
-  else if (tab === "docs") screen = <DocsScreen d={d} quests={ready.quests} go={setTab} reqs={ready.reqs} docs={ready.docs} dossiers={dossiers} uploads={uploads} busy={busy} onUpload={upload} lang={lang} t={t} sub={sub} />;
+  else if (tab === "docs") screen = <DocsScreen d={d} quests={ready.quests} go={setTab} reqs={ready.reqs} docs={ready.docs} dossiers={dossiers} uploads={uploads} busy={busy} onUpload={upload} onScan={openScan} lang={lang} t={t} sub={sub} />;
+  else if (tab === "receipts") screen = <ReceiptsScreen key={d.id} d={d} dossiers={dossiers} reload={reload} lang={lang} t={t} go={setTab} />;
   else if (tab === "quest") screen = <QuestScreen key={d.id} d={d} quests={ready.quests} reqs={ready.reqs} reload={reload} retry={retry} lang={lang} t={t} go={setTab} />;
   else if (tab === "messages") screen = <ChatScreen d={d} msgs={ready.msgs} author={d.client_name || email} reload={reload} lang={lang} t={t} sub={sub} />;
   else {
@@ -249,7 +268,7 @@ function View({ lang, email }: { lang: Lang; email: string }) {
       <div className="sticky top-[7.75rem] hidden h-[calc(100svh-9.75rem)] min-h-[26rem] flex-col rounded-3xl border border-line bg-white p-3 lg:flex">
         <nav aria-label={t.navDesktop} className="flex-1 overflow-y-auto">
           <ul className="space-y-1">
-            {SIDE.map((x) => sideBtn(x.id, x.icon, t.side[x.id], counts[x.id], x.id === "home" ? undefined : t.badge[x.id as "docs" | "messages" | "sign" | "pay"]?.(counts[x.id])))}
+            {SIDE.map((x) => sideBtn(x.id, x.icon, t.side[x.id], counts[x.id], x.id === "home" || x.id === "receipts" ? undefined : t.badge[x.id as "docs" | "messages" | "sign" | "pay"]?.(counts[x.id])))}
           </ul>
           <ul className="mt-3 border-t border-line pt-3">{sideBtn("profile", "user", t.side.profile, 0)}</ul>
         </nav>
@@ -289,6 +308,10 @@ function View({ lang, email }: { lang: Lang; email: string }) {
           })}
         </ul>
       </nav>
+
+      {scan && (
+        <Scanner lang={lang} title={scan.label ? scanTx[lang].titleFor(scan.label) : undefined} send={(f) => sendOne(f, scan.dossierId, scan.requestId)} onClose={closeScan} />
+      )}
 
       {/* Clara s'ouvre depuis le bouton central ou « Parler à Clara » : son bouton flottant reste masqué. */}
       <div ref={claraBox} className="[&_.clara-fab]:!hidden [&_[role=dialog]]:!bottom-[calc(6.75rem+env(safe-area-inset-bottom))] lg:[&_[role=dialog]]:!bottom-6">

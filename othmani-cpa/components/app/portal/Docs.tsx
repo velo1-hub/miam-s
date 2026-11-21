@@ -6,10 +6,11 @@ import { Ico } from "./icons";
 import { QuestEntry } from "./Situation";
 import type { T } from "./text";
 import { Box, Eyebrow, FilePick, PageTitle, Pill, Tile, useDrop } from "./ui";
-import { fmtSize, hasQuest, type Go, type Questionnaire, type Upload, type UploadFn } from "./util";
+import { scanTx } from "./scantext";
+import { fmtSize, hasQuest, type Go, type Questionnaire, type ScanFn, type Upload, type UploadFn } from "./util";
 
 /** Une ligne de la liste : reçue (cochée) ou à fournir (avec les boutons d'envoi). On peut y déposer un fichier. */
-function Row({ r, busy, onUpload, t, compact }: { r: DocRequest; busy: boolean; onUpload: UploadFn; t: T; compact: boolean }) {
+function Row({ r, busy, onUpload, onScan, t, compact }: { r: DocRequest; busy: boolean; onUpload: UploadFn; onScan: ScanFn; t: T; compact: boolean }) {
   const [over, drop] = useDrop((f) => onUpload(f, r.id), busy || r.received);
   if (r.received)
     return (
@@ -28,9 +29,9 @@ function Row({ r, busy, onUpload, t, compact }: { r: DocRequest; busy: boolean; 
       </div>
       <div className={`mt-3 flex flex-col gap-2 min-[26rem]:flex-row ${compact ? "pl-8" : ""}`}>
         {!compact && (
-          <FilePick camera aria={`${t.photo} : ${r.label}`} disabled={busy} onFiles={(f) => onUpload(f, r.id)} className="btn-primary min-h-12 flex-1 px-4">
+          <button type="button" aria-label={`${t.photo} : ${r.label}`} disabled={busy} onClick={() => onScan(r.id, r.label)} className="btn-primary min-h-12 flex-1 px-4 disabled:opacity-60">
             <Ico name="camera" /><span>{t.photo}</span>
-          </FilePick>
+          </button>
         )}
         <FilePick aria={`${t.pick} : ${r.label}`} disabled={busy} onFiles={(f) => onUpload(f, r.id)} className={`btn-secondary px-4 ${compact ? "min-h-11" : "min-h-12 flex-1"}`}>
           <span>{t.pick}</span>
@@ -41,14 +42,29 @@ function Row({ r, busy, onUpload, t, compact }: { r: DocRequest; busy: boolean; 
 }
 
 /** La liste qui se coche toute seule : chaque document envoyé pour une ligne la marque « Reçu ». */
-export function Checklist({ reqs, busy, onUpload, t, compact = false }: { reqs: DocRequest[]; busy: boolean; onUpload: UploadFn; t: T; compact?: boolean }) {
+export function Checklist({ reqs, busy, onUpload, onScan, t, compact = false }: { reqs: DocRequest[]; busy: boolean; onUpload: UploadFn; onScan: ScanFn; t: T; compact?: boolean }) {
   if (reqs.length === 0) return <p className="py-2 text-[0.95rem] text-muted">{t.noReqs}</p>;
   const sorted = [...reqs.filter((r) => !r.received), ...reqs.filter((r) => r.received)];
-  return <ul className="divide-y divide-line">{(compact ? reqs : sorted).map((r) => <Row key={r.id} r={r} busy={busy} onUpload={onUpload} t={t} compact={compact} />)}</ul>;
+  return <ul className="divide-y divide-line">{(compact ? reqs : sorted).map((r) => <Row key={r.id} r={r} busy={busy} onUpload={onUpload} onScan={onScan} t={t} compact={compact} />)}</ul>;
+}
+
+/** Entrée vers « Mes reçus » : photographier un reçu du quotidien et demander s'il est déductible. */
+export function ReceiptsEntry({ lang, go }: { lang: Lang; go: Go }) {
+  const s = scanTx[lang];
+  return (
+    <Box className="!py-4">
+      <Eyebrow>{s.rEyebrow}</Eyebrow>
+      <div className="mt-2 flex items-center gap-3">
+        <Tile icon="receipt" tone="violet" className="h-10 w-10" />
+        <p className="min-w-0 flex-1 text-[0.95rem] leading-snug text-ink">{s.rCardD}</p>
+      </div>
+      <button type="button" onClick={() => go("receipts")} className="btn-secondary mt-3 min-h-11 w-full px-4">{s.rCardCta}</button>
+    </Box>
+  );
 }
 
 /** Zone de dépôt (grand écran). Les fichiers déposés ici partent sans être liés à une ligne de la liste. */
-export function DropZone({ busy, onUpload, t, hint }: { busy: boolean; onUpload: UploadFn; t: T; hint: boolean }) {
+export function DropZone({ busy, onUpload, onScan, t, hint }: { busy: boolean; onUpload: UploadFn; onScan: ScanFn; t: T; hint: boolean }) {
   const [over, drop] = useDrop((f) => onUpload(f, null), busy);
   return (
     <div>
@@ -56,9 +72,13 @@ export function DropZone({ busy, onUpload, t, hint }: { busy: boolean; onUpload:
         <Ico name="cloudUp" className="h-7 w-7 text-[#175f77]" />
         <p className="mt-1.5 font-semibold text-[#175f77]">{t.dropHere}</p>
         <p className="text-sm text-muted">{t.dropOr}</p>
-        <FilePick aria={t.other} disabled={busy} onFiles={(f) => onUpload(f, null)} className="btn-secondary mt-3 min-h-11 px-5"><span>{t.pick}</span></FilePick>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          <FilePick aria={t.other} disabled={busy} onFiles={(f) => onUpload(f, null)} className="btn-secondary min-h-11 px-5"><span>{t.pick}</span></FilePick>
+          <button type="button" aria-label={t.photoOther} disabled={busy} onClick={() => onScan(null)} className="btn-secondary min-h-11 px-5 disabled:opacity-60"><Ico name="camera" /><span>{t.photo}</span></button>
+        </div>
       </div>
-      <div className="flex lg:hidden">
+      <div className="flex flex-col gap-2 min-[26rem]:flex-row lg:hidden">
+        <button type="button" aria-label={t.photoOther} disabled={busy} onClick={() => onScan(null)} className="btn-primary min-h-12 flex-1 px-4 disabled:opacity-60"><Ico name="camera" /><span>{t.photo}</span></button>
         <FilePick aria={t.other} disabled={busy} onFiles={(f) => onUpload(f, null)} className="btn-secondary min-h-12 flex-1 px-4"><Ico name="cloudUp" /><span>{t.other}</span></FilePick>
       </div>
       <p className="mt-2 text-sm text-muted">{hint && <span className="hidden lg:inline">{t.dropRow} </span>}{t.formats}</p>
@@ -126,7 +146,7 @@ function Vault({ title, docs, dossiers, empty, lang, t }: { title: string; docs:
   );
 }
 
-export function DocsScreen({ d, quests, reqs, docs, dossiers, uploads, busy, onUpload, lang, t, sub, go }: { d: Dossier; quests: Questionnaire[] | null; reqs: DocRequest[]; docs: Doc[]; dossiers: Dossier[]; uploads: Upload[]; busy: boolean; onUpload: UploadFn; lang: Lang; t: T; sub?: string; go: Go }) {
+export function DocsScreen({ d, quests, reqs, docs, dossiers, uploads, busy, onUpload, onScan, lang, t, sub, go }: { d: Dossier; quests: Questionnaire[] | null; reqs: DocRequest[]; docs: Doc[]; dossiers: Dossier[]; uploads: Upload[]; busy: boolean; onUpload: UploadFn; onScan: ScanFn; lang: Lang; t: T; sub?: string; go: Go }) {
   const got = reqs.filter((r) => r.received).length;
   return (
     <div className="space-y-4">
@@ -135,10 +155,13 @@ export function DocsScreen({ d, quests, reqs, docs, dossiers, uploads, busy, onU
       {hasQuest(d) && <QuestEntry quest={quests?.find((q) => q.dossier_id === d.id)} lang={lang} t={t} go={go} />}
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr] lg:items-start">
         <Box className="!py-3">
-          <Checklist reqs={reqs} busy={busy} onUpload={onUpload} t={t} />
+          <Checklist reqs={reqs} busy={busy} onUpload={onUpload} onScan={onScan} t={t} />
           {reqs.length > 0 && got === reqs.length && <p className="border-t border-line pt-3 pb-1 text-[0.95rem] text-muted">{t.allDocs}</p>}
         </Box>
-        <Box><DropZone busy={busy} onUpload={onUpload} t={t} hint={got < reqs.length} /></Box>
+        <div className="space-y-4">
+          <Box><DropZone busy={busy} onUpload={onUpload} onScan={onScan} t={t} hint={got < reqs.length} /></Box>
+          <ReceiptsEntry lang={lang} go={go} />
+        </div>
       </div>
       <Eyebrow className="px-1 pt-2">{t.vault}</Eyebrow>
       <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
