@@ -1,12 +1,12 @@
 "use client";
 import { QUESTIONS } from "./questionnaire";
 /**
- * Mode démonstration (code 0000) : un faux client de base de données, en mémoire, avec des
+ * Mode démonstration (code 232323) : un faux client de base de données, en mémoire, avec des
  * données fictives. Rien n'est lu ni écrit dans la vraie base, et tout s'efface à la fermeture
  * de l'onglet. Sert aux présentations et à l'examen des magasins d'applications.
- * Le code 0000 ne donne JAMAIS accès aux vrais dossiers : ceux-ci exigent la connexion par courriel.
+ * Le code 232323 ne donne JAMAIS accès aux vrais dossiers : ceux-ci exigent la connexion par courriel.
  */
-export const DEMO_CODE = "0000";
+export const DEMO_CODE = "232323";
 const KEY = "ocpa-demo";
 export type DemoRole = "cabinet" | "client";
 export const demoRole = (): DemoRole | null => {

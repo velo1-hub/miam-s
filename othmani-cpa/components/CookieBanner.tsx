@@ -16,7 +16,9 @@ export function CookieSettingsButton({ label, className }: { label: string; clas
 
 export function CookieBanner({ lang }: { lang: Lang }) {
   const t = dict(lang).cookies;
-  const [open, setOpen] = useState(false);
+  // Présent dès le premier affichage (pas d'attente du JavaScript). Pour un visiteur qui a déjà répondu,
+  // un petit script dans <head> le masque avant même le premier rendu (classe « has-consent »).
+  const [open, setOpen] = useState(true);
   const [custom, setCustom] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [maps, setMaps] = useState(false);
@@ -26,6 +28,7 @@ export function CookieBanner({ lang }: { lang: Lang }) {
     const c = readConsent();
     if (!c) setOpen(true);
     else {
+      setOpen(false);
       setAnalytics(c.analytics);
       setMaps(c.maps);
     }
@@ -34,6 +37,7 @@ export function CookieBanner({ lang }: { lang: Lang }) {
       setAnalytics(cur?.analytics ?? false);
       setMaps(cur?.maps ?? false);
       setCustom(true);
+      document.documentElement.classList.remove("has-consent");
       setOpen(true);
     };
     window.addEventListener(OPEN_EVENT, onOpen);
@@ -54,6 +58,7 @@ export function CookieBanner({ lang }: { lang: Lang }) {
 
   return (
     <section
+      data-cookie-banner
       role="region"
       aria-labelledby={titleId}
       className="fixed inset-x-3 bottom-3 z-[60] rounded-3xl border border-white/80 bg-white/85 p-4 shadow-[0_24px_70px_-30px_rgba(23,23,58,.55)] backdrop-blur-2xl backdrop-saturate-150 sm:inset-x-auto sm:left-5 sm:bottom-5 sm:max-w-md sm:p-6"

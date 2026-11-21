@@ -8,7 +8,7 @@ L'application charge la version en ligne : une mise à jour du site met à jour 
 - Identifiant : `com.othmanicpa.pilotefiscal`, nom : « Pilote Fiscal ».
 - Icône 1024 × 1024 : `../public/icons/icon-1024.png`.
 - Connexion par code reçu par courriel (compatible application ; pas de lien à ouvrir).
-- Compte de démonstration pour l'examen Apple et Google : code d'accès **0000** (données fictives).
+- Compte de démonstration pour l'examen Apple et Google : code d'accès **232323** (données fictives).
 - Fiche de magasin : `store-listing.md`.
 
 ## Ce qui ne peut se faire que sur vos comptes et vos machines

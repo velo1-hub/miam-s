@@ -58,7 +58,7 @@ const tx = {
   },
 };
 
-/** Session de l'application : vraie (courriel vérifié) ou démonstration (code 0000, données fictives). */
+/** Session de l'application : vraie (courriel vérifié) ou démonstration (code 232323, données fictives). */
 export type AppSession = { email: string; demo: boolean };
 
 /* ───────────── Messages de confirmation (toasts) ───────────── */
@@ -242,7 +242,7 @@ function Bell({ role, lang }: { role: "cabinet" | "client"; lang: Lang }) {
 /**
  * Cadre commun : en-tête vitré, connexion, puis contenu.
  * Connexion réelle : courriel, puis code à 6 chiffres reçu par courriel (ou lien du même courriel).
- * Code 0000 : mode démonstration, données fictives seulement (voir lib/demo.ts).
+ * Code 232323 : mode démonstration, données fictives seulement (voir lib/demo.ts).
  */
 export function AppFrame({ lang, title, subtitle, demo, wide = false, children }: { lang: Lang; title: string; subtitle: string; demo: DemoRole; wide?: boolean; children: (s: AppSession) => ReactNode }) {
   const t = tx[lang];

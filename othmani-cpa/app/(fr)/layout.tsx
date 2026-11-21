@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="fr-CA">
       <head>
         {/* Active les animations seulement si JavaScript est disponible : sans JS, tout reste visible. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js');try{if(localStorage.getItem('ocpa-consent'))document.documentElement.classList.add('has-consent')}catch(e){}" }} />
       </head>
       <body>{children}</body>
     </html>

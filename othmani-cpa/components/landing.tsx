@@ -150,7 +150,7 @@ function MediaDoor({ lang, title, lead, img, alt, items, hub, delay, pos = "obje
             <li key={c.key}>
               <Link href={href(c.key, lang)} className="glass-dark group flex items-center gap-4 rounded-2xl px-4 py-3.5 transition-colors hover:bg-white/15">
                 {concernImagesReady && concernImages[c.key] ? (
-                  <img src={concernImages[c.key]!.src} alt={concernImages[c.key]![lang]} width={640} height={800} loading="lazy" decoding="async" className="h-20 w-16 shrink-0 rounded-xl object-cover" />
+                  <img src={concernImages[c.key]!.src.replace(".webp", "-s.webp")} alt={concernImages[c.key]![lang]} width={160} height={200} loading="lazy" decoding="async" className="h-20 w-16 shrink-0 rounded-xl object-cover" />
                 ) : (
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-sky"><Icon name={c.icon} className="h-5 w-5" /></span>
                 )}

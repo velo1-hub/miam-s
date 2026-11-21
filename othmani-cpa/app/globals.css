@@ -55,8 +55,8 @@
 }
 
 /* Animations douces au défilement : le contenu reste visible sans JavaScript. */
-.js .reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
-.js .reveal.is-visible { opacity: 1; transform: none; }
+.js .reveal.reveal-armed { opacity: 0; transform: translateY(18px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+.js .reveal.reveal-armed.is-visible { opacity: 1; transform: none; }
 .js .reveal[data-delay="1"] { transition-delay: .08s; }
 .js .reveal[data-delay="2"] { transition-delay: .16s; }
 .js .reveal[data-delay="3"] { transition-delay: .24s; }
@@ -69,7 +69,7 @@
 @keyframes blink { 50% { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .js .reveal.reveal-armed { opacity: 1; transform: none; transition: none; }
   .typing .ch { opacity: 1; }
   .typing .ch.cur::after { display: none; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -287,3 +287,6 @@ html:not(:has(#mobile-menu[open])) .site-header[data-dark-top]:not([data-scrolle
   .app-fx .fx-dot, .app-fx .animate-pulse, .app-fx[data-auth] main :is(section, article, form).rounded-3xl { animation: none; }
   .app-fx .btn-primary, .app-fx[data-auth] main :is(button, a) { transition: none; }
 }
+
+/* Bandeau de témoins : masqué avant le premier rendu pour qui a déjà répondu (voir le script dans <head>). */
+.has-consent [data-cookie-banner] { display: none; }

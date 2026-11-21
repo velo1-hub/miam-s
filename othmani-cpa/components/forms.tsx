@@ -76,6 +76,24 @@ export function ContactForm({ lang }: { lang: Lang }) {
           </div>
         </fieldset>
       </div>
+      <fieldset className="rounded-2xl border border-line p-4">
+        <legend className="px-1 text-sm font-semibold text-ink">{lang === "fr" ? "Vous souhaitez un rendez-vous ? (facultatif)" : "Would you like an appointment? (optional)"}</legend>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor={`${id}-d`} className="label">{lang === "fr" ? "Jour souhaité" : "Preferred day"}</label>
+            <input id={`${id}-d`} name="jour_souhaite" type="date" className="field" />
+          </div>
+          <div>
+            <label htmlFor={`${id}-t`} className="label">{lang === "fr" ? "Moment de la journée" : "Time of day"}</label>
+            <select id={`${id}-t`} name="moment_souhaite" defaultValue="" className="field">
+              <option value="">{lang === "fr" ? "Peu importe" : "No preference"}</option>
+              <option value="matin">{lang === "fr" ? "Le matin" : "Morning"}</option>
+              <option value="apres-midi">{lang === "fr" ? "L'après-midi" : "Afternoon"}</option>
+            </select>
+          </div>
+        </div>
+        <p className="mt-2 text-sm text-muted">{lang === "fr" ? "C'est un souhait : un membre du cabinet vous confirmera le moment exact." : "This is a preference: a member of the firm will confirm the exact time."}</p>
+      </fieldset>
       <div>
         <label htmlFor={`${id}-m`} className="label">{t.message}{req}</label>
         <textarea id={`${id}-m`} name="message" required rows={4} aria-describedby={`${id}-mh`} className="field resize-y" maxLength={2000} />

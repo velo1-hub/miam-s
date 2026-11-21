@@ -33,7 +33,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
       <div className="hdr-shell">
         <div className="relative flex items-center justify-between gap-3">
           {/* Logo */}
-          <Link href={href("home", lang)} aria-label={fr ? "Othmani CPA, accueil" : "Othmani CPA, home"} className="flex shrink-0 items-center gap-2.5 rounded-xl">
+          <Link href={href("home", lang)} aria-label={fr ? "Othmani CPA Inc., société de comptable professionnel agréé : accueil" : "Othmani CPA Inc., société de comptable professionnel agréé: home"} className="flex shrink-0 items-center gap-2.5 rounded-xl">
             <LogoMark className="hdr-ink h-9 w-auto transition-colors sm:h-10" />
             <span className="flex flex-col leading-none">
               <span className="hdr-ink font-display text-[1.05rem] font-bold tracking-tight whitespace-nowrap text-navy transition-colors sm:text-[1.2rem]">Othmani CPA <span className="text-[0.65rem] font-medium">Inc.</span></span>
@@ -64,7 +64,7 @@ export function Header({ lang, routeKey, overlay = false }: { lang: Lang; routeK
               href={routes[routeKey][other]}
               hrefLang={other === "fr" ? "fr-CA" : "en-CA"}
               lang={other}
-              aria-label={t.nav.langSwitchLabel}
+              aria-label={`${other === "fr" ? "FR" : "EN"} : ${t.nav.langSwitchLabel}`}
               className="gbtn h-11 w-11 text-[0.9rem] font-semibold sm:h-12 sm:w-12"
             >
               {other === "fr" ? "FR" : "EN"}
