@@ -1,12 +1,12 @@
 import type { ServiceId } from "./services";
 /** Photo per service. Files live in public/media; a missing file falls back to the dark aurora hero. */
 export const SERVICE_PHOTO: Record<ServiceId, string> = {
-  residential: "/media/visit.webp", // TODO swap for residential.webp once generated
-  deep: "/media/after.webp", // TODO swap for deep.webp once generated
+  residential: "/media/residential.webp",
+  deep: "/media/deep.webp",
   move: "/media/move.webp",
   postconstruction: "/media/postcon.webp",
   airbnb: "/media/airbnb.webp",
-  office: "/media/office.webp", // temporary crop of the lobby entrance until the office photo is generated
+  office: "/media/office.webp",
   restaurant: "/media/restaurant.webp",
   property: "/media/lobby.webp",
 };

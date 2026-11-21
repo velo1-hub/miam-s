@@ -5,12 +5,14 @@ import { BIZ } from "@/content/business";
 import { Section, Heading, CtaBand, PageHero, Check } from "@/components/ui";
 import { LeadForm } from "@/components/Forms";
 import { I } from "@/components/Icons";
+import { PHOTO } from "@/content/media";
+import { mediaExists } from "@/lib/media-exists";
 
 export function AboutPage({ locale }: { locale: Locale }) {
   const fr = locale === "fr"; const d = t(locale);
   return (
     <>
-      <PageHero eyebrow={d.nav.about} title={fr ? "Une entreprise montréalaise bâtie sur une idée simple" : "A Montréal company built on one simple idea"} sub={fr ? "Le nettoyage est un métier de constance. Même équipe, même liste, même résultat, et quelqu'un qui répond quand ça compte." : "Cleaning is a job of consistency. Same team, same checklist, same result, and someone who answers when it matters."} />
+      <PageHero photo={mediaExists(PHOTO.team) ? PHOTO.team : null} eyebrow={d.nav.about} title={fr ? "Une entreprise montréalaise bâtie sur une idée simple" : "A Montréal company built on one simple idea"} sub={fr ? "Le nettoyage est un métier de constance. Même équipe, même liste, même résultat, et quelqu'un qui répond quand ça compte." : "Cleaning is a job of consistency. Same team, same checklist, same result, and someone who answers when it matters."} />
       <Section>
         <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr]">
           <div className="prose-gnm">
@@ -75,7 +77,7 @@ export function CareersPage({ locale }: { locale: Locale }) {
   const roles = fr ? [["Préposé(e) à l'entretien résidentiel", "Jour, lun–ven, 25–35 h", "Montréal, Laval, Rive-Sud"], ["Préposé(e) commercial", "Soir, 18 h–23 h, 20–30 h", "Centre-ville, Laval"], ["Chef d'équipe", "Jour ou soir, temps plein", "Montréal"], ["Coordination et service client", "Jour, temps plein, bilingue", "Bureau / télétravail"]] : [["Residential cleaner", "Days, Mon–Fri, 25–35 h", "Montréal, Laval, South Shore"], ["Commercial cleaner", "Evenings, 6–11 p.m., 20–30 h", "Downtown, Laval"], ["Team lead", "Days or evenings, full time", "Montréal"], ["Coordination and customer service", "Days, full time, bilingual", "Office / remote"]];
   return (
     <>
-      <PageHero eyebrow={d.nav.careers} title={fr ? "Un métier respecté, une équipe stable" : "A respected trade, a stable team"} sub={fr ? "Nous embauchons toute l'année. Candidature en deux minutes, réponse en 48 heures, entrevue la semaine même." : "We hire year-round. Two-minute application, reply within 48 hours, interview the same week."} />
+      <PageHero photo={mediaExists(PHOTO.team) ? PHOTO.team : null} eyebrow={d.nav.careers} title={fr ? "Un métier respecté, une équipe stable" : "A respected trade, a stable team"} sub={fr ? "Nous embauchons toute l'année. Candidature en deux minutes, réponse en 48 heures, entrevue la semaine même." : "We hire year-round. Two-minute application, reply within 48 hours, interview the same week."} />
       <Section><div className="grid gap-12 lg:grid-cols-[1fr_1fr]">
         <div><Heading title={fr ? "Postes ouverts" : "Open positions"} /><ul className="mt-6 divide-y divide-line rounded-2xl border border-line">{roles.map(([r, h, z]) => <li key={r} className="flex flex-wrap items-center justify-between gap-2 px-5 py-4"><div><p className="text-[16px] font-semibold text-navy-950">{r}</p><p className="text-[13.5px] text-ink-600">{h} · {z}</p></div><a href="#apply" className="text-[14px] font-semibold text-amber-600 underline">{fr ? "Postuler" : "Apply"}</a></li>)}</ul>
           <h3 className="mt-10 text-[13px] font-semibold uppercase tracking-wider text-ink-500">{fr ? "Ce que nous offrons" : "What we offer"}</h3><ul className="mt-4 grid gap-2.5">{perks.map((p) => <Check key={p}>{p}</Check>)}</ul>
