@@ -11,11 +11,11 @@ export default function OG() {
           <div style={{ fontSize: 34, fontWeight: 700, display: "flex" }}>Groupe Nettoyage Montréal</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <div style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, display: "flex" }}>Un espace propre,</div>
-          <div style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, color: "#e9a84c", display: "flex" }}>réservé en deux minutes.</div>
-          <div style={{ fontSize: 28, color: "rgba(255,255,255,.75)", display: "flex" }}>Résidentiel · Airbnb · Bureaux · Immeubles · Montréal, Laval, Rive-Sud</div>
+          <div style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, display: "flex" }}>Des locaux impeccables,</div>
+          <div style={{ fontSize: 68, fontWeight: 700, lineHeight: 1.05, letterSpacing: -2, color: "#e9a84c", display: "flex" }}>sans y penser.</div>
+          <div style={{ fontSize: 28, color: "rgba(255,255,255,.75)", display: "flex" }}>Bureaux · Restaurants · Immeubles · Locations court terme · Montréal, Laval, Rive-Sud</div>
         </div>
-        <div style={{ display: "flex", gap: 36, fontSize: 24, color: "rgba(255,255,255,.85)" }}><div style={{ display: "flex" }}>Assurés · CNESST</div><div style={{ display: "flex" }}>Même équipe</div><div style={{ display: "flex" }}>Rapport photo</div><div style={{ display: "flex" }}>Sans contrat</div></div>
+        <div style={{ display: "flex", gap: 36, fontSize: 24, color: "rgba(255,255,255,.85)" }}><div style={{ display: "flex" }}>Assurés · CNESST</div><div style={{ display: "flex" }}>Même équipe</div><div style={{ display: "flex" }}>Rapport photo</div><div style={{ display: "flex" }}>Soumission en 24 h</div></div>
       </div>
     ), { ...size },
   );

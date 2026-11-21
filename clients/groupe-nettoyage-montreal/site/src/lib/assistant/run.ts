@@ -1,21 +1,19 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { SERVICES, serviceById, type ServiceId } from "@/content/services";
-import { ZONES } from "@/content/zones";
 import { FAQ } from "@/content/faq";
 import { BIZ } from "@/content/business";
-import { computeQuote, withTax, type QuoteInput } from "@/lib/pricing";
 import { getSlots, nextAvailableDays, isBookableDate, addMinutes, SCHEDULE, makeRef, todayISO, dayOfWeek } from "@/lib/availability";
 import { getDB, type Booking, type DB } from "@/lib/db";
 import { notifyBooking, notifyLead } from "@/lib/email";
-import { quoteInputSchema } from "@/lib/schema";
 import type { Locale } from "@/i18n/config";
 
 export const MODEL = "claude-opus-5-5";
 export type ChatMsg = { role: "user" | "assistant"; content: string };
-export type AssistantState = { quote?: QuoteInput & { zone?: string }; name?: string; email?: string; phone?: string; address?: string };
-export type AssistantContext = { page?: string; quote?: QuoteInput & { zone?: string } };
-export type StatusKey = "pricing" | "availability" | "booking" | "lead";
+/** Facts gathered during the session; replayed each turn so the model never asks twice. */
+export type AssistantState = { company?: string; service?: ServiceId; sqft?: number; units?: number; frequency?: string; schedule?: string; name?: string; email?: string; phone?: string; address?: string };
+export type AssistantContext = { page?: string; service?: ServiceId };
+export type StatusKey = "availability" | "booking" | "lead";
 export type AssistantEvent = { t: "delta"; text: string } | { t: "status"; key: StatusKey };
 export type AssistantResult = { reply: string; chips: string[]; state: AssistantState; booking: Booking | null };
 
@@ -24,49 +22,52 @@ export type ModelClient = { beta: { messages: { stream: Anthropic["beta"]["messa
 
 const serviceIds = SERVICES.map((s) => s.id) as [ServiceId, ...ServiceId[]];
 const tools: Anthropic.Beta.BetaToolUnion[] = [
-  { name: "estimate_price", description: "Compute the price for a cleaning service from the structured details. Residential, deep, move, airbnb and small post-construction return a firm price or range; office, restaurant and property return a monthly range or 'quote' and require a free walkthrough. Call it as soon as you know the service and the size: it is cheap and instant.", strict: true,
-    input_schema: { type: "object", additionalProperties: false, required: ["service"], properties: { service: { type: "string", enum: serviceIds }, homeType: { type: "string", enum: ["studio", "3half", "4half", "5half", "house"] }, bedrooms: { type: "integer" }, bathrooms: { type: "integer" }, floors: { type: "integer" }, sqft: { type: "integer" }, frequency: { type: "string", enum: ["once", "weekly", "biweekly", "monthly"] }, visitsPerWeek: { type: "integer" }, addons: { type: "array", items: { type: "string", enum: ["oven", "fridge", "windows", "pets", "laundry", "linens", "carpet", "balcony"] } }, zone: { type: "string", enum: ZONES.map((z) => z.id) } } } },
-  { name: "get_availability", description: "List open appointment slots. kind=cleaning for a bookable cleaning, kind=walkthrough for the free 20-minute commercial visit. Pass a date (YYYY-MM-DD) for one day, or omit it for the next days with openings. Call it in the same turn as estimate_price when the user is ready to pick a time.", strict: true,
-    input_schema: { type: "object", additionalProperties: false, required: ["kind"], properties: { kind: { type: "string", enum: ["cleaning", "walkthrough"] }, date: { type: "string" } } } },
-  { name: "book_appointment", description: "Create a confirmed booking. Only call after the user has explicitly confirmed the date, time slot, service, full address, name, email and phone. Returns the reference.", strict: true,
-    input_schema: { type: "object", additionalProperties: false, required: ["kind", "service", "date", "slot_start", "name", "email", "phone", "address"], properties: { kind: { type: "string", enum: ["cleaning", "walkthrough"] }, service: { type: "string", enum: serviceIds }, date: { type: "string" }, slot_start: { type: "string" }, name: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, address: { type: "string" }, notes: { type: "string" } } } },
-  { name: "create_lead", description: "Save a callback/quote request when the user cannot or does not want to book now (e.g. property management, restaurant, out-of-area, custom needs). Requires name and email or phone.", strict: true,
-    input_schema: { type: "object", additionalProperties: false, required: ["name", "message"], properties: { name: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, service: { type: "string", enum: serviceIds }, message: { type: "string" } } } },
+  { name: "save_details", description: "Record what the visitor has told you about their premises and themselves, so the quote team has it and you never ask twice. Call it as soon as you learn a new fact; partial input is fine.", strict: true,
+    input_schema: { type: "object", additionalProperties: false, required: [], properties: { company: { type: "string" }, service: { type: "string", enum: serviceIds }, sqft: { type: "integer" }, units: { type: "integer" }, frequency: { type: "string", description: "e.g. '3 evenings a week', 'daily', 'per turnover', 'one-off'" }, schedule: { type: "string", description: "when the work should happen, e.g. 'after 6 p.m.', 'nights after close'" }, name: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, address: { type: "string" } } } },
+  { name: "get_availability", description: "List open slots for the free 20-minute walkthrough (weekdays, 09:00 to 18:30). Pass a date (YYYY-MM-DD) for one day, or omit it for the next days with openings.", strict: true,
+    input_schema: { type: "object", additionalProperties: false, required: [], properties: { date: { type: "string" } } } },
+  { name: "book_walkthrough", description: "Confirm the free walkthrough. Only call after the visitor has explicitly confirmed the date, time slot, company, premises address, name, email and phone. Returns the reference.", strict: true,
+    input_schema: { type: "object", additionalProperties: false, required: ["service", "date", "slot_start", "company", "name", "email", "phone", "address"], properties: { service: { type: "string", enum: serviceIds }, date: { type: "string" }, slot_start: { type: "string" }, company: { type: "string" }, name: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, address: { type: "string" }, notes: { type: "string" } } } },
+  { name: "create_lead", description: "Save a callback request when the visitor cannot or does not want to pick a slot now (large portfolio, custom needs, outside the service area, prefers a call). Requires name and email or phone.", strict: true,
+    input_schema: { type: "object", additionalProperties: false, required: ["name", "message"], properties: { name: { type: "string" }, company: { type: "string" }, email: { type: "string" }, phone: { type: "string" }, service: { type: "string", enum: serviceIds }, message: { type: "string" } } } },
 ];
-const STATUS_OF: Record<string, StatusKey> = { estimate_price: "pricing", get_availability: "availability", book_appointment: "booking", create_lead: "lead" };
+const STATUS_OF: Record<string, StatusKey> = { get_availability: "availability", book_walkthrough: "booking", create_lead: "lead" };
 
-const bookSchema = z.object({ kind: z.enum(["cleaning", "walkthrough"]), service: z.enum(serviceIds), date: z.string(), slot_start: z.string(), name: z.string().min(2), email: z.string().email(), phone: z.string().min(7), address: z.string().min(5), notes: z.string().optional() });
-const leadSchema = z.object({ name: z.string().min(2), email: z.string().email().optional(), phone: z.string().optional(), service: z.enum(serviceIds).optional(), message: z.string().min(1) });
+const detailsSchema = z.object({ company: z.string().optional(), service: z.enum(serviceIds).optional(), sqft: z.number().int().optional(), units: z.number().int().optional(), frequency: z.string().optional(), schedule: z.string().optional(), name: z.string().optional(), email: z.string().optional(), phone: z.string().optional(), address: z.string().optional() });
+const bookSchema = z.object({ service: z.enum(serviceIds), date: z.string(), slot_start: z.string(), company: z.string().min(1), name: z.string().min(2), email: z.string().email(), phone: z.string().min(7), address: z.string().min(5), notes: z.string().optional() });
+const leadSchema = z.object({ name: z.string().min(2), company: z.string().optional(), email: z.string().email().optional(), phone: z.string().optional(), service: z.enum(serviceIds).optional(), message: z.string().min(1) });
 
 const DAY = { fr: ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"], en: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] };
 function catalog(locale: Locale) {
-  return SERVICES.map((s) => `- ${s.id}: ${s.name[locale]} · ${s.priceHint[locale]} · ${s.bookable ? "bookable online (kind=cleaning)" : "quote after free walkthrough (kind=walkthrough)"}`).join("\n");
+  return SERVICES.map((s) => `- ${s.id}: ${s.name[locale]} · ${s.format[locale]}`).join("\n");
 }
 
 /** Stable part of the prompt: no dates, no per-request data, so it caches across every visitor. */
 function systemPrompt(locale: Locale) {
   const fr = locale === "fr";
-  return `You are the booking assistant of ${BIZ.name}, a cleaning company serving Montréal, Laval, Longueuil, Brossard and the West Island. Reply in ${fr ? "French (Québec, vouvoiement)" : "English (Canadian)"} only.
+  return `You are the assistant of ${BIZ.name}, a commercial cleaning company serving Montréal, Laval, Longueuil, Brossard and the West Island. Reply in ${fr ? "French (Québec, vouvoiement)" : "English (Canadian)"} only.
 
-Goal: get the visitor a price and a confirmed appointment in as few messages as possible, four or fewer when they cooperate. Be fast, warm and concrete.
+Who we serve: businesses and managers only. Offices and shops, restaurants, property managers and condo boards, short-term rental operators, contractors and developers, landlords with units between tenants. We do NOT clean private homes for individuals. If someone asks for house, condo or apartment cleaning for themselves, say in one friendly sentence that we only work with businesses and building managers, and do not offer alternatives or referrals.
 
-Flow: (1) identify the service and the size of the space, (2) call estimate_price, (3) call get_availability and propose at most 3 concrete slots, (4) ask for name, email, phone and full address in one message, (5) read back a one-line summary and ask for an explicit yes, (6) call book_appointment, then give the reference. Never invent prices, slots or references: always use the tools. Never claim a booking exists unless book_appointment returned ok.
+Prices: we never state, estimate or hint at a price, rate, range or minimum, not even "roughly" or "it depends but usually". Every price comes in a written quote within 24 hours after a free 20-minute walkthrough. If asked for a number, say exactly that in one sentence and move on to scheduling the walkthrough.
+
+Goal: qualify the visitor and get the free walkthrough on the calendar in as few messages as possible, four or fewer when they cooperate. Be fast, warm and concrete.
+
+Flow: (1) identify the type of space and roughly its size and frequency, (2) call save_details with what you learned, (3) call get_availability and propose at most 3 concrete slots, (4) ask for company, contact name, email, phone and the premises address in one message, (5) read back a one-line summary and ask for an explicit yes, (6) call book_walkthrough, then give the reference and say the written quote follows within 24 hours of the visit. Never invent slots or references: always use the tools. Never claim a walkthrough exists unless book_walkthrough returned ok.
 
 Speed rules:
-- Use every detail the user already gave and the known context; never ask for something you already have.
-- Apply sensible defaults instead of asking (4½ = 2 bedrooms 1 bathroom, biweekly is most popular, no add-ons) and state the assumption in half a sentence.
-- When you have the service and size, call estimate_price and get_availability in the same turn.
+- Use every detail the visitor already gave and the known context; never ask for something you already have.
 - Ask at most two questions per message. Prefer offering choices over open questions.
-- Keep each reply under 70 words, plain sentences, no markdown, no headings, no bullet lists longer than 3 items. Prices as "145 $" (fr) or "$145" (en).
-- Quick replies: when the next step is a choice (service, home size, frequency, a slot, confirmation), end your message with one final line of the exact form [[choice 1 | choice 2 | choice 3]] with 2 to 4 short options (under 30 characters each). Slot options use the form "mardi 25 nov. 10:30". Never add quick replies when you need free text (address, name, email) or after a booking is confirmed.
+- When the visitor is ready for a time, call get_availability in the same turn as save_details.
+- Keep each reply under 70 words, plain sentences, no markdown, no headings, no bullet lists longer than 3 items.
+- Quick replies: when the next step is a choice (type of space, frequency, a slot, confirmation), end your message with one final line of the exact form [[choice 1 | choice 2 | choice 3]] with 2 to 4 short options (under 30 characters each). Slot options use the form "mardi 25 nov. 11:00". Never add quick replies when you need free text (company, address, email) or after a confirmed walkthrough.
 
 Business rules:
-- Residential (residential, deep, move, airbnb, postconstruction under 2,500 sq ft) get a firm price and are booked as kind=cleaning, tomorrow at the earliest.
-- Office, restaurant, property management and large post-construction get a range or a quote and are booked as kind=walkthrough (free 20-minute visit, weekdays only). Mention the written quote arrives within 24 hours.
-- Prices are before tax (GST 5% + QST 9.975%); products, equipment, insured dedicated team, photo report and the 24-hour fix guarantee are included.
-- Same-day emergencies: tell them to call ${BIZ.phoneDisplay}. Hours ${BIZ.hours.opens}–${BIZ.hours.closes}, 7 days.
-- Outside the service area or for anything you cannot handle, offer create_lead so a human calls back within 24 business hours.
-- If the user asks something unrelated to cleaning services, answer in one sentence and steer back.
+- The walkthrough is free, 20 minutes, weekdays only, tomorrow at the earliest. The quote is written, detailed per visit and per month, valid 30 days. Agreements are month to month, 30 days' notice, no minimum term.
+- Products, equipment, consumables, insured dedicated team, photo report every visit and the 24-hour fix guarantee are included in every agreement.
+- Same-day emergencies: tell them to call ${BIZ.phoneDisplay}. Phone hours ${BIZ.hours.opens}–${BIZ.hours.closes}, 7 days.
+- Outside the service area, portfolios above 50 buildings, or anything you cannot handle: offer create_lead so an account manager calls back within 24 business hours.
+- If the visitor asks something unrelated to commercial cleaning, answer in one sentence and steer back.
 
 Services (ids for tools):
 ${catalog(locale)}
@@ -79,8 +80,8 @@ ${FAQ[locale].map((f) => `Q: ${f.q} A: ${f.a}`).join("\n")}`;
 function sessionNote(locale: Locale, state: AssistantState, context: AssistantContext) {
   const today = todayISO();
   const parts = [`Today is ${DAY[locale][dayOfWeek(today)]} ${today} (America/Toronto).`];
-  if (context.page) parts.push(`The visitor is currently on the page ${context.page}; infer the service from it when obvious.`);
-  if (context.quote) parts.push(`They just computed this quote in the pricing tool, start from it: ${JSON.stringify(context.quote)}.`);
+  if (context.page) parts.push(`The visitor is currently on the page ${context.page}; infer the type of space from it when obvious.`);
+  if (context.service) parts.push(`They opened the chat from the ${context.service} service page.`);
   if (Object.keys(state).length) parts.push(`Known from earlier in this session (do not ask again unless missing): ${JSON.stringify(state)}.`);
   return parts.join(" ");
 }
@@ -100,38 +101,38 @@ export async function runAssistant(opts: { locale: Locale; history: ChatMsg[]; s
   const context = opts.context ?? {};
   let booking: Booking | null = null;
   const newState: AssistantState = { ...opts.state };
-  if (!newState.quote && context.quote) newState.quote = context.quote;
+  if (!newState.service && context.service) newState.service = context.service;
 
   const messages: Anthropic.Beta.BetaMessageParam[] = history.map((m) => ({ role: m.role, content: m.content }));
   messages.push({ role: "system", content: sessionNote(locale, opts.state, context) });
 
   async function exec(name: string, input: unknown): Promise<string> {
     switch (name) {
-      case "estimate_price": {
-        const p = quoteInputSchema.safeParse(input); if (!p.success) return JSON.stringify({ error: "invalid_input" });
-        const zone = ZONES.find((z) => z.id === p.data.zone); const q = computeQuote({ ...p.data, travelFee: zone?.travelFee ?? 0 });
-        newState.quote = p.data; return JSON.stringify({ ...q, tax_example: withTax(q.min), currency: "CAD", before_tax: true });
+      case "save_details": {
+        const p = detailsSchema.safeParse(input); if (!p.success) return JSON.stringify({ error: "invalid_input" });
+        for (const [k, v] of Object.entries(p.data)) if (v !== undefined && v !== "") (newState as Record<string, unknown>)[k] = v;
+        return JSON.stringify({ ok: true, known: newState });
       }
       case "get_availability": {
-        const { kind, date } = input as { kind: "cleaning" | "walkthrough"; date?: string };
-        if (date) { if (!isBookableDate(date, kind)) return JSON.stringify({ date, slots: [], reason: "date_not_bookable", min_lead_days: SCHEDULE.minLeadDays }); return JSON.stringify({ date, slots: (await getSlots(db, date, kind)).filter((s) => s.remaining > 0) }); }
-        const days = await nextAvailableDays(db, kind, 4);
+        const { date } = (input ?? {}) as { date?: string };
+        if (date) { if (!isBookableDate(date)) return JSON.stringify({ date, slots: [], reason: "date_not_bookable", note: "weekdays only, from tomorrow" }); return JSON.stringify({ date, slots: (await getSlots(db, date)).filter((s) => s.remaining > 0).map((s) => s.start) }); }
+        const days = await nextAvailableDays(db, 4);
         return JSON.stringify({ days: days.map((d) => ({ date: d.date, weekday: DAY[locale][dayOfWeek(d.date)], starts: d.slots.filter((s) => s.remaining > 0).map((s) => s.start) })) });
       }
-      case "book_appointment": {
+      case "book_walkthrough": {
         const p = bookSchema.safeParse(input); if (!p.success) return JSON.stringify({ error: "invalid_input", issues: p.error.issues.map((i) => i.path.join(".")) });
         const b = p.data; const svc = serviceById(b.service);
-        const slots = await getSlots(db, b.date, b.kind); const slot = slots.find((s) => s.start === b.slot_start);
+        const slots = await getSlots(db, b.date); const slot = slots.find((s) => s.start === b.slot_start);
         if (!slot || slot.remaining <= 0) return JSON.stringify({ error: "slot_unavailable", alternatives: slots.filter((s) => s.remaining > 0).map((s) => s.start) });
-        const q = b.kind === "cleaning" && newState.quote?.service === b.service ? computeQuote({ ...newState.quote, travelFee: ZONES.find((z) => z.id === newState.quote?.zone)?.travelFee ?? 0 }) : null;
-        booking = await db.createBooking({ ref: makeRef(), locale, kind: b.kind, service: b.service, date: b.date, slot_start: b.slot_start, slot_end: addMinutes(b.slot_start, SCHEDULE[b.kind].durationH * 60), name: b.name, email: b.email, phone: b.phone, address: b.address, notes: b.notes ?? null, price_min: q?.min ?? null, price_max: q?.max ?? null, quote: q, status: "confirmed", lead_id: null });
-        Object.assign(newState, { name: b.name, email: b.email, phone: b.phone, address: b.address });
+        const notes = [`${locale === "fr" ? "Entreprise" : "Company"} : ${b.company}`, newState.sqft ? `${newState.sqft} sq ft` : "", newState.units ? `${newState.units} units` : "", newState.frequency ?? "", newState.schedule ?? "", b.notes ?? ""].filter(Boolean).join("\n");
+        booking = await db.createBooking({ ref: makeRef(), locale, kind: "walkthrough", service: b.service, date: b.date, slot_start: b.slot_start, slot_end: addMinutes(b.slot_start, SCHEDULE.walkthrough.durationH * 60), name: b.name, email: b.email, phone: b.phone, address: b.address, company: b.company, notes, price_min: null, price_max: null, quote: null, status: "confirmed", lead_id: null });
+        Object.assign(newState, { company: b.company, service: b.service, name: b.name, email: b.email, phone: b.phone, address: b.address });
         void notifyBooking(booking, svc.name[locale]).catch((e) => console.error("[assistant] notify", e));
-        return JSON.stringify({ ok: true, ref: booking.ref, date: booking.date, slot: `${booking.slot_start}-${booking.slot_end}`, price_min: booking.price_min, price_max: booking.price_max });
+        return JSON.stringify({ ok: true, ref: booking.ref, date: booking.date, slot: `${booking.slot_start}-${booking.slot_end}` });
       }
       case "create_lead": {
         const p = leadSchema.safeParse(input); if (!p.success || (!p.data.email && !p.data.phone)) return JSON.stringify({ error: "need_email_or_phone" });
-        const lead = await db.createLead({ locale, type: "assistant", name: p.data.name, email: p.data.email ?? "", phone: p.data.phone ?? null, message: p.data.message, service: p.data.service ?? null, source: "assistant", quote: newState.quote ? computeQuote(newState.quote) : null, meta: { history_tail: history.slice(-6) } });
+        const lead = await db.createLead({ locale, type: "assistant", name: p.data.name, email: p.data.email ?? "", phone: p.data.phone ?? null, message: p.data.message, service: p.data.service ?? newState.service ?? null, segment: "commercial", source: "assistant", quote: null, meta: { ...newState, company: p.data.company ?? newState.company, history_tail: history.slice(-6) } });
         void notifyLead(lead).catch((e) => console.error("[assistant] notify", e)); return JSON.stringify({ ok: true, id: lead.id });
       }
       default: return JSON.stringify({ error: "unknown_tool" });
@@ -174,7 +175,7 @@ export async function runAssistant(opts: { locale: Locale; history: ChatMsg[]; s
     const res = await stream.finalMessage();
     const uses = res.content.filter((b): b is Anthropic.Beta.BetaToolUseBlock => b.type === "tool_use");
     if (res.stop_reason === "refusal") {
-      if (!visible.trim()) { const text = locale === "fr" ? "Je ne peux pas aider avec cette demande. Pour tout ce qui concerne le nettoyage, je suis là." : "I can't help with that request. For anything about cleaning, I'm here."; pending += text; }
+      if (!visible.trim()) { const text = locale === "fr" ? "Je ne peux pas aider avec cette demande. Pour tout ce qui concerne l'entretien de vos locaux, je suis là." : "I can't help with that request. For anything about cleaning your premises, I'm here."; pending += text; }
       flush(true); break;
     }
     if (uses.length === 0 || res.stop_reason !== "tool_use") { flush(true); break; }

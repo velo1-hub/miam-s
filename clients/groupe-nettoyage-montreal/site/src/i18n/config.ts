@@ -14,7 +14,6 @@ export function href(locale: Locale, path: string): string {
 export const pageSlugs = {
   services: { fr: "services", en: "services" },
   zones: { fr: "zones", en: "areas" },
-  pricing: { fr: "tarifs", en: "pricing" },
   quote: { fr: "soumission", en: "quote" },
   book: { fr: "reserver", en: "book" },
   about: { fr: "a-propos", en: "about" },

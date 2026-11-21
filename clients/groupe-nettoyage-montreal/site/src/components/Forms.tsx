@@ -22,7 +22,7 @@ export function LeadForm({ locale, type, source }: { locale: Locale; type: "cont
         <div className="sm:col-span-2"><label className="label" htmlFor={`${type}-service`}>{career ? (locale === "fr" ? "Poste souhaité" : "Position") : (locale === "fr" ? "Service concerné" : "Service")}</label>
           <select id={`${type}-service`} className="field" value={f.service} onChange={(e) => setF({ ...f, service: e.target.value })}>
             <option value="">—</option>
-            {career ? ["Préposé(e) à l'entretien résidentiel", "Préposé(e) commercial (soir)", "Chef d'équipe", "Coordination / bureau"].map((p) => <option key={p}>{p}</option>) : SERVICES.map((s) => <option key={s.id} value={s.id}>{s.name[locale]}</option>)}
+            {career ? ["Préposé(e) commercial (soir)", "Préposé(e) commercial (jour)", "Chef d'équipe", "Coordination / bureau"].map((p) => <option key={p}>{p}</option>) : SERVICES.map((s) => <option key={s.id} value={s.id}>{s.name[locale]}</option>)}
           </select></div>
         <div className="sm:col-span-2"><label className="label" htmlFor={`${type}-msg`}>{career ? (locale === "fr" ? "Expérience, disponibilités, secteur" : "Experience, availability, area") : d.common.message}</label><textarea id={`${type}-msg`} rows={5} required className="field" value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} /></div>
       </div>

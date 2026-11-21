@@ -37,62 +37,76 @@ function fakeClient(turns: Turn[], seen: unknown[][] = []): ModelClient {
   }) as unknown as ModelClient["beta"]["messages"]["stream"];
   return { beta: { messages: { stream } } };
 }
+const lastToolResult = (seen: unknown[][]) => JSON.parse(((seen.at(-1) as { content: { content: string }[] }[]).at(-1)!.content[0]).content);
 
 test("chips are split off the reply and never streamed", () => {
-  assert.deepEqual(splitChips("Prix : 125 $.\n[[Oui | Non | Autre]]"), { reply: "Prix : 125 $.", chips: ["Oui", "Non", "Autre"] });
+  assert.deepEqual(splitChips("Mardi ou mercredi?\n[[Mardi 11:00 | Mercredi 14:00 | Autre]]"), { reply: "Mardi ou mercredi?", chips: ["Mardi 11:00", "Mercredi 14:00", "Autre"] });
   assert.deepEqual(splitChips("Pas de choix ici."), { reply: "Pas de choix ici.", chips: [] });
 });
 
-test("price + availability in one turn, streamed, chips returned separately", async () => {
+test("details + availability in one turn, streamed, chips returned separately, no price anywhere", async () => {
   const db = memDB(); const events: AssistantEvent[] = []; const seen: unknown[][] = [];
   const client = fakeClient([
-    { tools: [{ id: "t1", name: "estimate_price", input: { service: "residential", homeType: "4half", frequency: "biweekly" } }, { id: "t2", name: "get_availability", input: { kind: "cleaning" } }] },
-    { text: "Pour un 4½ aux deux semaines, c'est 125 $ par visite avant taxes. Je peux passer mardi 10:30 ou mercredi 08:00.\n[[mardi 10:30 | mercredi 08:00 | Autre date]]" },
+    { tools: [{ id: "t1", name: "save_details", input: { service: "office", sqft: 2000, frequency: "3 evenings a week" } }, { id: "t2", name: "get_availability", input: {} }] },
+    { text: "Pour un bureau de 2 000 pi² trois soirs par semaine, je passe 20 minutes sur place et la soumission écrite suit en 24 h. Mardi 11:00 ou mercredi 14:00?\n[[mardi 11:00 | mercredi 14:00 | Autre date]]" },
   ], seen);
-  const out = await runAssistant({ locale: "fr", history: [{ role: "user", content: "Prix pour un 4½ aux deux semaines" }], state: {}, client, db, onEvent: (e) => events.push(e) });
+  const out = await runAssistant({ locale: "fr", history: [{ role: "user", content: "Bureau de 2 000 pi², 3 soirs/semaine" }], state: {}, client, db, onEvent: (e) => events.push(e) });
   assert.equal(out.chips.length, 3);
-  assert.ok(out.reply.startsWith("Pour un 4½"));
+  assert.ok(out.reply.startsWith("Pour un bureau"));
   assert.ok(!out.reply.includes("[["));
-  assert.equal(out.state.quote?.service, "residential");
+  assert.equal(out.state.service, "office"); assert.equal(out.state.sqft, 2000);
   const streamed = events.filter((e): e is Extract<AssistantEvent, { t: "delta" }> => e.t === "delta").map((e) => e.text).join("");
   assert.ok(!streamed.includes("[["), "chip marker leaked into the stream: " + streamed);
   assert.equal(streamed.trim(), out.reply);
-  assert.deepEqual(events.filter((e) => e.t === "status").map((e) => (e as { key: string }).key), ["pricing", "availability"]);
+  assert.deepEqual(events.filter((e) => e.t === "status").map((e) => (e as { key: string }).key), ["availability"]);
   // Both tool results went back in a single user message, and the session note is a system message after the history.
   const second = seen[1] as { role: string; content: unknown }[];
   assert.equal(second[1].role, "system");
   const results = second[second.length - 1]; assert.equal(results.role, "user"); assert.equal((results.content as unknown[]).length, 2);
+  // Availability only ever returns weekday walkthrough slots.
+  const avail = JSON.parse((results.content as { content: string }[])[1].content) as { days: { date: string; starts: string[] }[] };
+  assert.ok(avail.days.length > 0); for (const d of avail.days) { const dow = new Date(`${d.date}T12:00:00Z`).getUTCDay(); assert.ok(dow >= 1 && dow <= 5); assert.ok(d.starts.every((s) => ["09:00", "11:00", "14:00", "16:00", "18:00"].includes(s))); }
 });
 
-test("booking is created only through the tool and the card comes back", async () => {
-  const db = memDB(); const day = (await nextAvailableDays(db, "cleaning", 1))[0]; const slot = day.slots[0].start;
+test("the walkthrough is created only through the tool and carries the company", async () => {
+  const db = memDB(); const day = (await nextAvailableDays(db, 1))[0]; const slot = day.slots[0].start;
   const client = fakeClient([
-    { tools: [{ id: "b1", name: "book_appointment", input: { kind: "cleaning", service: "residential", date: day.date, slot_start: slot, name: "Marie Tremblay", email: "marie@example.com", phone: "5145550199", address: "123 rue Saint-Denis, Montréal" } }] },
-    { text: "C'est confirmé! Votre référence est en route par courriel.\n[[Merci]]" },
+    { tools: [{ id: "b1", name: "book_walkthrough", input: { service: "office", date: day.date, slot_start: slot, company: "Clinique Mont-Royal", name: "Marie Tremblay", email: "marie@example.com", phone: "5145550199", address: "123 rue Saint-Denis, Montréal" } }] },
+    { text: "C'est confirmé! La soumission écrite suit dans les 24 h après la visite.\n[[Merci]]" },
   ]);
-  const out = await runAssistant({ locale: "fr", history: [{ role: "user", content: "oui je confirme" }], state: { quote: { service: "residential", homeType: "4half", frequency: "biweekly" } }, client, db });
-  assert.ok(out.booking); assert.equal(out.booking?.date, day.date); assert.equal(out.booking?.price_min, out.booking?.price_max);
-  assert.deepEqual(out.chips, [], "no quick replies after a confirmed booking");
+  const out = await runAssistant({ locale: "fr", history: [{ role: "user", content: "oui je confirme" }], state: { service: "office", sqft: 2000 }, client, db });
+  assert.ok(out.booking); assert.equal(out.booking?.date, day.date); assert.equal(out.booking?.kind, "walkthrough"); assert.equal(out.booking?.company, "Clinique Mont-Royal");
+  assert.equal(out.booking?.price_min, null);
+  assert.deepEqual(out.chips, [], "no quick replies after a confirmed walkthrough");
   assert.equal(out.state.email, "marie@example.com");
   assert.equal((await db.listBookings()).length, 1);
 });
 
 test("a taken slot is refused with alternatives instead of double-booking", async () => {
-  const db = memDB(); const day = (await nextAvailableDays(db, "walkthrough", 1))[0]; const slot = day.slots[0].start;
-  const input = { kind: "walkthrough", service: "office", date: day.date, slot_start: slot, name: "Ali Ben", email: "ali@example.com", phone: "5145550100", address: "1 Place Ville-Marie, Montréal" };
-  await runAssistant({ locale: "en", history: [{ role: "user", content: "yes" }], state: {}, client: fakeClient([{ tools: [{ id: "x", name: "book_appointment", input }] }, { text: "Done." }]), db });
+  const db = memDB(); const day = (await nextAvailableDays(db, 1))[0]; const slot = day.slots[0].start;
+  const input = { service: "restaurant", date: day.date, slot_start: slot, company: "Bistro Ali", name: "Ali Ben", email: "ali@example.com", phone: "5145550100", address: "1 Place Ville-Marie, Montréal" };
+  await runAssistant({ locale: "en", history: [{ role: "user", content: "yes" }], state: {}, client: fakeClient([{ tools: [{ id: "x", name: "book_walkthrough", input }] }, { text: "Done." }]), db });
   const seen: unknown[][] = [];
-  const out = await runAssistant({ locale: "en", history: [{ role: "user", content: "yes" }], state: {}, client: fakeClient([{ tools: [{ id: "y", name: "book_appointment", input }] }, { text: "That slot just went; here are others.\n[[11:00 | 14:00]]" }], seen), db });
+  const out = await runAssistant({ locale: "en", history: [{ role: "user", content: "yes" }], state: {}, client: fakeClient([{ tools: [{ id: "y", name: "book_walkthrough", input }] }, { text: "That slot just went; here are others.\n[[11:00 | 14:00]]" }], seen), db });
   assert.equal(out.booking, null);
-  const result = JSON.parse(((seen[1] as { content: { content: string }[] }[]).at(-1)!.content[0]).content);
+  const result = lastToolResult(seen);
   assert.equal(result.error, "slot_unavailable"); assert.ok(Array.isArray(result.alternatives));
   assert.equal((await db.listBookings()).length, 1);
 });
 
-test("wizard quote in context seeds the state and the note", async () => {
+test("context from a service page seeds the state and the session note", async () => {
   const seen: unknown[][] = [];
-  const out = await runAssistant({ locale: "en", history: [{ role: "user", content: "when can you come?" }], state: {}, context: { page: "/en/quote", quote: { service: "airbnb", bedrooms: 1 } }, client: fakeClient([{ text: "Tomorrow at 08:00 or 10:30.\n[[08:00 | 10:30]]" }], seen), db: memDB() });
-  assert.equal(out.state.quote?.service, "airbnb");
+  const out = await runAssistant({ locale: "en", history: [{ role: "user", content: "when can you come?" }], state: {}, context: { page: "/en/services/restaurant-cleaning", service: "restaurant" }, client: fakeClient([{ text: "Tomorrow at 09:00 or 11:00.\n[[09:00 | 11:00]]" }], seen), db: memDB() });
+  assert.equal(out.state.service, "restaurant");
   const note = (seen[0] as { role: string; content: string }[]).find((m) => m.role === "system")!.content;
-  assert.ok(note.includes("/en/quote") && note.includes("airbnb"));
+  assert.ok(note.includes("restaurant-cleaning") && note.includes("restaurant"));
+});
+
+test("a callback lead keeps the gathered details for the account manager", async () => {
+  const db = memDB(); const seen: unknown[][] = [];
+  const out = await runAssistant({ locale: "fr", history: [{ role: "user", content: "rappelez-moi plutôt" }], state: { service: "property", units: 12, company: "Gestion Nord" }, client: fakeClient([{ tools: [{ id: "l1", name: "create_lead", input: { name: "Paul Roy", phone: "5145550111", message: "12 immeubles, préfère un appel" } }] }, { text: "Un gestionnaire de compte vous rappelle sous 24 h ouvrables." }], seen), db });
+  assert.equal(lastToolResult(seen).ok, true);
+  const lead = (await db.listLeads())[0];
+  assert.equal(lead.service, "property"); assert.equal((lead.meta as { company: string }).company, "Gestion Nord"); assert.equal((lead.meta as { units: number }).units, 12);
+  assert.equal(out.booking, null);
 });

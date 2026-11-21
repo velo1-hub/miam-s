@@ -7,8 +7,8 @@ import { I } from "./Icons";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type BookingCard = { ref: string; date: string; slot_start: string; slot_end: string; service: string; address: string; price_min?: number | null; price_max?: number | null };
-type Ctx = { page?: string; quote?: Record<string, unknown> };
-type Status = "pricing" | "availability" | "booking" | "lead" | null;
+type Ctx = { page?: string; service?: string };
+type Status = "availability" | "booking" | "lead" | null;
 const KEY = "gnm-assistant-v2";
 
 export function Assistant({ locale }: { locale: Locale }) {

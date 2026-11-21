@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
 import { runAssistant } from "@/lib/assistant/run";
-import { quoteInputSchema } from "@/lib/schema";
+import { serviceIdSchema } from "@/lib/schema";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
@@ -10,7 +10,7 @@ const schema = z.object({
   locale: z.enum(["fr", "en"]),
   messages: z.array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(4000) })).min(1).max(30),
   state: z.record(z.string(), z.unknown()).optional(),
-  context: z.object({ page: z.string().max(200).optional(), quote: quoteInputSchema.optional() }).optional(),
+  context: z.object({ page: z.string().max(200).optional(), service: serviceIdSchema.optional() }).optional(),
 });
 const hits = new Map<string, { n: number; t: number }>();
 

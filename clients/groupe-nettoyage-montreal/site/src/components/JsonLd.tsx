@@ -9,7 +9,7 @@ export function JsonLd({ data }: { data: object }) {
 export function businessJsonLd(locale: Locale) {
   return {
     "@context": "https://schema.org",
-    "@type": ["LocalBusiness", "HousekeepingService"],
+    "@type": ["LocalBusiness", "ProfessionalService"],
     "@id": `${BIZ.url}/#business`,
     name: BIZ.name, url: BIZ.url, telephone: BIZ.phone, email: BIZ.email,
     image: `${BIZ.url}/opengraph-image`, logo: `${BIZ.url}/icon.svg`,
@@ -17,10 +17,10 @@ export function businessJsonLd(locale: Locale) {
     geo: { "@type": "GeoCoordinates", latitude: BIZ.geo.lat, longitude: BIZ.geo.lng },
     areaServed: BIZ.serviceArea.map((name) => ({ "@type": "City", name })),
     openingHoursSpecification: [{ "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], opens: BIZ.hours.opens, closes: BIZ.hours.closes }],
-    priceRange: "$$", availableLanguage: ["fr", "en"],
+    availableLanguage: ["fr", "en"],
     hasOfferCatalog: { "@type": "OfferCatalog", name: locale === "fr" ? "Services de nettoyage" : "Cleaning services",
       itemListElement: SERVICES.map((s) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: s.name[locale], url: `${BIZ.url}${pagePath(locale, "services", s.slug[locale])}` } })) },
-    potentialAction: { "@type": "ReserveAction", target: `${BIZ.url}${pagePath(locale, "book")}` },
+    potentialAction: { "@type": "ReserveAction", name: locale === "fr" ? "Planifier une visite d'évaluation gratuite" : "Schedule a free walkthrough", target: `${BIZ.url}${pagePath(locale, "book")}` },
   };
 }
 

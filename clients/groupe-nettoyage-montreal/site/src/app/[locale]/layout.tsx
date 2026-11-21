@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params; const fr = locale === "fr";
   return {
     metadataBase: new URL(BIZ.url),
-    title: { default: fr ? "Groupe Nettoyage Montréal · Entretien ménager résidentiel et commercial" : "Groupe Nettoyage Montréal · Residential and commercial cleaning", template: "%s · Groupe Nettoyage Montréal" },
-    description: fr ? "Nettoyage de maisons, condos, Airbnb, bureaux et immeubles à Montréal, Laval et sur la Rive-Sud. Prix ferme en ligne, réservation en deux minutes, même équipe à chaque visite." : "Cleaning for homes, condos, Airbnbs, offices and buildings in Montréal, Laval and the South Shore. Firm online price, two-minute booking, same team every visit.",
+    title: { default: fr ? "Groupe Nettoyage Montréal · Entretien commercial pour bureaux, restaurants et immeubles" : "Groupe Nettoyage Montréal · Commercial cleaning for offices, restaurants and buildings", template: "%s · Groupe Nettoyage Montréal" },
+    description: fr ? "Entretien commercial à Montréal, Laval et sur la Rive-Sud : bureaux, commerces, restaurants, immeubles et locations court terme. Visite gratuite, soumission écrite en 24 h, même équipe à chaque passage." : "Commercial cleaning in Montréal, Laval and the South Shore: offices, shops, restaurants, buildings and short-term rentals. Free walkthrough, written quote within 24 h, same team every visit.",
     applicationName: BIZ.name, openGraph: { siteName: BIZ.name, locale: fr ? "fr_CA" : "en_CA", type: "website" }, twitter: { card: "summary_large_image" }, robots: { index: true, follow: true }, manifest: "/manifest.webmanifest",
   };
 }

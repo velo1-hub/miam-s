@@ -1,14 +1,14 @@
 import type { DB } from "./db/types";
 
-export type SlotKind = "cleaning" | "walkthrough";
+/** The only thing booked online is the free 20-minute walkthrough, on weekdays. */
+export type SlotKind = "walkthrough";
 export interface Slot { date: string; start: string; end: string; kind: SlotKind; remaining: number }
 
 export const SCHEDULE = {
   timezone: "America/Toronto",
   minLeadDays: 1,
   horizonDays: 45,
-  cleaning: { starts: ["08:00", "10:30", "13:00", "15:30"], durationH: 2.5, teams: 3, sundayTeams: 1 },
-  walkthrough: { starts: ["09:00", "11:00", "14:00", "16:00", "18:00"], durationH: 0.5, perSlot: 1, weekdaysOnly: true },
+  walkthrough: { starts: ["09:00", "11:00", "14:00", "16:00", "18:00"], durationH: 0.5, perSlot: 1 },
 };
 
 export function addMinutes(hhmm: string, mins: number) {
@@ -24,31 +24,29 @@ export function addDays(iso: string, n: number) {
 export function dayOfWeek(iso: string) { return new Date(`${iso}T12:00:00Z`).getUTCDay(); } // 0 = Sunday
 export const isValidISODate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`));
 
-export function isBookableDate(iso: string, kind: SlotKind) {
+export function isBookableDate(iso: string) {
   if (!isValidISODate(iso)) return false;
   const today = todayISO(); const min = addDays(today, SCHEDULE.minLeadDays); const max = addDays(today, SCHEDULE.horizonDays);
   if (iso < min || iso > max) return false;
   const dow = dayOfWeek(iso);
-  if (kind === "walkthrough" && (dow === 0 || dow === 6)) return false;
-  return true;
+  return dow !== 0 && dow !== 6;
 }
 
-export async function getSlots(db: DB, date: string, kind: SlotKind): Promise<Slot[]> {
-  if (!isBookableDate(date, kind)) return [];
+export async function getSlots(db: DB, date: string): Promise<Slot[]> {
+  if (!isBookableDate(date)) return [];
   const booked = await db.listBookings({ from: date, to: date });
-  const cfg = SCHEDULE[kind];
-  const capacity = kind === "cleaning" ? (dayOfWeek(date) === 0 ? SCHEDULE.cleaning.sundayTeams : SCHEDULE.cleaning.teams) : SCHEDULE.walkthrough.perSlot;
+  const cfg = SCHEDULE.walkthrough;
   return cfg.starts.map((start) => {
-    const used = booked.filter((b) => b.status === "confirmed" && b.kind === kind && b.slot_start === start).length;
-    return { date, start, end: addMinutes(start, cfg.durationH * 60), kind, remaining: Math.max(0, capacity - used) };
+    const used = booked.filter((b) => b.status === "confirmed" && b.slot_start === start).length;
+    return { date, start, end: addMinutes(start, cfg.durationH * 60), kind: "walkthrough", remaining: Math.max(0, cfg.perSlot - used) };
   });
 }
 
-export async function nextAvailableDays(db: DB, kind: SlotKind, count = 7, fromDate?: string) {
+export async function nextAvailableDays(db: DB, count = 7, fromDate?: string) {
   const out: { date: string; slots: Slot[] }[] = [];
   let d = fromDate && isValidISODate(fromDate) ? fromDate : addDays(todayISO(), SCHEDULE.minLeadDays);
   for (let i = 0; i < SCHEDULE.horizonDays && out.length < count; i++, d = addDays(d, 1)) {
-    const slots = await getSlots(db, d, kind);
+    const slots = await getSlots(db, d);
     if (slots.some((s) => s.remaining > 0)) out.push({ date: d, slots: slots.filter((s) => s.remaining > 0) });
   }
   return out;

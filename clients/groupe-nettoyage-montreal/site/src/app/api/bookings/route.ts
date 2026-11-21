@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { bookingSchema } from "@/lib/schema";
 import { getDB } from "@/lib/db";
 import { getSlots, addMinutes, SCHEDULE, makeRef } from "@/lib/availability";
-import { computeQuote } from "@/lib/pricing";
-import { ZONES } from "@/content/zones";
 import { serviceById } from "@/content/services";
 import { notifyBooking } from "@/lib/email";
 import { bookingICS } from "@/lib/ics";
@@ -20,11 +18,10 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null); const p = bookingSchema.safeParse(body);
   if (!p.success) return NextResponse.json({ ok: false, error: "invalid_input", issues: p.error.issues.map((i) => i.path.join(".")) }, { status: 400 });
   const b = p.data; const db = getDB(); const svc = serviceById(b.service);
-  const kind = svc.bookable ? b.kind : "walkthrough";
-  const slot = (await getSlots(db, b.date, kind)).find((s) => s.start === b.slot_start);
+  const slot = (await getSlots(db, b.date)).find((s) => s.start === b.slot_start);
   if (!slot || slot.remaining <= 0) return NextResponse.json({ ok: false, error: "slot_unavailable" }, { status: 409 });
-  const q = kind === "cleaning" && b.quote && b.quote.service === b.service ? computeQuote({ ...b.quote, travelFee: ZONES.find((z) => z.id === b.quote?.zone)?.travelFee ?? 0 }) : null;
-  const booking = await db.createBooking({ ref: makeRef(), locale: b.locale, kind, service: b.service, date: b.date, slot_start: slot.start, slot_end: addMinutes(slot.start, SCHEDULE[kind].durationH * 60), name: b.name, email: b.email, phone: b.phone, address: b.address, notes: b.notes ?? null, price_min: q?.min ?? null, price_max: q?.max ?? null, quote: q, status: "confirmed", lead_id: null });
+  const notes = [b.company ? `${b.locale === "fr" ? "Entreprise" : "Company"} : ${b.company}` : "", b.notes ?? ""].filter(Boolean).join("\n") || null;
+  const booking = await db.createBooking({ ref: makeRef(), locale: b.locale, kind: "walkthrough", service: b.service, date: b.date, slot_start: slot.start, slot_end: addMinutes(slot.start, SCHEDULE.walkthrough.durationH * 60), name: b.name, email: b.email, phone: b.phone, address: b.address, company: b.company ?? null, notes, price_min: null, price_max: null, quote: null, status: "confirmed", lead_id: null });
   void notifyBooking(booking, svc.name[b.locale]);
   return NextResponse.json({ ok: true, booking });
 }
