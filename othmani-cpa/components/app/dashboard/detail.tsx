@@ -4,10 +4,11 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
 import { QGROUPS, QUESTIONS } from "@/lib/questionnaire";
 import { Card, Documents, KINDS, Messages, STATUSES, STEPS5, WEATHER, fmtDate, save, statusLabel, step5, toast, type Appointment, type Dossier, type Signature } from "../shared";
-import { BUSINESS_KINDS, INVOICE_STATUS, Loadable, SavedAt, askAi, copyText, daysUntil, link, money, mailQuery, mailto, newId, origin, panel, pill, removeBtn, rows, smallBtn, todayISO, useLoad, warnPill, type FileDoc, type Focus, type Invoice, type Note, type PatchOpts, type Req, type Task } from "./common";
+import { BUSINESS_KINDS, INVOICE_STATUS, Loadable, SavedAt, askAi, copyText, daysUntil, link, money, mailQuery, mailto, newId, origin, panel, pill, removeBtn, rows, smallBtn, todayISO, useLoad, warnPill, type FileDoc, type Focus, type Invoice, type Note, type PatchOpts, type Req, type ShowReceipts, type Task } from "./common";
 import { DURATIONS, MODE_LABEL, OFF_HOURS_CONFIRM, PART_LABEL, bookingPatch, cancelPatch, dayText, durationOf, inOfficeHours, patchAppointment, whenText, type OpenCalendar, type SetAppointments } from "./agenda";
 import { fmtDuration, minOf, mtlParts } from "./caltime";
 import { DossierInvoices } from "./invoices";
+import { DossierReceipts } from "./receipts";
 /* ───────────── Détail d'un dossier ───────────── */
 export function DossierHeader({ d, onRoll, onPrint, printing = false }: { d: Dossier; onRoll?: () => void; onPrint?: () => void; printing?: boolean }) {
   const text = `Bonjour,\n\nVotre dossier « ${d.title} » est ouvert chez Othmani CPA. Vous pouvez suivre son avancement, déposer vos documents et nous écrire dans votre espace client :\n\n${origin()}/espace-client/\n\nConnectez-vous avec ce courriel : ${d.client_email}. Vous recevrez un code de connexion, sans mot de passe.\n\nL'équipe d'Othmani CPA`;
@@ -660,8 +661,8 @@ export function PrintSummary({ d, staffName, data }: { d: Dossier; staffName: st
 }
 
 /** Fiche d'un dossier : le travail à gauche, les échanges à droite (colonne fixe quand la place le permet). */
-export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices, onRoll, onCalendar }: {
-  onRoll?: () => void; onCalendar?: OpenCalendar; onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
+export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, onPatch, onMove, onTouch, onInvoices, onRoll, onCalendar, onReceipts }: {
+  onReceipts?: ShowReceipts; onRoll?: () => void; onCalendar?: OpenCalendar; onFocused?: () => void; onInvoices?: (dossierId: string, list: Invoice[]) => void; d: Dossier; staffName: string; team: string[]; railTop: string; focus?: { what: Focus; n: number } | null; onPatch: (p: Partial<Dossier>, o?: PatchOpts) => Promise<boolean>; onMove: (status: string) => void; onTouch: () => void;
 }) {
   useEffect(() => { onTouch(); }, [onTouch]);
   const summary = usePrintSummary(d);
@@ -695,6 +696,7 @@ export function DossierDetail({ d, staffName, team, railTop, focus, onFocused, o
           <Questionnaire d={d} staffName={staffName} />
           <ClientValue d={d} onPatch={onPatch} />
           <div data-focus="documents" tabIndex={-1} className="scroll-mt-24"><Documents dossierId={d.id} role="cabinet" lang="fr" /></div>
+          <div data-focus="recus"><DossierReceipts d={d} onQueue={onReceipts} /></div>
           <Signatures dossierId={d.id} />
           <div data-focus="rdv" tabIndex={-1} className="scroll-mt-24"><Appointments dossierId={d.id} team={team} owner={d.assignee ?? ""} onCalendar={onCalendar} /></div>
           <div data-focus="facture" className="scroll-mt-24"><DossierInvoices dossierId={d.id} onList={onInvoices} /></div>

@@ -6,12 +6,13 @@
 import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
 import { supabase } from "@/lib/supabase";
 import { demoRole } from "@/lib/demo";
-import { AppFrame, LoadError, Skeleton, save, statusLabel, toast, type Dossier } from "./shared";
-import { NO_FILTER, SECTIONS, SECTION_ALIAS, SectionHead, isTyping, link, rows, smallBtn, todayISO, useLoad, useOnline, type DFilter, type DossierUi, type FileDoc, type Focus, type Invoice, type LastMsg, type Lead, type PatchDossier, type PatchLead, type Section, type Store, type Task } from "./dashboard/common";
+import { AppFrame, LoadError, Skeleton, save, statusLabel, toast, type Dossier, type Receipt } from "./shared";
+import { NO_FILTER, NO_RECEIPT_FILTER, RECEIPT_CAP, SECTIONS, SECTION_ALIAS, SectionHead, isTyping, link, receiptsToCheck, rows, smallBtn, todayISO, useLoad, useOnline, type DFilter, type DossierUi, type FileDoc, type Focus, type Invoice, type LastMsg, type Lead, type PatchDossier, type PatchLead, type PatchReceipt, type ReceiptUi, type Section, type ShowReceipts, type Store, type Task } from "./dashboard/common";
 import { Clients, type ClientUi } from "./dashboard/clients";
 import { Dossiers } from "./dashboard/dossiers";
 import { Fees } from "./dashboard/invoices";
 import { Leads } from "./dashboard/prospects";
+import { Receipts } from "./dashboard/receipts";
 import type { CalUi, OpenCalendar } from "./dashboard/agenda";
 import { Calendar } from "./dashboard/calendar";
 import { DocumentsSection, MessagesSection } from "./dashboard/sections";
@@ -22,7 +23,7 @@ import { Today } from "./dashboard/today";
 /* ───────────── Espace de travail ───────────── */
 async function loadStore(): Promise<Store> {
   const db = supabase();
-  const [dossiers, leads, waiting, staff, tasks, docs, pending, invoices, msgs] = await Promise.all([
+  const [dossiers, leads, waiting, staff, tasks, docs, pending, invoices, msgs, receipts] = await Promise.all([
     rows<Dossier>(db.from("dossiers").select("*").order("updated_at", { ascending: false }).limit(500)),
     rows<Lead>(db.from("leads").select("*").order("created_at", { ascending: false }).limit(300)),
     rows<string>(db.rpc("dossiers_a_repondre")),
@@ -32,6 +33,8 @@ async function loadStore(): Promise<Store> {
     rows<{ id: string }>(db.from("document_requests").select("id").eq("received", false).limit(2000)),
     rows<Invoice>(db.from("invoices").select("*").order("created_at", { ascending: false }).limit(1000)),
     rows<LastMsg>(db.from("messages").select("dossier_id,created_at,author_role,author_name,body").order("created_at", { ascending: false }).limit(600)),
+    // Les reçus ne doivent pas empêcher le tableau de bord de s'ouvrir : en cas d'échec, la section Reçus le dit et propose de réessayer.
+    rows<Receipt>(db.from("receipts").select("*").order("created_at", { ascending: false }).limit(RECEIPT_CAP)).catch(() => null),
   ]);
   // Dernier message de chaque dossier : la liste arrive du plus récent au plus ancien, on garde le premier vu.
   const last = new Map<string, LastMsg>();
@@ -43,7 +46,7 @@ async function loadStore(): Promise<Store> {
     if (answered.has(m.dossier_id)) continue;
     if (m.author_role === "client") waitSince[m.dossier_id] = m.created_at; else answered.add(m.dossier_id);
   }
-  return { waitSince, dossiers, leads, waiting, team: staff.map((m) => m.name || m.email), tasks, docs, clientDocs: docs.filter((f) => f.uploader_role === "client"), pendingReqs: pending.map((r) => r.id), invoices, lastMsgs: [...last.values()] };
+  return { waitSince, dossiers, leads, waiting, team: staff.map((m) => m.name || m.email), tasks, docs, clientDocs: docs.filter((f) => f.uploader_role === "client"), pendingReqs: pending.map((r) => r.id), invoices, lastMsgs: [...last.values()], receipts: receipts ?? [], receiptsOk: receipts !== null };
 }
 
 function Workspace({ email, staffName }: { email: string; staffName: string }) {
@@ -62,6 +65,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
   const [focus, setFocus] = useState<{ what: Focus; n: number } | null>(null);
   // Calendrier : la vue, le jour et la demande à placer sont gardés ici, pour retrouver le même jour en revenant d'un dossier.
   const [cal, setCal] = useState<CalUi>(() => ({ view: "mois", day: todayISO(), request: null }));
+  const [receiptUi, setReceiptUi] = useState<ReceiptUi>(NO_RECEIPT_FILTER);
 
   const go = useCallback((k: Section) => {
     setSection(k);
@@ -96,6 +100,14 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     const back = Object.fromEntries(Object.keys(p).map((k) => [k, before[k as keyof Lead]])) as Partial<Lead>;
     edit("leads", (l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)));
     return save(supabase().from("leads").update(p).eq("id", id), { ...o, rollback: () => edit("leads", (l) => l.map((x) => (x.id === id ? { ...x, ...back } : x))) });
+  }, [edit]);
+  /** Reçus : valeurs corrigées, décision et note du cabinet. L'écran change tout de suite ; un échec le remet comme avant. */
+  const patchReceipt: PatchReceipt = useCallback((id, p, o = {}) => {
+    const before = snap.current?.receipts.find((x) => x.id === id);
+    if (!before) return Promise.resolve(false);
+    const back = Object.fromEntries(Object.keys(p).map((k) => [k, before[k as keyof Receipt]])) as Partial<Receipt>;
+    edit("receipts", (l) => l.map((x) => (x.id === id ? { ...x, ...p } : x)));
+    return save(supabase().from("receipts").update(p).eq("id", id), { ...o, rollback: () => edit("receipts", (l) => l.map((x) => (x.id === id ? { ...x, ...back } : x))) });
   }, [edit]);
   /** Changement d'étape : confirmation si le client le remarque (transmis, fermé), puis message avec « Annuler ». */
   const move = useCallback((id: string, status: string) => {
@@ -155,9 +167,12 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
     dirty.current = true;
   }, [edit, staffName]);
   const showDossiers = useCallback((f: Partial<DFilter>) => { setUi((u) => ({ ...u, view: "liste", current: null, creating: false, filter: { ...NO_FILTER, ...f } })); go("dossiers"); }, [go]);
+  /** Ouvre la file des reçus ; les filtres non précisés reviennent à « À vérifier », tous clients, tous mois. */
+  const showReceipts: ShowReceipts = useCallback((f = {}) => { setReceiptUi({ ...NO_RECEIPT_FILTER, ...f }); go("recus"); }, [go]);
   const showLeads = useCallback((f: string) => { setFocusLead(null); setLeadFilter(f); go("prospects"); }, [go]);
-  const targets = useRef<SearchTargets>({ client: openClient, dossier: openDossier, lead: openLead });
-  targets.current.client = openClient; targets.current.dossier = openDossier; targets.current.lead = openLead;
+  const openReceipt = useCallback((r: Receipt) => showReceipts({ status: "tous", dossier: r.dossier_id, focus: r.id }), [showReceipts]);
+  const targets = useRef<SearchTargets>({ client: openClient, dossier: openDossier, lead: openLead, receipt: openReceipt });
+  targets.current.client = openClient; targets.current.dossier = openDossier; targets.current.lead = openLead; targets.current.receipt = openReceipt;
   const onCreated = useCallback((d: Dossier, lead: Lead | null) => {
     edit("dossiers", (l) => [d, ...l]);
     if (lead) patchLead(lead.id, { status: "client" }, { ok: `${lead.name} est maintenant client.` });
@@ -190,6 +205,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
   const demo = Boolean(demoRole());
   const badges: Partial<Record<Section, [number, string]>> = store ? {
     prospects: [store.leads.filter((l) => l.status === "nouveau").length, "nouveaux prospects"],
+    recus: [receiptsToCheck(store).length, "reçus à vérifier"],
     messages: [store.waiting.filter((id) => store.dossiers.some((d) => d.id === id)).length, "conversations à répondre"],
   } : {};
   const refresh = <button type="button" onClick={() => reload(true)} className={smallBtn}>Actualiser</button>;
@@ -214,7 +230,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
         ) : section === "aujourdhui" ? (
           <>
             <div className="hidden lg:block"><SectionHead title="Aujourd'hui" sub={`${firstName ? `Bonjour ${firstName}. ` : ""}${new Intl.DateTimeFormat("fr-CA", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Montreal" }).format(new Date())}.`}>{refresh}</SectionHead></div>
-            <Today store={store} staffName={staffName} firstName={firstName} demo={demo} refresh={refresh} openDossier={openDossier} openLead={openLead} acceptLead={acceptLead} showDossiers={showDossiers} showLeads={showLeads} go={go} completeTask={completeTask} markReceived={markReceived} />
+            <Today store={store} staffName={staffName} firstName={firstName} demo={demo} refresh={refresh} openDossier={openDossier} openLead={openLead} acceptLead={acceptLead} showDossiers={showDossiers} showLeads={showLeads} showReceipts={showReceipts} go={go} completeTask={completeTask} markReceived={markReceived} />
           </>
         ) : section === "prospects" ? (
           <>
@@ -224,7 +240,7 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
         ) : section === "dossiers" ? (
           <>
             <div className={detailOpen ? "hidden min-[1400px]:block" : ""}><SectionHead title="Dossiers">{refresh}</SectionHead></div>
-            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} onRolled={addDossiers} onUnrolled={removeDossiers} onCalendar={openCalendar} />
+            <Dossiers store={store} ui={ui} setUi={setUi} staffName={staffName} draft={draft} clearDraft={() => setDraft(null)} patch={patchDossier} move={move} onCreated={onCreated} onTouch={touch} focus={focus} onFocused={clearFocus} onInvoices={syncInvoices} onRolled={addDossiers} onUnrolled={removeDossiers} onCalendar={openCalendar} onReceipts={showReceipts} />
           </>
         ) : section === "clients" ? (
           <>
@@ -235,6 +251,11 @@ function Workspace({ email, staffName }: { email: string; staffName: string }) {
           <>
             <SectionHead title="Documents" sub="Les fichiers récents de tous les dossiers, ceux des clients et ceux du cabinet.">{refresh}</SectionHead>
             <DocumentsSection store={store} openDossier={openDossier} markReceived={markReceived} />
+          </>
+        ) : section === "recus" ? (
+          <>
+            <SectionHead title="Reçus" sub="Les reçus photographiés par les clients. Vérifiez les valeurs lues, puis décidez.">{refresh}</SectionHead>
+            <Receipts store={store} ui={receiptUi} setUi={setReceiptUi} patch={patchReceipt} openDossier={openDossier} retry={() => reload(true)} />
           </>
         ) : section === "messages" ? (
           <>

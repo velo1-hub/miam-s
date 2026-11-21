@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type SetStateAction } from "react";
 import { real, supabase } from "@/lib/supabase";
 import { demoRole } from "@/lib/demo";
-import { LoadError, Skeleton, toast, type Doc, type DocRequest, type Dossier } from "../shared";
+import { LoadError, Skeleton, toast, type Doc, type DocRequest, type Dossier, type Receipt } from "../shared";
 import { minOf, mtlISO } from "./caltime";
 /* ───────────── Types ───────────── */
 export type Lead = {
@@ -20,8 +20,18 @@ export type LastMsg = { dossier_id: string; created_at: string; author_role: str
 /**
  * `docs` : fichiers récents des deux côtés ; `clientDocs` en est la partie déposée par les clients. `lastMsgs` : dernier message de chaque dossier.
  * `waitSince` : pour chaque dossier, date du plus ancien message du client resté sans réponse (parmi les messages chargés).
+ * `receipts` : reçus photographiés par les clients, les plus récents d'abord (au plus `RECEIPT_CAP`) ; `receiptsOk` est faux si leur lecture a échoué.
  */
-export type Store = { dossiers: Dossier[]; leads: Lead[]; waiting: string[]; team: string[]; tasks: Task[]; docs: FileDoc[]; clientDocs: FileDoc[]; pendingReqs: string[]; invoices: Invoice[]; lastMsgs: LastMsg[]; waitSince: Record<string, string> };
+export type Store = { dossiers: Dossier[]; leads: Lead[]; waiting: string[]; team: string[]; tasks: Task[]; docs: FileDoc[]; clientDocs: FileDoc[]; pendingReqs: string[]; invoices: Invoice[]; lastMsgs: LastMsg[]; waitSince: Record<string, string>; receipts: Receipt[]; receiptsOk: boolean };
+export const RECEIPT_CAP = 1000;
+/** File des reçus : filtres gardés par le tableau de bord, pour y arriver déjà filtré depuis un dossier ou la recherche. `focus` : reçu à mettre en évidence. */
+export type ReceiptUi = { status: "a_verifier" | "valide" | "refuse" | "tous"; client: string; dossier: string; month: string; focus: string | null };
+export const NO_RECEIPT_FILTER: ReceiptUi = { status: "a_verifier", client: "", dossier: "", month: "", focus: null };
+export type ShowReceipts = (f?: Partial<ReceiptUi>) => void;
+export type PatchReceipt = (id: string, p: Partial<Receipt>, o?: PatchOpts) => Promise<boolean>;
+export const RECEIPT_STATUS: Record<Receipt["status"], string> = { a_verifier: "À vérifier", valide: "Confirmé", refuse: "Non retenu" };
+/** Reçus à vérifier dont le dossier est connu : sert à la pastille du menu, aux priorités et à la phrase du jour. */
+export const receiptsToCheck = (store: Store) => { const known = new Set(store.dossiers.map((d) => d.id)); return store.receipts.filter((r) => r.status === "a_verifier" && known.has(r.dossier_id)); };
 export type Focus = "messages" | "rdv" | "facture" | "documents";
 export type OpenDossier = (id: string, focus?: Focus) => void;
 export type DFilter = { scope: "a_faire" | "fermes" | "tous"; stage: string; owner: string; signal: "" | "retard" | "bientot" | "messages"; q: string };
@@ -31,7 +41,7 @@ export type PatchDossier = (id: string, p: Partial<Dossier>, o?: PatchOpts) => P
 export type PatchLead = (id: string, p: Partial<Lead>, o?: PatchOpts) => Promise<boolean>;
 
 /* ───────────── Constantes ───────────── */
-export const SECTIONS = [["aujourdhui", "Aujourd'hui"], ["prospects", "Prospects"], ["clients", "Clients"], ["dossiers", "Dossiers"], ["documents", "Documents"], ["messages", "Messages"], ["facturation", "Facturation"], ["calendrier", "Calendrier"], ["parametres", "Paramètres"]] as const;
+export const SECTIONS = [["aujourdhui", "Aujourd'hui"], ["prospects", "Prospects"], ["clients", "Clients"], ["dossiers", "Dossiers"], ["documents", "Documents"], ["recus", "Reçus"], ["messages", "Messages"], ["facturation", "Facturation"], ["calendrier", "Calendrier"], ["parametres", "Paramètres"]] as const;
 /** Anciennes adresses (signets, cloche de notifications) : elles mènent à la section renommée. */
 export const SECTION_ALIAS: Record<string, string> = { demandes: "prospects", honoraires: "facturation", reglages: "parametres" };
 export type Section = (typeof SECTIONS)[number][0];
@@ -302,6 +312,7 @@ const ICONS = {
   document: "M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2ZM14 3v5h5M9 13h6M9 17h6",
   message: "M4 5h16v11H9l-5 4Z",
   invoice: "M6 3h12v18l-3-2-3 2-3-2-3 2ZM9 8h6M9 12h6",
+  receipt: "M7 3h10v18l-2.5-1.7L12 21l-2.5-1.7L7 21ZM10 8h4M10 12h4M3.5 9.5l1.5 1.5 2.5-3",
   calendar: "M4 6h16v14H4ZM4 10h16M8 3v4M16 3v4",
   settings: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1",
   search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4",
@@ -331,15 +342,16 @@ export const clockFmt = new Intl.DateTimeFormat("fr-CA", { timeZone: "America/Mo
 export const dayOf = (iso: string) => (iso.length === 10 ? iso : dayFmt.format(new Date(iso)));
 
 /** Phrase du jour, construite à partir des vrais décomptes : rien n'est inventé. */
-export function daySentence(c: { review: number; prospects: number; unpaid: number; late: number; toRead: number }): string {
+export function daySentence(c: { review: number; prospects: number; unpaid: number; late: number; toRead: number; receipts?: number }): string {
   const parts = [
     c.review && `${plural(c.review, "dossier", "dossiers")} à réviser.`,
     c.prospects && (c.prospects > 1 ? `${c.prospects} prospects attendent votre décision.` : "1 prospect attend votre décision."),
     c.toRead && `${plural(c.toRead, "message", "messages")} de clients à lire.`,
+    c.receipts && `${plural(c.receipts, "reçu", "reçus")} à vérifier.`,
     c.late && `${plural(c.late, "dossier", "dossiers")} en retard.`,
     c.unpaid && `${plural(c.unpaid, "facture", "factures")} en attente de paiement.`,
   ].filter(Boolean);
-  return parts.length ? parts.join(" ") : "Rien ne presse aujourd'hui : aucun dossier à réviser, aucun prospect ni paiement en attente.";
+  return parts.length ? parts.join(" ") : "Rien ne presse aujourd'hui : aucun dossier à réviser, aucun prospect, aucun reçu ni paiement en attente.";
 }
 
 /** À vérifier : fichier lié à une demande pas encore marquée reçue, ou fichier récent d'un client sans demande associée. */

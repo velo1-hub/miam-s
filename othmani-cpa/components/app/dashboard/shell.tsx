@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { LogoMark } from "../../Logo";
-import { fmtDate } from "../shared";
-import { Avatar, Dialog, Icon, SECTIONS, groupClients, money, norm, type Focus, type IconName, type Section, type Store } from "./common";
+import { fmtDate, type Receipt } from "../shared";
+import { Avatar, Dialog, Icon, RECEIPT_STATUS, SECTIONS, groupClients, money, norm, type Focus, type IconName, type Section, type Store } from "./common";
 
-const NAV_ICON: Record<Section, IconName> = { aujourdhui: "home", prospects: "prospect", clients: "clients", dossiers: "dossier", documents: "document", messages: "message", facturation: "invoice", calendrier: "calendar", parametres: "settings" };
+const NAV_ICON: Record<Section, IconName> = { aujourdhui: "home", prospects: "prospect", clients: "clients", dossiers: "dossier", documents: "document", recus: "receipt", messages: "message", facturation: "invoice", calendrier: "calendar", parametres: "settings" };
 
 /**
  * Habillage de la présentation à l'intérieur du cadre commun (AppFrame) : le contenu prend toute la largeur
@@ -58,7 +58,7 @@ export function SideNav({ section, go, badges }: { section: Section; go: (s: Sec
 
 /* ───────────── Recherche globale ───────────── */
 type Hit = { key: string; group: string; title: string; sub: string; open: () => void };
-export type SearchTargets = { client: (email: string) => void; dossier: (id: string, focus?: Focus) => void; lead: (id: string) => void };
+export type SearchTargets = { client: (email: string) => void; dossier: (id: string, focus?: Focus) => void; lead: (id: string) => void; receipt: (r: Receipt) => void };
 
 function useHits(store: Store | null, q: string, to: SearchTargets): Hit[] {
   return useMemo(() => {
@@ -74,6 +74,8 @@ function useHits(store: Store | null, q: string, to: SearchTargets): Hit[] {
       ...cap(store.leads.filter((l) => has(l.name, l.email, l.phone, l.topic, l.message))).map((l) => ({ key: `l-${l.id}`, group: "Prospects", title: l.name, sub: l.topic || l.message.slice(0, 70) || "Sans détails", open: () => to.lead(l.id) })),
       ...cap(store.docs.filter((f) => byId.has(f.dossier_id) && has(f.name))).map((f) => ({ key: `f-${f.id}`, group: "Documents", title: f.name, sub: `${who(f.dossier_id)} · ${fmtDate(f.created_at, "fr")}`, open: () => to.dossier(f.dossier_id, "documents") })),
       ...cap(store.invoices.filter((x) => byId.has(x.dossier_id) && has(x.label, money.format(x.amount_cents / 100), String(x.amount_cents / 100), byId.get(x.dossier_id)?.client_name))).map((x) => ({ key: `i-${x.id}`, group: "Factures", title: `${x.label} · ${money.format(x.amount_cents / 100)}`, sub: who(x.dossier_id), open: () => to.dossier(x.dossier_id, "facture") })),
+      // Reçus : par commerçant ou par montant (« 85 », « 85,00 » ou « 85,00 $ »).
+      ...cap(store.receipts.filter((r) => byId.has(r.dossier_id) && has(r.vendor, r.total_cents == null ? "" : `${money.format(r.total_cents / 100)} ${r.total_cents / 100} ${(r.total_cents / 100).toFixed(2).replace(".", ",")}`))).map((r) => ({ key: `r-${r.id}`, group: "Reçus", title: `${r.vendor?.trim() || "Commerçant non lu"} · ${r.total_cents == null ? "total non lu" : money.format(r.total_cents / 100)}`, sub: `${who(r.dossier_id)} · ${RECEIPT_STATUS[r.status]} · ${fmtDate(r.created_at, "fr")}`, open: () => to.receipt(r) })),
     ];
   }, [store, q, to]);
 }
@@ -107,7 +109,7 @@ function Search({ store, to }: { store: Store | null; to: SearchTargets }) {
   const shown = open && q.trim().length >= 2;
   return (
     <div ref={wrap} role="search" className="relative min-w-0 flex-1">
-      <label htmlFor={`${id}-q`} className="sr-only">Rechercher un client, un dossier, un prospect, un document ou une facture</label>
+      <label htmlFor={`${id}-q`} className="sr-only">Rechercher un client, un dossier, un prospect, un document, une facture ou un reçu</label>
       <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted"><Icon name="search" /></span>
       <input
         ref={input} id={`${id}-q`} type="search" role="combobox" aria-expanded={shown} aria-controls={`${id}-list`} aria-autocomplete="list" aria-activedescendant={shown && hits[at] ? `${id}-${at}` : undefined}
@@ -123,7 +125,7 @@ function Search({ store, to }: { store: Store | null; to: SearchTargets }) {
       />
       <kbd className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-md border border-[#d5d8e6] bg-[#f4f5fa] px-1.5 py-0.5 font-sans text-xs text-muted sm:block" aria-hidden="true">{mac ? "⌘K" : "Ctrl K"}</kbd>
       <div id={`${id}-list`} role="listbox" aria-label="Résultats de la recherche" className={shown ? "absolute inset-x-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-[#e6e8f2] bg-white p-2 shadow-[0_30px_70px_-30px_rgba(23,23,58,.55)]" : "hidden"}>
-        {shown && (hits.length === 0 ? <p className="px-3 py-3 text-sm text-muted">{store ? "Aucun résultat. La recherche porte sur les clients, dossiers, prospects, documents et factures déjà chargés." : "Chargement des données…"}</p> : hits.map((h, i) => (
+        {shown && (hits.length === 0 ? <p className="px-3 py-3 text-sm text-muted">{store ? "Aucun résultat. La recherche porte sur les clients, dossiers, prospects, documents, factures et reçus déjà chargés." : "Chargement des données…"}</p> : hits.map((h, i) => (
           <div key={h.key}>
             {(i === 0 || hits[i - 1].group !== h.group) && <p className="pf-eyebrow px-3 pt-2 pb-1">{h.group}</p>}
             <button type="button" role="option" id={`${id}-${i}`} aria-selected={i === at} tabIndex={-1} onMouseEnter={() => setAt(i)} onClick={() => pick(h)} className="flex min-h-11 w-full flex-col justify-center rounded-xl px-3 py-1.5 text-left aria-selected:bg-sky-100">
@@ -153,7 +155,7 @@ export function TopBar({ store, to, staffName, demo, onHelp }: { store: Store | 
 
 /* ───────────── Raccourcis clavier ───────────── */
 /** « g » puis une lettre mène à une section. */
-export const GO_KEYS: Record<string, Section> = { a: "aujourdhui", p: "prospects", c: "clients", d: "dossiers", m: "messages" };
+export const GO_KEYS: Record<string, Section> = { a: "aujourdhui", p: "prospects", c: "clients", d: "dossiers", m: "messages", r: "recus" };
 const KEY_HELP: [string[], string][] = [
   [["?"], "Afficher cette liste"],
   [["g", "a"], "Aller à Aujourd'hui"],
@@ -161,6 +163,11 @@ const KEY_HELP: [string[], string][] = [
   [["g", "c"], "Aller à Clients"],
   [["g", "d"], "Aller à Dossiers"],
   [["g", "m"], "Aller à Messages"],
+  [["g", "r"], "Aller à Reçus"],
+  [["J"], "Reçus : reçu suivant (aussi ↓)"],
+  [["K"], "Reçus : reçu précédent (aussi ↑)"],
+  [["C"], "Reçus : confirmer le reçu actif"],
+  [["R"], "Reçus : ne pas retenir le reçu actif"],
   [["/"], "Rechercher (aussi Ctrl+K, ou ⌘K sur Mac)"],
   [["Échap"], "Fermer une fenêtre ou la recherche"],
 ];

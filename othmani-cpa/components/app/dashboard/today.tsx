@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, type ReactNode } from "react";
 import { STEPS5, fmtDate, step5 } from "../shared";
-import { Avatar, Box, Eyebrow, Icon, STAGE_INK, STAGE_TONE, WAIT_RULE, box, daySentence, daysUntil, docsToCheck, dueInfo, isLate, isSoon, link, money, plural, smallBtn, waitOf, type DFilter, type Lead, type OpenDossier, type Section, type Store, type Task } from "./common";
+import { Avatar, Box, Eyebrow, Icon, STAGE_INK, STAGE_TONE, WAIT_RULE, box, daySentence, daysUntil, docsToCheck, dueInfo, isLate, isSoon, link, money, plural, receiptsToCheck, smallBtn, waitOf, type DFilter, type Lead, type OpenDossier, type Section, type ShowReceipts, type Store, type Task } from "./common";
 import { paidThisMonth, sumCents } from "./invoices";
 
 type Tone = "review" | "info" | "warn" | "late";
@@ -15,11 +15,11 @@ export function useCounts(store: Store) {
     const paid = paidThisMonth(store.invoices);
     return {
       open, review: open.filter((d) => d.status === "en_revision"), fresh: store.leads.filter((l) => l.status === "nouveau"), paid,
-      paidCents: sumCents(paid), unpaid: store.invoices.filter((x) => x.status === "a_payer"), late: open.filter(isLate), toRead: store.dossiers.filter((d) => store.waiting.includes(d.id)),
+      paidCents: sumCents(paid), unpaid: store.invoices.filter((x) => x.status === "a_payer"), late: open.filter(isLate), toRead: store.dossiers.filter((d) => store.waiting.includes(d.id)), receipts: receiptsToCheck(store),
     };
   }, [store]);
 }
-export const sentenceOf = (c: ReturnType<typeof useCounts>) => daySentence({ review: c.review.length, prospects: c.fresh.length, unpaid: c.unpaid.length, late: c.late.length, toRead: c.toRead.length });
+export const sentenceOf = (c: ReturnType<typeof useCounts>) => daySentence({ review: c.review.length, prospects: c.fresh.length, unpaid: c.unpaid.length, late: c.late.length, toRead: c.toRead.length, receipts: c.receipts.length });
 
 function Kpi({ label, value, note, tone = "text-ink", onClick }: { label: string; value: string; note: string; tone?: string; onClick: () => void }) {
   return (
@@ -61,7 +61,7 @@ function PriorityList({ items, more }: { items: Priority[]; more: () => void }) 
         <h2 className="font-display text-lg font-semibold text-ink">Priorités</h2>
         <button type="button" onClick={more} className={`${link} inline-flex min-h-11 items-center text-sm`}>Tout voir</button>
       </div>
-      {items.length === 0 ? <p className={`${box} text-sm text-muted`}>Rien d'urgent : aucun retard, aucun message ni document en attente.</p> : (
+      {items.length === 0 ? <p className={`${box} text-sm text-muted`}>Rien d'urgent : aucun retard, aucun message, document ni reçu en attente.</p> : (
         <ul className={`${box} divide-y divide-line !py-1`}>
           {items.map((p) => (
             <li key={p.key} className="flex items-center gap-1">
@@ -128,9 +128,9 @@ function Workload({ store, showDossiers }: { store: Store; showDossiers: (f: Par
   );
 }
 
-export function Today({ store, staffName, firstName, demo, refresh, openDossier, openLead, acceptLead, showDossiers, showLeads, go, completeTask, markReceived }: {
+export function Today({ store, staffName, firstName, demo, refresh, openDossier, openLead, acceptLead, showDossiers, showLeads, showReceipts, go, completeTask, markReceived }: {
   store: Store; staffName: string; firstName: string; demo: boolean; refresh: ReactNode; openDossier: OpenDossier; openLead: (id: string) => void; acceptLead: (l: Lead) => void;
-  showDossiers: (f: Partial<DFilter>) => void; showLeads: (f: string) => void; go: (s: Section) => void; completeTask: (t: Task) => void; markReceived: (requestId: string) => void;
+  showDossiers: (f: Partial<DFilter>) => void; showLeads: (f: string) => void; showReceipts: ShowReceipts; go: (s: Section) => void; completeTask: (t: Task) => void; markReceived: (requestId: string) => void;
 }) {
   const c = useCounts(store);
   const sentence = sentenceOf(c);
@@ -138,6 +138,13 @@ export function Today({ store, staffName, firstName, demo, refresh, openDossier,
   const name = (id: string) => byId.get(id)?.client_name ?? "Dossier";
   const mine = store.tasks.filter((t) => !t.done && t.assignee === staffName).sort((a, b) => (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999"));
   const toCheck = docsToCheck(store);
+  // Reçus à vérifier, regroupés par dossier : une ligne par dossier, le plus ancien envoi d'abord.
+  const receiptGroups = useMemo(() => {
+    const groups = new Map<string, typeof c.receipts>();
+    for (const r of c.receipts) groups.set(r.dossier_id, [...(groups.get(r.dossier_id) ?? []), r]);
+    const oldest = (l: typeof c.receipts) => l.reduce((min, r) => (r.created_at < min ? r.created_at : min), l[0].created_at);
+    return [...groups.entries()].sort((a, b) => oldest(a[1]).localeCompare(oldest(b[1])));
+  }, [c.receipts]);
 
   // Une ligne par dossier, la raison la plus pressante d'abord ; puis les documents à vérifier et les prospects.
   const seen = new Set<string>();
@@ -149,6 +156,7 @@ export function Today({ store, staffName, firstName, demo, refresh, openDossier,
     ...once(c.toRead.map((d) => ({ d, w: waitOf(store, d.id) })).sort((a, b) => (b.w?.hours ?? -1) - (a.w?.hours ?? -1)).map(({ d, w }) => ({ key: d.id, name: d.client_name, label: w ? `Message à lire · attend depuis ${w.text}` : "Message à lire", tone: w?.late ? ("warn" as const) : ("info" as const), onClick: () => openDossier(d.id, "messages"), wait: w ?? undefined }))),
     ...once(c.review.map((d) => ({ key: d.id, name: d.client_name, label: `À réviser · ${d.title}`, tone: "review" as const, onClick: () => openDossier(d.id) }))),
     ...toCheck.map((f) => ({ key: `f-${f.id}`, name: name(f.dossier_id), label: `Document à vérifier · ${f.name}`, tone: "info" as const, onClick: () => openDossier(f.dossier_id, "documents"), action: f.request_id ? <button type="button" onClick={() => markReceived(f.request_id!)} className={`${smallBtn} shrink-0`}>Marquer reçu</button> : undefined })),
+    ...receiptGroups.map(([id, list]) => ({ key: `rc-${id}`, name: name(id), label: list.length > 1 ? `${list.length} reçus à vérifier` : `Reçu à vérifier · ${list[0].vendor?.trim() || "commerçant non lu"}`, tone: "info" as const, onClick: () => showReceipts({ dossier: id }) })),
     ...c.fresh.map((l) => ({ key: `l-${l.id}`, name: l.name, label: "Prospect à approuver", tone: "warn" as const, onClick: () => openLead(l.id) })),
     ...once(c.open.filter(isSoon).sort((a, b) => a.due_date!.localeCompare(b.due_date!)).map((d) => ({ key: d.id, name: d.client_name, label: `Échéance ${dueInfo(d.due_date!).text.toLowerCase()} · ${d.title}`, tone: "info" as const, onClick: () => openDossier(d.id) }))),
   ];
@@ -180,10 +188,11 @@ export function Today({ store, staffName, firstName, demo, refresh, openDossier,
         <div className="mt-3 flex items-center justify-between gap-2">{demo ? <span className="rounded-full bg-[#eef0f6] px-3 py-1 text-xs font-medium text-ink">Données d'exemple</span> : <span />}{refresh}</div>
       </div>
 
-      <ul className="hidden gap-4 lg:grid lg:grid-cols-4" aria-label="Chiffres du jour">
+      <ul className="hidden gap-4 lg:grid lg:grid-cols-3 xl:grid-cols-5" aria-label="Chiffres du jour">
         <Kpi label="Dossiers en cours" value={String(c.open.length)} note={c.late.length ? `dont ${c.late.length} en retard` : "aucun en retard"} onClick={() => showDossiers({})} />
         <Kpi label="Prêts à réviser" value={String(c.review.length)} tone="text-[#5140b8]" note="étape Révision par un CPA" onClick={() => showDossiers({ stage: "en_revision" })} />
         <Kpi label="Prospects à approuver" value={String(c.fresh.length)} tone="text-[#8a4b00]" note={c.fresh.length > 1 ? "nouveaux" : c.fresh.length ? "nouveau" : "aucun en attente"} onClick={() => showLeads("nouveau")} />
+        <Kpi label="Reçus à vérifier" value={store.receiptsOk ? String(c.receipts.length) : "?"} tone="text-[#0d6474]" note={!store.receiptsOk ? "lecture impossible" : c.receipts.length ? "décision à prendre" : "aucun en attente"} onClick={() => showReceipts()} />
         <Kpi label="Payé ce mois-ci" value={money.format(c.paidCents / 100)} tone="text-[#1e5b2e]" note={plural(c.paid.length, "facture payée", "factures payées")} onClick={() => go("facturation")} />
       </ul>
 
