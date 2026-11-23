@@ -131,6 +131,6 @@ Avant d'activer : mettre à jour la politique de confidentialité (hébergeur de
 ### Connexion, démonstration et application
 
 - **Connexion** : courriel, puis code reçu par courriel. Pour que le courriel contienne le code, ajouter `{{ .Token }}` au modèle « Magic Link » dans Supabase → Authentication → Emails.
-- **Code 232323** : mode démonstration de `/gestion/` et de `/espace-client/`, avec des données fictives en mémoire (`lib/demo.ts`). Il ne donne jamais accès à la vraie base.
+- **Code 211221** : mode démonstration de `/gestion/` et de `/espace-client/`, avec des données fictives en mémoire (`lib/demo.ts`). Il ne donne jamais accès à la vraie base.
 - **Application iOS / Android** : voir `mobile/README.md`.
 - **Sécurité** : en-têtes (CSP, HSTS, anti-cadre) dans `next.config.ts` ; règles d'accès et durcissement dans `supabase/migrations/`. Réglages Supabase à vérifier : Confirm email ON, Secure email change ON, connexions anonymes OFF.

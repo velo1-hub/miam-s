@@ -9,7 +9,7 @@ const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 export const backendReady = Boolean(url && key);
 
 let client: SupabaseClient | null = null;
-/** En mode démonstration (code 232323), renvoie un faux client en mémoire : la vraie base n'est jamais touchée. */
+/** En mode démonstration (code 211221), renvoie un faux client en mémoire : la vraie base n'est jamais touchée. */
 export function supabase(): SupabaseClient {
   const demo = demoRole();
   if (demo) return demoClient(demo) as unknown as SupabaseClient;

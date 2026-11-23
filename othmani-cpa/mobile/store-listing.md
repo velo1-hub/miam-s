@@ -32,7 +32,7 @@ Password-free sign-in: you receive a code by email. Access is reserved for the f
 impôt, comptable, CPA, déclaration, documents, Montréal, fiscalité, TPS, TVQ
 
 ## Notes pour l'examen (App Review)
-Compte de démonstration : sur l'écran de connexion, entrez **232323** dans le champ « Votre courriel ». Les données affichées sont fictives.
+Compte de démonstration : sur l'écran de connexion, entrez **211221** dans le champ « Votre courriel ». Les données affichées sont fictives.
 
 ## Adresses
 Politique de confidentialité : https://www.othmanicpa.com/confidentialite/
