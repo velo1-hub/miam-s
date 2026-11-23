@@ -1,0 +1,19 @@
+{
+  "name": "pilote-fiscal-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Enveloppe iOS et Android de l'espace client Pilote Fiscal (Capacitor)",
+  "scripts": {
+    "add:ios": "cap add ios",
+    "add:android": "cap add android",
+    "sync": "cap sync",
+    "ios": "cap open ios",
+    "android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  },
+  "devDependencies": { "@capacitor/cli": "^7.0.0" }
+}

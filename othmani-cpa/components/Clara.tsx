@@ -1,0 +1,242 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useId, useRef, useState } from "react";
+import { concerns } from "@/content/concerns";
+import { dict } from "@/content/ui";
+import { href, type RouteKey } from "@/lib/routes";
+import { portalHref, portalOn, type Lang } from "@/lib/site";
+import { Icon } from "./Icon";
+
+/**
+ * Clara : assistante d'orientation entièrement locale (aucun serveur, aucun enregistrement).
+ * Elle reconnaît des mots-clés et propose la page la plus utile, ou l'équipe.
+ */
+const keywords: Record<string, { fr: string[]; en: string[] }> = {
+  personalTaxes: { fr: ["impot", "declaration", "rapport", "remboursement", "feuillet", "t4", "releve", "reer", "credit"], en: ["tax return", "taxes", "refund", "slip", "t4", "rrsp", "file", "credit"] },
+  taxLetter: { fr: ["lettre", "avis", "cotisation", "revenu quebec", "arc", "verification", "opposition", "reclame", "dette"], en: ["letter", "notice", "assessment", "cra", "revenu quebec", "audit", "objection", "owe"] },
+  selfEmployed: { fr: ["autonome", "a mon compte", "pigiste", "freelance", "depense", "acompte", "uber", "travailleur"], en: ["self-employed", "self employed", "freelance", "contractor", "expense", "instalment", "gig"] },
+  lifeChanges: { fr: ["maison", "bebe", "enfant", "retraite", "succession", "deces", "liquidateur", "separation", "celiapp", "rap", "rente"], en: ["house", "home", "baby", "child", "retire", "estate", "death", "liquidator", "separation", "fhsa", "hbp", "pension"] },
+  startBusiness: { fr: ["demarrer", "lancer", "incorporer", "incorporation", "nouvelle entreprise", "enregistrer", "neq", "societe par actions"], en: ["start", "launch", "incorporate", "new business", "register", "sole proprietor"] },
+  salesTax: { fr: ["tps", "tvq", "taxe de vente", "taxes", "30 000", "petit fournisseur", "intrant"], en: ["gst", "qst", "sales tax", "30,000", "small supplier", "input tax"] },
+  statements: { fr: ["etats financiers", "bilan", "audit", "mission d'examen", "compilation", "banque", "obnl", "verification"], en: ["financial statements", "balance sheet", "audit", "review engagement", "compilation", "bank", "non-profit"] },
+  multiCompanies: { fr: ["plusieurs", "holding", "societe de gestion", "associees", "groupe", "immeuble"], en: ["several", "multiple", "holding", "associated", "group", "property"] },
+  calendar: { fr: ["date", "echeance", "quand", "limite", "calendrier", "30 avril", "15 juin"], en: ["date", "deadline", "when", "due", "calendar", "april 30", "june 15"] },
+  tools: { fr: ["calcul", "calculatrice", "outil", "liste", "documents", "papiers", "checklist"], en: ["calculator", "calculate", "tool", "checklist", "documents", "paperwork"] },
+  contact: { fr: ["rendez-vous", "rencontre", "appeler", "telephone", "adresse", "heure", "prix", "tarif", "cout", "parler"], en: ["appointment", "meet", "call", "phone", "address", "hours", "price", "fee", "cost", "talk"] },
+};
+
+const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const STOP = new Set("le la les de des du un une et ou au aux en dans pour par sur avec mon ma mes ce cette ces est sont je il on que qui quoi quel quelle quels quelles dois doit faire fait pas ne plus vous votre vos nous notre the an and or of to in on for my is are do does what how when can should with your you it be".split(" "));
+const tokens = (s: string) => norm(s).replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w));
+
+/** Cherche la question fréquente la plus proche parmi toutes les pages. */
+function searchFaq(q: string, lang: Lang) {
+  const qt = new Set(tokens(q));
+  if (qt.size === 0) return null;
+  let best: { key: RouteKey; q: string; a: string; score: number } | null = null;
+  for (const c of concerns) {
+    for (const f of c[lang].faq) {
+      const ft = tokens(f.q + " " + f.a);
+      let score = 0;
+      for (const w of qt) if (ft.some((x) => x === w || (w.length > 4 && x.startsWith(w.slice(0, 5))))) score++;
+      const ratio = score / qt.size;
+      if (score >= 2 && ratio >= 0.5 && (!best || ratio * score > best.score)) best = { key: c.key, q: f.q, a: f.a, score: ratio * score };
+    }
+  }
+  return best;
+}
+
+/** Clara « agent » : éteinte tant que NEXT_PUBLIC_CLARA_AGENT n'est pas « on » dans Vercel. */
+const AGENT = process.env.NEXT_PUBLIC_CLARA_AGENT === "on";
+const agentText = {
+  fr: {
+    role: "Assistante virtuelle du cabinet",
+    hello: "Bonjour ! Je suis Clara, l'assistante virtuelle du cabinet. Posez-moi votre question de comptabilité ou d'impôt. Si vous le souhaitez, je transmets aussi votre demande à l'équipe.",
+    notice: "Clara est un outil automatique (intelligence artificielle) : information générale, pas un avis personnalisé. N'écrivez ni NAS ni renseignement bancaire. Vos coordonnées ne sont transmises au cabinet qu'avec votre accord.",
+    typing: "Clara écrit…",
+    sent: "Demande transmise à l'équipe",
+  },
+  en: {
+    role: "The firm's virtual assistant",
+    hello: "Hello! I'm Clara, the firm's virtual assistant. Ask me your accounting or tax question. If you like, I can also pass your request on to the team.",
+    notice: "Clara is an automated tool (artificial intelligence): general information, not personalized advice. Do not enter your SIN or banking details. Your contact details are only sent to the firm with your consent.",
+    typing: "Clara is typing…",
+    sent: "Request sent to the team",
+  },
+};
+
+type Msg = { from: "clara" | "me"; text: string; quote?: string; link?: { key?: RouteKey; href?: string; label: string }; badge?: string; sig?: string };
+
+export function Clara({ lang, context, raised = false }: { lang: Lang; context?: string; raised?: boolean }) {
+  const base = dict(lang).clara;
+  const t = AGENT ? { ...base, ...agentText[lang] } : { ...base, typing: "", sent: "" };
+  const [open, setOpen] = useState(false);
+  const [msgs, setMsgs] = useState<Msg[]>([{ from: "clara", text: t.hello }]);
+  const [busy, setBusy] = useState(false);
+  const leadSaved = useRef(false);
+  const agentDown = useRef(false);
+  const [input, setInput] = useState("");
+  const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fabRef = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
+
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+  }, [msgs]);
+
+  useEffect(() => {
+    if (!open) return;
+    inputRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        fabRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  const labelFor = (key: RouteKey) => {
+    const c = concerns.find((x) => x.key === key);
+    if (c) return c[lang].label;
+    if (key === "calendar") return t.goCalendar;
+    if (key === "tools") return lang === "fr" ? "Outils gratuits" : "Free tools";
+    return t.goContact;
+  };
+
+  const answer = (q: string): Msg => {
+    if (/^\s*(bonjour|bonsoir|salut|allo|allô|hello|hi|hey|good (morning|afternoon))\b/i.test(q))
+      return { from: "clara", text: lang === "fr" ? "Bonjour ! Comment puis-je vous aider ? Vous pouvez poser une question ou choisir un sujet ci-dessous." : "Hello! How can I help? Ask a question or pick a topic below." };
+    if (/(merci|thank)/i.test(q))
+      return { from: "clara", text: lang === "fr" ? "Avec plaisir ! Autre chose ?" : "You're welcome! Anything else?" };
+    const hit = searchFaq(q, lang);
+    if (hit) return { from: "clara", text: hit.a, quote: hit.q, link: { key: hit.key, label: lang === "fr" ? "Lire toute la réponse" : "Read the full answer" } };
+    const n = norm(q);
+    let best: RouteKey | null = null;
+    let score = 0;
+    for (const [key, kw] of Object.entries(keywords)) {
+      const s = kw[lang].concat(lang === "en" ? kw.fr : kw.en).reduce((acc, w) => (n.includes(norm(w)) ? acc + w.length : acc), 0);
+      if (s > score) { score = s; best = key as RouteKey; }
+    }
+    if (best) return { from: "clara", text: t.found, link: { key: best, label: labelFor(best) } };
+    return { from: "clara", text: t.fallback, link: { key: "contact", label: t.goContact } };
+  };
+
+  const send = async (text: string) => {
+    const q = text.trim();
+    if (!q || busy) return;
+    setInput("");
+    if (!AGENT || agentDown.current) {
+      setMsgs((m) => [...m, { from: "me", text: q }, answer(q)]);
+      return;
+    }
+    const history = [...msgs.slice(1), { from: "me" as const, text: q }];
+    setMsgs((m) => [...m, { from: "me", text: q }]);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/clara/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lang, context, leadSaved: leadSaved.current, messages: history.map((m) => ({ role: m.from === "me" ? "user" : "assistant", content: m.text, sig: m.sig })) }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as { reply?: string; lead?: boolean; sig?: string };
+      if (!data.reply) throw new Error("empty");
+      if (data.lead) leadSaved.current = true;
+      setMsgs((m) => [...m, { from: "clara", text: data.reply!, badge: data.lead ? t.sent : undefined, sig: data.sig }]);
+    } catch {
+      // L'agent ne répond pas : Clara continue avec la recherche locale dans les pages.
+      agentDown.current = true;
+      setMsgs((m) => [...m, answer(q)]);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const choose = (key: RouteKey) =>
+    setMsgs((m) => [...m, { from: "me", text: labelFor(key) }, { from: "clara", text: t.found, link: { key, label: labelFor(key) } }]);
+
+  const chips: RouteKey[] = ["personalTaxes", "taxLetter", "selfEmployed", "salesTax", "startBusiness", "calendar", "tools"];
+
+  return (
+    <div className="clara-root">
+      {open && (
+        <div
+          id={panelId}
+          role="dialog"
+          aria-label={`${t.name}, ${t.role}`}
+          className={`fixed inset-x-3 ${raised ? "bottom-[calc(10.5rem+env(safe-area-inset-bottom))] lg:bottom-24" : "bottom-24"} z-[55] flex max-h-[min(36rem,calc(100dvh-8rem))] flex-col overflow-hidden rounded-3xl border border-white/80 bg-white/85 shadow-[0_30px_80px_-30px_rgba(23,23,58,.6)] backdrop-blur-2xl backdrop-saturate-150 sm:inset-x-auto sm:right-5 sm:w-[24rem]`}
+        >
+          <div className="mesh-dark flex items-center justify-between gap-3 px-5 py-4 text-white on-dark">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky font-display text-lg font-semibold text-navy" aria-hidden="true">C</span>
+              <div>
+                <p className="font-display font-semibold leading-tight">{t.name}</p>
+                <p className="text-xs text-white/80">{t.role}</p>
+              </div>
+            </div>
+            <button type="button" onClick={() => { setOpen(false); fabRef.current?.focus(); }} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/10" aria-label={t.close}>
+              <Icon name="close" className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
+            {msgs.map((m, i) => (
+              <div key={i} className={m.from === "me" ? "flex justify-end" : "flex justify-start"}>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.93rem] leading-relaxed ${m.from === "me" ? "bg-navy text-white" : "border border-white bg-white/80 text-ink"}`}>
+                  {m.quote && <p className="mb-1.5 text-xs font-semibold tracking-wide text-navy/80 uppercase">{m.quote}</p>}
+                  <p className="whitespace-pre-line">{m.text}</p>
+                  {m.badge && <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-navy"><Icon name="check" className="h-3.5 w-3.5" /> {m.badge}</p>}
+                  {m.link && (
+                    <Link href={m.link.key ? href(m.link.key, lang) : m.link.href!} onClick={() => setOpen(false)} className="mt-2 inline-flex items-center gap-1.5 font-semibold text-navy underline underline-offset-4">
+                      {m.link.label} <Icon name="arrow" className="h-4 w-4" />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ))}
+            {busy && <p className="px-1 text-sm text-muted">{t.typing}</p>}
+            <div>
+              <p className="sr-only">{t.chips}</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {chips.map((k) => (
+                  <button key={k} type="button" onClick={() => choose(k)} className="rounded-full border border-line px-3 py-1.5 text-sm text-navy hover:border-navy hover:bg-sky-50">
+                    {labelFor(k)}
+                  </button>
+                ))}
+                {portalOn() && <a href={portalHref(lang)} className="rounded-full border border-line px-3 py-1.5 text-sm text-navy hover:border-navy hover:bg-sky-50">{t.goPortal}</a>}
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="border-t border-line p-3">
+            <div className="flex gap-2">
+              <label htmlFor={`${panelId}-q`} className="sr-only">{t.placeholder}</label>
+              <input id={`${panelId}-q`} ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder={t.placeholder} autoComplete="off" className="field min-h-11 flex-1 py-2" maxLength={AGENT ? 1200 : 300} />
+              <button type="submit" disabled={busy} className="btn-primary min-h-11 px-4" aria-label={t.send}><Icon name="arrow" className="h-5 w-5" /></button>
+            </div>
+            <p className="mt-2 px-1 text-xs leading-snug text-muted">{t.notice}</p>
+          </form>
+        </div>
+      )}
+
+      <button
+        ref={fabRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={open ? panelId : undefined}
+        aria-label={open ? t.close : t.open}
+        className={`clara-fab glass-dark fixed right-4 ${raised ? "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] lg:bottom-5" : "bottom-4"} z-[55] flex h-14 items-center gap-2.5 rounded-full !bg-navy/80 pr-2 pl-2 text-white transition-transform hover:-translate-y-0.5 on-dark sm:right-5 sm:bottom-5 sm:pr-5`}
+      >
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sky font-display text-lg font-semibold text-navy" aria-hidden="true">
+          {open ? <Icon name="close" className="h-5 w-5" /> : "C"}
+        </span>
+        <span className="hidden font-display font-semibold sm:inline">{t.name}</span>
+      </button>
+    </div>
+  );
+}

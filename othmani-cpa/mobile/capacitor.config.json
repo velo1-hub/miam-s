@@ -1,0 +1,12 @@
+{
+  "appId": "com.othmanicpa.pilotefiscal",
+  "appName": "Pilote Fiscal",
+  "webDir": "www",
+  "server": {
+    "url": "https://othmani-cpa.vercel.app/espace-client/",
+    "cleartext": false,
+    "allowNavigation": ["othmani-cpa.vercel.app", "www.othmanicpa.com", "*.supabase.co", "buy.stripe.com"]
+  },
+  "ios": { "contentInset": "always", "backgroundColor": "#f5f7fb" },
+  "android": { "backgroundColor": "#f5f7fb", "allowMixedContent": false }
+}
